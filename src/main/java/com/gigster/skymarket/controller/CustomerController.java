@@ -38,10 +38,16 @@ public class CustomerController {
     }
     @GetMapping("all")
     public ResponseEntity<ResponseDto> findAll(){
+        responseDto=new ResponseDto();
        List<CustomerResponseDto> customerResponseDtos= customerService.findAll();
        responseDto.setStatus(HttpStatus.OK);
-       responseDto.setDescription("List of all customers");
-       responseDto.setPayload(customerResponseDtos);
+        if(customerResponseDtos.size()!=0){
+            responseDto.setDescription("List of all customers");
+            responseDto.setPayload(customerResponseDtos);
+        }else{
+            responseDto.setDescription("No Customer Found");
+        }
+
 
        return new ResponseEntity<>(responseDto, responseDto.getStatus());
     }
