@@ -21,7 +21,7 @@ public class CustomerController {
 
     ResponseDto responseDto;
 
-    @PostMapping()
+    @PostMapping("new")
     public ResponseEntity<ResponseDto> addCustomer(@RequestBody NewCustomerDto newCustomer){
         responseDto=new ResponseDto();
         try{
@@ -36,7 +36,7 @@ public class CustomerController {
 
     return new ResponseEntity<>(responseDto, responseDto.getStatus());
     }
-    @GetMapping
+    @GetMapping("all")
     public ResponseEntity<ResponseDto> findAll(){
        List<CustomerResponseDto> customerResponseDtos= customerService.findAll();
        responseDto.setStatus(HttpStatus.OK);
