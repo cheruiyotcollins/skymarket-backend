@@ -4,6 +4,7 @@ import com.gigster.skymarket.dto.CustomerResponseDto;
 import com.gigster.skymarket.dto.NewCustomerDto;
 import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.service.CustomerService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,7 @@ public class CustomerController {
     ResponseDto responseDto;
 
     @PostMapping("new")
-    public ResponseEntity<ResponseDto> addCustomer(@RequestBody NewCustomerDto newCustomer){
+    public ResponseEntity<ResponseDto> addCustomer(@Valid @RequestBody NewCustomerDto newCustomer){
         responseDto=new ResponseDto();
         try{
             customerService.saveCustomer(newCustomer);
@@ -41,7 +42,7 @@ public class CustomerController {
         responseDto=new ResponseDto();
        List<CustomerResponseDto> customerResponseDtos= customerService.findAll();
        responseDto.setStatus(HttpStatus.OK);
-        if(customerResponseDtos.size()!=0){
+        if(!customerResponseDtos.isEmpty()){
             responseDto.setDescription("List of all customers");
             responseDto.setPayload(customerResponseDtos);
         }else{
@@ -51,4 +52,13 @@ public class CustomerController {
 
        return new ResponseEntity<>(responseDto, responseDto.getStatus());
     }
+    @GetMapping("{id}")
+    public ResponseEntity<?> findCustomerById(@PathVariable long id){
+        return customerService.findCustomerById(id);
+    }
+    @DeleteMapping("delete/{id}")
+    public ResponseEntity<?>  deleteCustomerById(@PathVariable long id){
+        return customerService.deleteCustomerById(id);
+    }
+
 }
