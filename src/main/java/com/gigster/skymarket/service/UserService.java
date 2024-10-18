@@ -1,6 +1,5 @@
 package com.gigster.skymarket.service;
 
-import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.dto.SignUpRequest;
 import com.gigster.skymarket.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +16,11 @@ public class UserService {
     public ResponseEntity<?> register(SignUpRequest signUpRequest) {
         if(userRepository.existsByEmail(signUpRequest.getEmail())) {
 
-            return new ResponseEntity("Email Address already in use!",
+            return new ResponseEntity<>("Email Address already in use!",
                     HttpStatus.NOT_ACCEPTABLE);
         }
         if(userRepository.existsByUsername(signUpRequest.getUsername())) {
-            return new ResponseEntity( "Username is already taken!",
+            return new ResponseEntity<>( "Username is already taken!",
                     HttpStatus.NOT_ACCEPTABLE);
         }
         // todo signup using this methods automatically assigns a user as a customer
