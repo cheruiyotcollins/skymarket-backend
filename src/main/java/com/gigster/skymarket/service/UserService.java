@@ -1,17 +1,46 @@
 package com.gigster.skymarket.service;
 
+import com.gigster.skymarket.dto.LoginDto;
+import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.dto.SignUpRequest;
 import com.gigster.skymarket.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.gigster.skymarket.security.JwtTokenProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import com.gigster.skymarket.model.User;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
-    @Autowired
-    UserRepository userRepository;
+
+    private AuthenticationManager authenticationManager;
+    private UserRepository userRepository;
+    // todo private RoleRepository roleRepository;
+    private PasswordEncoder passwordEncoder;
+    private JwtTokenProvider jwtTokenProvider;
+
+    ResponseDto responseDto;
+
+
+    public UserService(AuthenticationManager authenticationManager,
+                           UserRepository userRepository,
+//                           RoleRepository roleRepository,
+                           PasswordEncoder passwordEncoder,
+                           JwtTokenProvider jwtTokenProvider) {
+        this.authenticationManager = authenticationManager;
+        this.userRepository = userRepository;
+//        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
 
     public ResponseEntity<?> register(SignUpRequest signUpRequest) {
         if(userRepository.existsByEmail(signUpRequest.getEmail())) {
@@ -46,4 +75,14 @@ public class UserService {
         return new ResponseEntity<>("User registered successfully",HttpStatus.ACCEPTED);
     }
 
+    public String login(LoginDto loginDto) {
+
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                loginDto.getUsername(), loginDto.getPassword()));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+
+        return jwtTokenProvider.generateToken(authentication);
+    }
 }
