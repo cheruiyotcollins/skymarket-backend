@@ -3,7 +3,9 @@ package com.gigster.skymarket.service;
 import com.gigster.skymarket.dto.LoginDto;
 import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.dto.SignUpRequest;
+import com.gigster.skymarket.repository.RoleRepository;
 import com.gigster.skymarket.repository.UserRepository;
+import com.gigster.skymarket.model.Role;
 import com.gigster.skymarket.security.JwtTokenProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import java.util.*;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,7 +26,7 @@ public class UserService {
 
     private AuthenticationManager authenticationManager;
     private UserRepository userRepository;
-    // todo private RoleRepository roleRepository;
+    private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
     private JwtTokenProvider jwtTokenProvider;
 
@@ -32,12 +35,12 @@ public class UserService {
 
     public UserService(AuthenticationManager authenticationManager,
                            UserRepository userRepository,
-//                           RoleRepository roleRepository,
+                           RoleRepository roleRepository,
                            PasswordEncoder passwordEncoder,
                            JwtTokenProvider jwtTokenProvider) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
-//        this.roleRepository = roleRepository;
+        this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
     }
@@ -59,17 +62,17 @@ public class UserService {
         User user = User.builder()
                 .email(signUpRequest.getEmail())
                 .password(signUpRequest.getPassword())
-                .fullName(signUpRequest.getName())
+                .name(signUpRequest.getName())
                 .username(signUpRequest.getUsername())
                 .build();
 
-        //todo use enums instead of table to store roles
 
 
-//        if(roleRepository.findByName("STUDENT").isPresent()){
-//            Role userRole = roleRepository.findByName("STUDENT").get();
-//            user.setRoles(Collections.singleton(userRole));
-//        }
+
+        if(roleRepository.findByName("CUSTOMER").isPresent()){
+            Role userRole = roleRepository.findByName("CUSTOMER").get();
+            user.setRoles(Collections.singleton(userRole));
+        }
         userRepository.save(user);
 
         return new ResponseEntity<>("User registered successfully",HttpStatus.ACCEPTED);
