@@ -41,6 +41,7 @@ public class UserService {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
     }
@@ -73,6 +74,10 @@ public class UserService {
             Role userRole = roleRepository.findByName("CUSTOMER").get();
             user.setRoles(Collections.singleton(userRole));
         }
+
+                .fullName(signUpRequest.getName())
+                .username(signUpRequest.getUsername())
+                .build();
         userRepository.save(user);
 
         return new ResponseEntity<>("User registered successfully",HttpStatus.ACCEPTED);

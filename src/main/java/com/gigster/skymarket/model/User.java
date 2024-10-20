@@ -11,7 +11,7 @@ import java.util.Set;
 @Table(name="users")
 @Data
 @Builder
-public class User {
+public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,9 +19,9 @@ public class User {
     @Column(nullable = false, unique = true)
     private String username;
     @Column(nullable = false, unique = true)
-//    @Email
+    @Email
     private String email;
-
+  
     @Column(nullable = false)
     private String password;
 
