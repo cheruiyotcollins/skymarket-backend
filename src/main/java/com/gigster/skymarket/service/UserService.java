@@ -56,8 +56,6 @@ public class UserService {
             return new ResponseEntity<>( "Username is already taken!",
                     HttpStatus.NOT_ACCEPTABLE);
         }
-        // todo signup using this methods automatically assigns a user as a customer
-
         // Creating user's account using lombok builder method
         // todo encrypt password before saving
         User user = User.builder()
@@ -70,16 +68,11 @@ public class UserService {
 
 
 
-        if(roleRepository.findByName("CUSTOMER").isPresent()){
+        if(roleRepository.findByName("CUSTOMER").isPresent()) {
             Role userRole = roleRepository.findByName("CUSTOMER").get();
             user.setRoles(Collections.singleton(userRole));
         }
-
-                .fullName(signUpRequest.getName())
-                .username(signUpRequest.getUsername())
-                .build();
         userRepository.save(user);
-
         return new ResponseEntity<>("User registered successfully",HttpStatus.ACCEPTED);
     }
 

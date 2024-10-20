@@ -1,6 +1,7 @@
 package com.gigster.skymarket.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.Builder;
 import lombok.Data;
 
