@@ -1,6 +1,7 @@
 package com.gigster.skymarket.service;
 
 import com.gigster.skymarket.dto.*;
+import com.gigster.skymarket.model.Customer;
 import com.gigster.skymarket.repository.RoleRepository;
 import com.gigster.skymarket.repository.UserRepository;
 import com.gigster.skymarket.model.Role;
@@ -63,10 +64,13 @@ public class UserService {
                 .name(signUpRequest.getName())
                 .username(signUpRequest.getUsername())
                 .build();
-
+        // by default new user signup he/she is assigned CUSTOMER Role
         if(roleRepository.findByName("CUSTOMER").isPresent()) {
             Role userRole = roleRepository.findByName("CUSTOMER").get();
             user.setRoles(Collections.singleton(userRole));
+            //todo then create a new customer
+//            Customer customer= new Customer();
+
         }
         userRepository.save(user);
         responseDto.setStatus(HttpStatus.ACCEPTED);
@@ -104,6 +108,7 @@ public class UserService {
             return new ResponseEntity<>(responseDto,HttpStatus.BAD_REQUEST);
         }
     }
+    //todo pagination
 
     public ResponseEntity<?> findAll(){
 
