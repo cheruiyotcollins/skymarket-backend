@@ -31,6 +31,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+        // Skip JWT validation for public paths
+        String path = request.getRequestURI();
+        if (path.startsWith("/api/users/auth/register") || path.startsWith("/api/users/auth/login") ||
+                path.startsWith("/api/users/auth/signup") || path.startsWith("/swagger-ui") ||
+                path.startsWith("/v3/api-docs")) {
+            filterChain.doFilter(request, response);  // Continue without checking the token
+            return;
+        }
 
         // get JWT token from http request
         String token = getTokenFromRequest(request);
@@ -45,19 +53,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                userDetails,
-                null,
-                userDetails.getAuthorities()
+                    userDetails,
+                    null,
+                    userDetails.getAuthorities()
             );
 
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-
         }
 
         filterChain.doFilter(request, response);
     }
+
 
     private String getTokenFromRequest(HttpServletRequest request){
 

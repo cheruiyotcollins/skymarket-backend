@@ -30,12 +30,11 @@ public class UserController {
             @ApiResponse(responseCode = "401",description = "Unauthorized user",content = @Content),
             @ApiResponse(responseCode = "404",description = "User not found",content = @Content),
             @ApiResponse(responseCode = "400",description = "Bad Request",content = @Content)})
-    @PostMapping(value = {"/register", "/signup"})
-    @PreAuthorize("permitAll()")
+    @PostMapping(value = "/signup")
     public ResponseEntity<ResponseDto> register(@RequestBody SignUpRequest signUpRequest){
         return userService.register(signUpRequest);
     }
-    @Operation(summary = "User sign in/ login")
+    @Operation(summary = "User sign in")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User Logged In Successfully",
                     content = {@Content(mediaType = "application/json",schema = @Schema(implementation = User.class))}),
@@ -43,7 +42,7 @@ public class UserController {
             @ApiResponse(responseCode = "404",description = "User not found",content = @Content),
             @ApiResponse(responseCode = "400",description = "Bad Request",content = @Content)})
     @PreAuthorize("permitAll()")
-    @PostMapping(value = {"/login", "/signin"})
+    @PostMapping(value = "/signin")
     public ResponseEntity<JWTAuthResponse> login(@RequestBody LoginDto loginDto){
         String token = userService.login(loginDto);
 

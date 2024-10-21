@@ -53,9 +53,8 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
-        // Removed .cors() from the chain
-        http.authorizeHttpRequests((authorize) ->
+                http.csrf().disable()
+                 .authorizeHttpRequests((authorize) ->
 
                         authorize
                                 //ALL PERMITTED
@@ -64,9 +63,7 @@ public class SecurityConfig {
                                 .requestMatchers("/v3/**").permitAll()
                                 // Users
                                 .requestMatchers("/api/users/auth/signup").permitAll()
-                                .requestMatchers("/api/users/auth/register").permitAll()
                                 .requestMatchers("/api/users/auth/signin").permitAll()
-                                .requestMatchers("/api/users/auth/login").permitAll()
                                 .requestMatchers("/api/users/auth/current").hasAnyAuthority("ADMIN", "CUSTOMER")
                                 // products permits
                                 .requestMatchers(HttpMethod.GET,"/api/products/{id}").permitAll()
