@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Entity
@@ -26,5 +28,7 @@ public class Customer implements Serializable {
     private String phoneNo;
     @Column(name = "gender")
     private String gender;
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders = new ArrayList<>();
 
 }
