@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -55,35 +56,42 @@ public class SecurityConfig {
 
         // Removed .cors() from the chain
         http.authorizeHttpRequests((authorize) ->
-                        //all permitted
-                        authorize.requestMatchers("/swagger-ui/**").permitAll()
+
+                        authorize
+                                //ALL PERMITTED
+                                //Swagger UI
+                                .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("/v3/**").permitAll()
-                                .requestMatchers("/api/user/auth/signup").permitAll()
-                                .requestMatchers("/api/user/auth/signin").permitAll()
-                                //Admin access only
-                                .requestMatchers("/api/user/auth/update").hasAuthority("ADMIN")
-                                .requestMatchers("/api/user/auth/add").hasAuthority("ADMIN")
-                                .requestMatchers("/api/user/auth/findById/**").hasAuthority("ADMIN")
-                                .requestMatchers("/api/user/auth/list/all").hasAuthority("ADMIN")
-                                .requestMatchers("/api/user/auth/deleteById/**").hasAuthority("ADMIN")
-                                .requestMatchers("/api/user/auth/new/role").hasAuthority("ADMIN")
-                                .requestMatchers("/api/user/auth/current").hasAnyAuthority("ADMIN", "CUSTOMER")
-                                //Admin and Customer Access
-                                .requestMatchers("/selections/schools/list/**").hasAnyAuthority("ADMIN", "CUSTOMER")
-                                .requestMatchers("/selections/zones/list/**").hasAnyAuthority("ADMIN", "CUSTOMER")
-                                .requestMatchers("/selections/subjects/list/**").hasAnyAuthority("ADMIN", "CUSTOMER")
-                                .requestMatchers("/selections/schools/delete/**").hasAnyAuthority("ADMIN", "CUSTOMER")
-                                .requestMatchers("/selections/zones/delete/**").hasAnyAuthority("ADMIN", "CUSTOMER")
-                                .requestMatchers("/selections/subjects/delete/**").hasAnyAuthority("ADMIN")
-                                .requestMatchers("/selections/schools/find/**").hasAnyAuthority("ADMIN", "CUSTOMER")
-                                .requestMatchers("/selections/zones/find/**").hasAnyAuthority("ADMIN", "CUSTOMER")
-                                .requestMatchers("/selections/subjects/find/**").hasAnyAuthority("ADMIN", "CUSTOMER")
-                                //Customer Access
-                                .requestMatchers("/selections/schools/new/**").hasAnyAuthority("ADMIN", "CUSTOMER")
-                                .requestMatchers("/selections/zones/new/**").hasAuthority("STUDENT")
-                                .requestMatchers("/selections/subjects/new/**").hasAuthority("STUDENT")
-                                .requestMatchers("/subjects/list/**").hasAnyAuthority("ADMIN", "CUSTOMER")
-                                .requestMatchers("/subjects/find/**").hasAnyAuthority("ADMIN", "CUSTOMER")
+                                // Users
+                                .requestMatchers("/api/users/auth/signup").permitAll()
+                                .requestMatchers("/api/users/auth/register").permitAll()
+                                .requestMatchers("/api/users/auth/signin").permitAll()
+                                .requestMatchers("/api/users/auth/login").permitAll()
+                                .requestMatchers("/api/users/auth/current").hasAnyAuthority("ADMIN", "CUSTOMER")
+                                // products permits
+                                .requestMatchers(HttpMethod.GET,"/api/products/{id}").permitAll()
+                                .requestMatchers(HttpMethod.GET,"/api/products").permitAll()
+
+                                //ADMIN PERMITS
+                                //users
+                                .requestMatchers("/api/users/auth/update").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.GET,"/api/users/auth").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.GET,"/api/users/auth/id/*").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.GET,"/api/users/auth").hasAuthority("ADMIN")
+                                .requestMatchers("/api/users/auth/new/role").hasAuthority("ADMIN")
+
+                                //products
+                                .requestMatchers(HttpMethod.PUT,"/api/products/{id}").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE,"/api/products/{id}").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.POST,"/api/products/{id}").hasAuthority("ADMIN")
+
+                                //customers
+                                .requestMatchers(HttpMethod.POST,"/api/customers").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.GET,"/api/customers").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.GET,"/api/customers/{id}").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE,"/api/customers/{id}").hasAuthority("ADMIN")
+                                //Orders
+
                                 .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception

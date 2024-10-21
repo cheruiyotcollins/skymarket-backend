@@ -27,7 +27,7 @@ public class ProductService {
     CategoryRepository categoryRepository;
     ResponseDto responseDto;
 
-    public ResponseEntity<?>  createProduct(NewProductDto newProductDto) {
+    public ResponseEntity<ResponseDto> createProduct(NewProductDto newProductDto) {
         responseDto= new ResponseDto();
         try {
             Product product = new Product();
@@ -50,7 +50,7 @@ public class ProductService {
         return new ResponseEntity<>(responseDto, responseDto.getStatus());
     }
 
-    public ResponseEntity<?>  getAllProducts() {
+    public ResponseEntity<ResponseDto>getAllProducts() {
         responseDto= new ResponseDto();
         responseDto.setStatus(HttpStatus.OK);
         responseDto.setDescription("Fetched List of All Products");
@@ -58,7 +58,7 @@ public class ProductService {
         return new ResponseEntity<>(responseDto, responseDto.getStatus());
     }
 
-    public ResponseEntity<?> getProductById(Long id) {
+    public ResponseEntity<ResponseDto>getProductById(Long id) {
         responseDto= new ResponseDto();
         Optional<Product> optionalProduct = productRepository.findById(id);
         if(optionalProduct.isPresent()){
@@ -72,7 +72,7 @@ public class ProductService {
         return new ResponseEntity<>(responseDto, responseDto.getStatus());
     }
 
-    public ResponseEntity<?> updateProduct(Long id, NewProductDto newProductDto) {
+    public ResponseEntity<ResponseDto> updateProduct(Long id, NewProductDto newProductDto) {
         responseDto= new ResponseDto();
         Optional<Product> optionalProduct = productRepository.findById(id);
         if (optionalProduct.isPresent()) {
@@ -94,7 +94,7 @@ public class ProductService {
         return new ResponseEntity<>(responseDto, responseDto.getStatus());
     }
 
-    public ResponseEntity<?> deleteProduct(Long id) {
+    public ResponseEntity<ResponseDto> deleteProduct(Long id) {
         responseDto= new ResponseDto();
         try{
             productRepository.deleteById(id);
