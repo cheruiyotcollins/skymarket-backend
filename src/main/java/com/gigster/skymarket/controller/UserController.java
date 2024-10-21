@@ -31,7 +31,6 @@ public class UserController {
             @ApiResponse(responseCode = "404",description = "User not found",content = @Content),
             @ApiResponse(responseCode = "400",description = "Bad Request",content = @Content)})
     @PostMapping(value = {"/register", "/signup"})
-    @PreAuthorize("permitAll()")
     public ResponseEntity<ResponseDto> register(@RequestBody SignUpRequest signUpRequest){
         return userService.register(signUpRequest);
     }

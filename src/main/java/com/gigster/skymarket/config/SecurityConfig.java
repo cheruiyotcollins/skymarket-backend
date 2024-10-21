@@ -53,9 +53,8 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
-        // Removed .cors() from the chain
-        http.authorizeHttpRequests((authorize) ->
+                http.csrf().disable()
+                 .authorizeHttpRequests((authorize) ->
 
                         authorize
                                 //ALL PERMITTED
