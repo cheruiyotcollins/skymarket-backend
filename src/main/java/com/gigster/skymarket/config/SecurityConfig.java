@@ -29,8 +29,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private UserDetailsService userDetailsService;
-    private JwtAuthenticationEntryPoint authenticationEntryPoint;
-    private JwtAuthenticationFilter authenticationFilter;
+    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
+    private final JwtAuthenticationFilter authenticationFilter;
 
     public SecurityConfig(UserDetailsService userDetailsService,
                           JwtAuthenticationEntryPoint authenticationEntryPoint,
@@ -58,32 +58,32 @@ public class SecurityConfig {
                         //all permitted
                         authorize.requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("/v3/**").permitAll()
-                                .requestMatchers("/user/auth/signup").permitAll()
-                                .requestMatchers("/user/auth/signin").permitAll()
+                                .requestMatchers("/api/user/auth/signup").permitAll()
+                                .requestMatchers("/api/user/auth/signin").permitAll()
                                 //Admin access only
-                                .requestMatchers("/user/auth/update").hasAuthority("ADMIN")
-                                .requestMatchers("/user/auth/add").hasAuthority("ADMIN")
-                                .requestMatchers("/user/auth/findById/**").hasAuthority("ADMIN")
-                                .requestMatchers("/user/auth/list/all").hasAuthority("ADMIN")
-                                .requestMatchers("/user/auth/deleteById/**").hasAuthority("ADMIN")
-                                .requestMatchers("/user/auth/new/role").hasAuthority("ADMIN")
-                                .requestMatchers("/user/auth/current").hasAnyAuthority("ADMIN", "LECTURER", "STUDENT")
-                                //Admin and lecturer Access
-                                .requestMatchers("/selections/schools/list/**").hasAnyAuthority("ADMIN", "LECTURER", "STUDENT")
-                                .requestMatchers("/selections/zones/list/**").hasAnyAuthority("ADMIN", "LECTURER", "STUDENT")
-                                .requestMatchers("/selections/subjects/list/**").hasAnyAuthority("ADMIN", "LECTURER", "STUDENT")
-                                .requestMatchers("/selections/schools/delete/**").hasAnyAuthority("ADMIN", "LECTURER")
-                                .requestMatchers("/selections/zones/delete/**").hasAnyAuthority("ADMIN", "LECTURER")
-                                .requestMatchers("/selections/subjects/delete/**").hasAnyAuthority("ADMIN", "LECTURER")
-                                .requestMatchers("/selections/schools/find/**").hasAnyAuthority("ADMIN", "LECTURER", "STUDENT")
-                                .requestMatchers("/selections/zones/find/**").hasAnyAuthority("ADMIN", "LECTURER", "STUDENT")
-                                .requestMatchers("/selections/subjects/find/**").hasAnyAuthority("ADMIN", "LECTURER", "STUDENT")
-                                //Students Access
-                                .requestMatchers("/selections/schools/new/**").hasAnyAuthority("ADMIN", "LECTURER", "STUDENT")
+                                .requestMatchers("/api/user/auth/update").hasAuthority("ADMIN")
+                                .requestMatchers("/api/user/auth/add").hasAuthority("ADMIN")
+                                .requestMatchers("/api/user/auth/findById/**").hasAuthority("ADMIN")
+                                .requestMatchers("/api/user/auth/list/all").hasAuthority("ADMIN")
+                                .requestMatchers("/api/user/auth/deleteById/**").hasAuthority("ADMIN")
+                                .requestMatchers("/api/user/auth/new/role").hasAuthority("ADMIN")
+                                .requestMatchers("/api/user/auth/current").hasAnyAuthority("ADMIN", "CUSTOMER")
+                                //Admin and Customer Access
+                                .requestMatchers("/selections/schools/list/**").hasAnyAuthority("ADMIN", "CUSTOMER")
+                                .requestMatchers("/selections/zones/list/**").hasAnyAuthority("ADMIN", "CUSTOMER")
+                                .requestMatchers("/selections/subjects/list/**").hasAnyAuthority("ADMIN", "CUSTOMER")
+                                .requestMatchers("/selections/schools/delete/**").hasAnyAuthority("ADMIN", "CUSTOMER")
+                                .requestMatchers("/selections/zones/delete/**").hasAnyAuthority("ADMIN", "CUSTOMER")
+                                .requestMatchers("/selections/subjects/delete/**").hasAnyAuthority("ADMIN")
+                                .requestMatchers("/selections/schools/find/**").hasAnyAuthority("ADMIN", "CUSTOMER")
+                                .requestMatchers("/selections/zones/find/**").hasAnyAuthority("ADMIN", "CUSTOMER")
+                                .requestMatchers("/selections/subjects/find/**").hasAnyAuthority("ADMIN", "CUSTOMER")
+                                //Customer Access
+                                .requestMatchers("/selections/schools/new/**").hasAnyAuthority("ADMIN", "CUSTOMER")
                                 .requestMatchers("/selections/zones/new/**").hasAuthority("STUDENT")
                                 .requestMatchers("/selections/subjects/new/**").hasAuthority("STUDENT")
-                                .requestMatchers("/subjects/list/**").hasAnyAuthority("ADMIN", "LECTURER", "STUDENT")
-                                .requestMatchers("/subjects/find/**").hasAnyAuthority("ADMIN", "LECTURER", "STUDENT")
+                                .requestMatchers("/subjects/list/**").hasAnyAuthority("ADMIN", "CUSTOMER")
+                                .requestMatchers("/subjects/find/**").hasAnyAuthority("ADMIN", "CUSTOMER")
                                 .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception
