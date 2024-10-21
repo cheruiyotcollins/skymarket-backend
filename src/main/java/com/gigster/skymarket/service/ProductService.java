@@ -30,13 +30,8 @@ public class ProductService {
     public ResponseEntity<ResponseDto> createProduct(NewProductDto newProductDto) {
         responseDto= new ResponseDto();
         try {
-            Product product = new Product();
-            product.setProductName(newProductDto.getProductName());
-            product.setManufacturer(newProductDto.getManufacturer());
-            product.setPrice(newProductDto.getPrice());
-            product.setStock(newProductDto.getStock());
-            Optional<Category> category = categoryRepository.findById(newProductDto.getCategory_id());
-            category.ifPresent(product::setCategory);
+            Product product = setProduct(newProductDto);
+
             responseDto.setStatus(HttpStatus.CREATED);
             responseDto.setDescription("Product Added Successfully");
             responseDto.setPayload(productRepository.save(product));
@@ -51,9 +46,11 @@ public class ProductService {
     }
 
     public ResponseEntity<ResponseDto>getAllProducts() {
+        //todo pagination
         responseDto= new ResponseDto();
         responseDto.setStatus(HttpStatus.OK);
         responseDto.setDescription("Fetched List of All Products");
+        //todo map Product to product dto
         responseDto.setPayload(productRepository.findAll());
         return new ResponseEntity<>(responseDto, responseDto.getStatus());
     }
@@ -76,13 +73,7 @@ public class ProductService {
         responseDto= new ResponseDto();
         Optional<Product> optionalProduct = productRepository.findById(id);
         if (optionalProduct.isPresent()) {
-            Product product = optionalProduct.get();
-            product.setProductName(newProductDto.getProductName());
-            product.setManufacturer(newProductDto.getManufacturer());
-            product.setPrice(newProductDto.getPrice());
-            product.setStock(newProductDto.getStock());
-            Optional<Category> category=categoryRepository.findById(newProductDto.getCategory_id());
-            category.ifPresent(product::setCategory);
+            Product product = setProduct(newProductDto);
              responseDto.setStatus(HttpStatus.ACCEPTED);
              responseDto.setDescription("product Updated successfully");
              responseDto.setPayload(productRepository.save(product));
@@ -106,5 +97,17 @@ public class ProductService {
             responseDto.setDescription("Product With Provided id not Found. err>>>   "+ e);
         }
         return new ResponseEntity<>(responseDto, responseDto.getStatus());
+    }
+    private Product setProduct(NewProductDto newProductDto){
+        Product product = Product.builder()
+                .productName(newProductDto.getProductName())
+                .stock(newProductDto.getStock())
+                .price(newProductDto.getPrice())
+                .manufacturer(newProductDto.getManufacturer())
+                .build();
+        // if mandatory is present then set it
+        Optional<Category> category = categoryRepository.findById(newProductDto.getCategory_id());
+        category.ifPresent(product::setCategory);
+        return product;
     }
 }
