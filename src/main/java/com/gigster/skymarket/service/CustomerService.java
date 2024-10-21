@@ -20,18 +20,32 @@ public class CustomerService {
 
     ResponseDto responseDto;
 
-    public void saveCustomer(NewCustomerDto newCustomer){
-        Customer customer= new Customer();
-        customer.setEmail(newCustomer.getEmail());
-        customer.setGender(newCustomer.getGender());
-        customer.setFullName(newCustomer.getFullName());
-        customer.setPhoneNo(newCustomer.getPhoneNo());
-        customerRepository.save(customer);
+    public ResponseEntity<ResponseDto> saveCustomer(NewCustomerDto newCustomer){
+        try {
+            Customer customer= new Customer();
+            customer.setEmail(newCustomer.getEmail());
+            customer.setGender(newCustomer.getGender());
+            customer.setFullName(newCustomer.getFullName());
+            customer.setPhoneNo(newCustomer.getPhoneNo());
+            customerRepository.save(customer);
+            responseDto.setStatus(HttpStatus.CREATED); // Use CREATED for successful creation
+            responseDto.setDescription("Customer created successfully");
+            responseDto.setPayload(newCustomer);
+        } catch (Exception e) {
+            responseDto.setStatus(HttpStatus.BAD_REQUEST);
+            responseDto.setDescription("Something went wrong, please check your request and try again");
+        }
+       return  new ResponseEntity<>(responseDto, responseDto.getStatus());
 
     }
-    public List<CustomerResponseDto> findAll(){
+    public ResponseEntity<ResponseDto> findAll(){
+        responseDto= new ResponseDto();
         List<CustomerResponseDto> customerResponseDtos= new ArrayList<>();
         List<Customer> customers= customerRepository.findAll();
+        if(customers.isEmpty()){
+            responseDto.setStatus(HttpStatus.NO_CONTENT);
+            responseDto.setDescription("No Customer Found");
+        }else{
         customers.forEach( customer->{
             CustomerResponseDto customerResponseDto= new CustomerResponseDto();
             customerResponseDto.setEmail(customer.getEmail());
@@ -39,13 +53,16 @@ public class CustomerService {
             customerResponseDto.setFullName(customer.getFullName());
             customerResponseDto.setPhoneNo(customer.getPhoneNo());
             customerResponseDtos.add(customerResponseDto);
-
         }
-
         );
-        return  customerResponseDtos;
+            responseDto.setStatus(HttpStatus.FOUND);
+            responseDto.setDescription("Customers Fetched Successfully");
+            responseDto.setPayload(customerResponseDtos);
+        }
+        return  new ResponseEntity<>(responseDto, responseDto.getStatus());
     }
-    public ResponseEntity<?> findCustomerById(long id){
+
+    public ResponseEntity<ResponseDto> findCustomerById(long id){
         responseDto= new ResponseDto();
         if(customerRepository.existsById(id)){
             Customer customer=customerRepository.findById(id).get();
@@ -65,7 +82,7 @@ public class CustomerService {
         return new ResponseEntity<>(responseDto, responseDto.getStatus());
     }
 
-    public ResponseEntity<?> deleteCustomerById(long id){
+    public ResponseEntity<ResponseDto> deleteCustomerById(long id){
         responseDto=new ResponseDto();
         try{
             responseDto.setStatus(HttpStatus.OK);
