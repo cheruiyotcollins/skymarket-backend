@@ -22,11 +22,12 @@ public class CustomerService {
 
     public ResponseEntity<ResponseDto> saveCustomer(NewCustomerDto newCustomer){
         try {
-            Customer customer= new Customer();
-            customer.setEmail(newCustomer.getEmail());
-            customer.setGender(newCustomer.getGender());
-            customer.setFullName(newCustomer.getFullName());
-            customer.setPhoneNo(newCustomer.getPhoneNo());
+            Customer customer= Customer.builder()
+                    .email(newCustomer.getEmail())
+                    .gender(newCustomer.getGender())
+                    .fullName(newCustomer.getFullName())
+                    .phoneNo(newCustomer.getPhoneNo())
+                    .build();
             customerRepository.save(customer);
             responseDto.setStatus(HttpStatus.CREATED); // Use CREATED for successful creation
             responseDto.setDescription("Customer created successfully");
@@ -47,11 +48,7 @@ public class CustomerService {
             responseDto.setDescription("No Customer Found");
         }else{
         customers.forEach( customer->{
-            CustomerResponseDto customerResponseDto= new CustomerResponseDto();
-            customerResponseDto.setEmail(customer.getEmail());
-            customerResponseDto.setGender(customer.getGender());
-            customerResponseDto.setFullName(customer.getFullName());
-            customerResponseDto.setPhoneNo(customer.getPhoneNo());
+            CustomerResponseDto customerResponseDto=mapCustomerResponseDto(customer);
             customerResponseDtos.add(customerResponseDto);
         }
         );
@@ -66,12 +63,8 @@ public class CustomerService {
         responseDto= new ResponseDto();
         if(customerRepository.existsById(id)){
             Customer customer=customerRepository.findById(id).get();
-            CustomerResponseDto customerResponseDto=CustomerResponseDto.builder()
-                    .email(customer.getEmail())
-                    .gender(customer.getGender())
-                    .phoneNo(customer.getPhoneNo())
-                    .fullName(customer.getFullName())
-                    .build();
+            //calling mapCustomerResponseDto
+            CustomerResponseDto customerResponseDto=mapCustomerResponseDto(customer);
             responseDto.setStatus(HttpStatus.OK);
             responseDto.setDescription("Customer Info Found");
             responseDto.setPayload(customerResponseDto);
@@ -93,5 +86,13 @@ public class CustomerService {
             responseDto.setDescription("Customer Not Found");
         }
         return new ResponseEntity<>(responseDto, responseDto.getStatus());
+    }
+    private CustomerResponseDto mapCustomerResponseDto(Customer customer){
+        return CustomerResponseDto.builder()
+                .email(customer.getEmail())
+                .gender(customer.getGender())
+                .phoneNo(customer.getPhoneNo())
+                .fullName(customer.getFullName())
+                .build();
     }
 }

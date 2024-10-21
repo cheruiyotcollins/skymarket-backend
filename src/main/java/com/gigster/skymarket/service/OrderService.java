@@ -113,6 +113,7 @@ public class OrderService {
 
 
     // 5. Delete an order by ID
+    //todo make this cancel, and only customer can do this if its on pending or processing status
     public void deleteOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
