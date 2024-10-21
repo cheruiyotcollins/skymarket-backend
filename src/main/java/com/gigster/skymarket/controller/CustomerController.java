@@ -27,6 +27,7 @@ public class CustomerController {
     }
 
     @GetMapping
+    //todo pagination
     public ResponseEntity<ResponseDto> getAllCustomers() {
         return customerService.findAll();
     }
