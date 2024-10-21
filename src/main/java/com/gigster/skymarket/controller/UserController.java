@@ -19,7 +19,7 @@ public class UserController {
     @Autowired
     UserService userService;
 
-    @PostMapping("new")
+    @PostMapping("signup")
     public ResponseEntity<?> register(@RequestBody SignUpRequest signUpRequest){
         return userService.register(signUpRequest);
     }
