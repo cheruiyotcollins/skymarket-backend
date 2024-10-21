@@ -25,11 +25,11 @@ public class RoleConfig implements CommandLineRunner {
        String admin="ADMIN";
        String customer="CUSTOMER";
 
-       if(!roleRepository.findByName(admin).isPresent()){
+       if(roleRepository.findByName(admin).isEmpty()){
            Role role=new Role();
            role.setName(admin);
            roleRepository.save(role);
-       }if(!roleRepository.findByName(customer).isPresent()){
+       }if(roleRepository.findByName(customer).isEmpty()){
             Role role=new Role();
             role.setName(customer);
             roleRepository.save(role);
