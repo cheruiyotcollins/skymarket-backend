@@ -117,11 +117,16 @@ public class OrderService {
 
 
     // 5. Delete an order by ID (Admin)
-    public void deleteOrder(Long orderId) {
+    public ResponseEntity<ResponseDto> deleteOrder(Long orderId) {
+        responseDto = new ResponseDto();
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new RuntimeException("Order not found or could not be deleted"));
 
-        orderRepository.delete(order);  // Delete the order from the database
+        orderRepository.delete(order);
+            responseDto.setStatus(HttpStatus.ACCEPTED);
+            responseDto.setDescription("Order deleted successfully");
+
+            return new ResponseEntity<>(responseDto, responseDto.getStatus());
     }
    //cancelling orders(Customers,admins)
     public ResponseEntity<ResponseDto> cancelOrder(Long orderId) {
