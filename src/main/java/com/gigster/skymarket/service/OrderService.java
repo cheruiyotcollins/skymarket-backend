@@ -2,6 +2,7 @@ package com.gigster.skymarket.service;
 
 import com.gigster.skymarket.dto.OrderDto;
 import com.gigster.skymarket.dto.OrderProductDto;
+import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.enums.OrderStatus;
 import com.gigster.skymarket.model.Customer;
 import com.gigster.skymarket.model.Order;
@@ -12,6 +13,8 @@ import com.gigster.skymarket.repository.OrderRepository;
 import com.gigster.skymarket.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -29,6 +32,7 @@ public class OrderService {
 
     @Autowired
     private ProductRepository productRepository;
+    ResponseDto responseDto;
 
     // 1. Create a new Order
     public OrderDto createOrder(OrderDto orderDto) {
@@ -112,17 +116,36 @@ public class OrderService {
     }
 
 
-    // 5. Delete an order by ID
-    //todo make this cancel, and only customer can do this if its on pending or processing status
+    // 5. Delete an order by ID (Admin)
     public void deleteOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
         orderRepository.delete(order);  // Delete the order from the database
     }
+   //cancelling orders(Customers,admins)
+    public ResponseEntity<ResponseDto> cancelOrder(Long orderId) {
+        responseDto=new ResponseDto();
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if(order.getStatus().equals(OrderStatus.PENDING) || order.getStatus().equals(OrderStatus.PROCESSING)){
+            order.setStatus(OrderStatus.CANCELLED);
+            orderRepository.save(order);
+            responseDto.setStatus(HttpStatus.ACCEPTED);
+            responseDto.setDescription("Order Cancelled Successfully");
+            responseDto.setPayload(order);
+        }else{
+            responseDto.setStatus(HttpStatus.NOT_ACCEPTABLE);
+            responseDto.setDescription("Orders currently being shipped or already delivered can not be cancelled");
+        }
+        return new ResponseEntity<>(responseDto,responseDto.getStatus());
+
+
+    }
 
     // Mapping OrderDto to Order
-    public Order mapToOrder(OrderDto orderDto, Customer customer, List<Product> products) {
+    private Order mapToOrder(OrderDto orderDto, Customer customer, List<Product> products) {
         Order order = new Order();
         order.setId(orderDto.getOrderId());
         order.setOrderNumber(orderDto.getOrderNumber());
@@ -151,7 +174,7 @@ public class OrderService {
     }
     // Mapping Order to OrderDto
 
-    public OrderDto mapToOrderDto(Order order) {
+    private OrderDto mapToOrderDto(Order order) {
         OrderDto orderDto = new OrderDto();
         orderDto.setOrderId(order.getId());
         orderDto.setOrderNumber(order.getOrderNumber());
