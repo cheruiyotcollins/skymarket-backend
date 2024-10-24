@@ -1,11 +1,13 @@
 package com.gigster.skymarket.service;
 
 import com.gigster.skymarket.dto.*;
+import com.gigster.skymarket.exception.ResourceNotFoundException;
 import com.gigster.skymarket.model.Customer;
 import com.gigster.skymarket.repository.RoleRepository;
 import com.gigster.skymarket.repository.UserRepository;
 import com.gigster.skymarket.model.Role;
 import com.gigster.skymarket.security.JwtTokenProvider;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import java.util.*;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class UserService {
 
     private final AuthenticationManager authenticationManager;
@@ -139,14 +142,39 @@ public class UserService {
     }
 
     public ResponseEntity<?> getCurrentUser(String email) {
+        responseDto = new ResponseDto();
 
-        CurrentUserDto currentUserDto=new CurrentUserDto();
-        User user= userRepository.findByEmail(email).get();
-        currentUserDto.setName(user.getUsername());
-        currentUserDto.setEmail(user.getEmail());
-        currentUserDto.setRole(user.getRoles().iterator().next().getId());
-        System.out.println(currentUserDto.getRole());
-        return new ResponseEntity<>(currentUserDto,HttpStatus.OK);
+        try {
+            // Fetch user by email, handle if user not found
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User with email " + email + "not found"));
+
+            // Build the CurrentUserDto object
+            CurrentUserDto currentUserDto = CurrentUserDto.builder()
+                    .name(user.getUsername())
+                    .email(user.getEmail())
+                    .role(user.getRoles().iterator().next().getId())
+                    .build();
+
+            // Set success response details
+            responseDto.setStatus(HttpStatus.FOUND);
+            responseDto.setDescription("Current User logged in");
+            responseDto.setPayload(currentUserDto);
+
+            return new ResponseEntity<>(responseDto, responseDto.getStatus());
+
+        } catch (ResourceNotFoundException ex) {
+            // Handle user not found case
+            responseDto.setStatus(HttpStatus.NOT_FOUND);
+            responseDto.setDescription(ex.getMessage());
+            return new ResponseEntity<>(responseDto, responseDto.getStatus());
+
+        } catch (Exception ex) {
+            // Handle any other unexpected exceptions
+            responseDto.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+            responseDto.setDescription("An error occurred while fetching the user details");
+            return new ResponseEntity<>(responseDto, responseDto.getStatus());
+        }
     }
 
 }
