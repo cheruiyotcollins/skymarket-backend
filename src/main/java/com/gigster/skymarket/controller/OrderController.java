@@ -88,19 +88,15 @@ public class OrderController {
         return new ResponseEntity<>(responseDto, responseDto.getStatus());
     }
 
-    // 5. DELETE: Delete an order by ID
+    // 5. DELETE: Delete an order by ID, admin
     @DeleteMapping("/{id}")
     public ResponseEntity<ResponseDto> deleteOrder(@PathVariable Long id) {
-        responseDto = new ResponseDto();
-        try {
-            orderService.deleteOrder(id);
-            responseDto.setStatus(HttpStatus.OK);
-            responseDto.setDescription("Order deleted successfully");
-        } catch (Exception e) {
-            responseDto.setStatus(HttpStatus.NOT_FOUND);
-            responseDto.setDescription("Order not found or could not be deleted");
-            log.error("Error deleting order: {}", e.getMessage());
-        }
-        return new ResponseEntity<>(responseDto, responseDto.getStatus());
+       return orderService.deleteOrder(id);
+
+    }
+    // use patch for partial update
+    @PatchMapping("/id/{id}")
+    public ResponseEntity<ResponseDto> cancelOrder(@PathVariable Long id){
+        return orderService.cancelOrder(id);
     }
 }
