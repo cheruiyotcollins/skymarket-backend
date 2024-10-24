@@ -88,7 +88,7 @@ public class OrderController {
         return new ResponseEntity<>(responseDto, responseDto.getStatus());
     }
 
-    // 5. DELETE: Delete an order by ID
+    // 5. DELETE: Delete an order by ID, admin
     @DeleteMapping("/{id}")
     public ResponseEntity<ResponseDto> deleteOrder(@PathVariable Long id) {
         responseDto = new ResponseDto();
@@ -102,5 +102,10 @@ public class OrderController {
             log.error("Error deleting order: {}", e.getMessage());
         }
         return new ResponseEntity<>(responseDto, responseDto.getStatus());
+    }
+    // use patch for partial update
+    @PatchMapping("/id/{id}")
+    public ResponseEntity<ResponseDto> cancelOrder(@PathVariable Long id){
+        return orderService.cancelOrder(id);
     }
 }
