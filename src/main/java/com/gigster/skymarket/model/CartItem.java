@@ -15,7 +15,6 @@ import lombok.Setter;
 @Table(name = "cart_items")
 public class CartItem {
 
-    // Getters and Setters
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
