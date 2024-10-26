@@ -1,27 +1,10 @@
 package com.gigster.skymarket.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
+public interface NotificationService {
 
-@Service
-public class NotificationService {
-    @Autowired
-    private JavaMailSender mailSender;
+    void sendMail(String to, String subject, String body);
 
-
-    @Async("asyncExecutor")
-    public void sendMail(String to, String subject, String body) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(body);
-        mailSender.send(message);
-    }
-    //todo order confirmation message sms
-
+    // todo add sms notification
 }
 
 
