@@ -6,7 +6,7 @@ import com.gigster.skymarket.model.Cart;
 import com.gigster.skymarket.model.CartItem;
 import com.gigster.skymarket.repository.CartItemRepository;
 import com.gigster.skymarket.repository.ProductRepository;
-import com.gigster.skymarket.service.CartServiceItem;
+import com.gigster.skymarket.service.CartItemService;
 import com.gigster.skymarket.setter.ResponseDtoSetter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class CartServiceItemImpl implements CartServiceItem {
+public class CartItemServiceImpl implements CartItemService {
     @Autowired
     CartItemRepository cartItemRepository;
 
