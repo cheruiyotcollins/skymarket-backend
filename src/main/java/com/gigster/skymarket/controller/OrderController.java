@@ -3,6 +3,7 @@ package com.gigster.skymarket.controller;
 import com.gigster.skymarket.dto.OrderDto;
 import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.service.OrderService;
+import com.gigster.skymarket.setter.ResponseDtoSetter;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,72 +21,56 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    private ResponseDto responseDto;
+    //todo move this to service
+    @Autowired
+    ResponseDtoSetter responseDtoSetter;
 
     // 1. CREATE: Add a new order
     @PostMapping
     public ResponseEntity<ResponseDto> createOrder(@Valid @RequestBody OrderDto orderDto) {
-        responseDto = new ResponseDto();
         try {
             orderService.createOrder(orderDto);
-            responseDto.setStatus(HttpStatus.CREATED);
-            responseDto.setDescription("Order created successfully");
-            responseDto.setPayload(orderDto);
+            return responseDtoSetter.responseDtoSetter(HttpStatus.CREATED, "Order created successfully",orderDto);
         } catch (Exception e) {
-            responseDto.setStatus(HttpStatus.BAD_REQUEST);
-            responseDto.setDescription("Failed to create order");
-            log.error("Error creating order: {}", e.getMessage());
+            return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST, "Failed to create order+>>>"+e);
         }
-        return new ResponseEntity<>(responseDto, responseDto.getStatus());
     }
 
     // 2. READ: Get all orders
     @GetMapping
     public ResponseEntity<ResponseDto> getAllOrders() {
-        responseDto = new ResponseDto();
         List<OrderDto> orders = orderService.getAllOrders();
-        responseDto.setStatus(HttpStatus.OK);
         if (!orders.isEmpty()) {
-            responseDto.setDescription("List of all orders");
-            responseDto.setPayload(orders);
+            return responseDtoSetter.responseDtoSetter(HttpStatus.OK, "List of all orders",orders);
         } else {
-            responseDto.setDescription("No orders found");
+            return responseDtoSetter.responseDtoSetter(HttpStatus.OK, "No orders found");
+
         }
-        return new ResponseEntity<>(responseDto, responseDto.getStatus());
+
     }
 
     // 3. READ: Get order by ID
     @GetMapping("/{id}")
     public ResponseEntity<ResponseDto> getOrderById(@PathVariable Long id) {
-        responseDto = new ResponseDto();
         try {
             OrderDto order = orderService.getOrderById(id);
-            responseDto.setStatus(HttpStatus.OK);
-            responseDto.setDescription("Order details");
-            responseDto.setPayload(order);
+            return responseDtoSetter.responseDtoSetter(HttpStatus.OK, "Order details",order);
         } catch (Exception e) {
-            responseDto.setStatus(HttpStatus.NOT_FOUND);
-            responseDto.setDescription("Order not found");
             log.error("Error fetching order by id: {}", e.getMessage());
+            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND, "Order not found");
         }
-        return new ResponseEntity<>(responseDto, responseDto.getStatus());
     }
 
     // 4. UPDATE: Update an existing order
     @PutMapping("/{id}")
     public ResponseEntity<ResponseDto> updateOrder(@PathVariable Long id, @Valid @RequestBody OrderDto orderDto) {
-        responseDto = new ResponseDto();
         try {
             OrderDto updatedOrder = orderService.updateOrder(id, orderDto);
-            responseDto.setStatus(HttpStatus.OK);
-            responseDto.setDescription("Order updated successfully");
-            responseDto.setPayload(updatedOrder);
+            return responseDtoSetter.responseDtoSetter(HttpStatus.OK, "Order updated successfully",updatedOrder);
         } catch (Exception e) {
-            responseDto.setStatus(HttpStatus.BAD_REQUEST);
-            responseDto.setDescription("Failed to update order");
             log.error("Error updating order: {}", e.getMessage());
+            return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST, "Failed to update order");
         }
-        return new ResponseEntity<>(responseDto, responseDto.getStatus());
     }
 
     // 5. DELETE: Delete an order by ID, admin

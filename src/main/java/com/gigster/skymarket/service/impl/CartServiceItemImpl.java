@@ -7,6 +7,7 @@ import com.gigster.skymarket.model.CartItem;
 import com.gigster.skymarket.repository.CartItemRepository;
 import com.gigster.skymarket.repository.ProductRepository;
 import com.gigster.skymarket.service.CartServiceItem;
+import com.gigster.skymarket.setter.ResponseDtoSetter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,8 @@ public class CartServiceItemImpl implements CartServiceItem {
 
     @Autowired
     ProductRepository productRepository;
-
+    @Autowired
+    ResponseDtoSetter responseDtoSetter;
 
 
     @Override
@@ -34,9 +36,9 @@ public class CartServiceItemImpl implements CartServiceItem {
             cartItem.setProduct(productRepository.findById(cartItemDto.getProductId()).get());
             cartItem.setQuantity(cartItemDto.getQuantity());
             cartItemRepository.save(cartItem);
-            return responseDtoSetter(HttpStatus.CREATED,"Item added successfully", cartItemRepository.save(cartItem));
+            return responseDtoSetter.responseDtoSetter(HttpStatus.CREATED,"Item added successfully", cartItemRepository.save(cartItem));
         } catch (Exception e) {
-            return responseDtoSetter(HttpStatus.BAD_REQUEST, "something went wrong please check your request: "+ e, new Object());
+            return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST, "something went wrong please check your request: "+ e, new Object());
         }
     }
 
@@ -59,8 +61,5 @@ public class CartServiceItemImpl implements CartServiceItem {
     public ResponseEntity<ResponseDto> clearCart(Long cartId) {
         return null;
     }
-    // Todo implement method overloading to handle null payloads
-    private ResponseEntity<ResponseDto> responseDtoSetter(HttpStatus httpStatus, String description, Object payload){
-        return new ResponseEntity<>(ResponseDto.builder().payload(payload).status(httpStatus).description(description).build(), httpStatus);
-    }
+
 }
