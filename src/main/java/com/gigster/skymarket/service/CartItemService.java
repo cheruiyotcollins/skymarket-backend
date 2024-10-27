@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
-public interface CartServiceItem {
+public interface CartItemService {
     // Create: Add an item to the cart
     ResponseEntity<ResponseDto> addItemToCart(Cart cart, CartItemDto cartItemDto);
 
