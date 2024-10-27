@@ -6,6 +6,7 @@ import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.model.Customer;
 import com.gigster.skymarket.repository.CustomerRepository;
 import com.gigster.skymarket.service.CustomerService;
+import com.gigster.skymarket.setter.ResponseDtoSetter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +19,8 @@ import java.util.List;
 public class CustomerServiceImpl implements CustomerService {
     @Autowired
     CustomerRepository customerRepository;
-
-    ResponseDto responseDto;
+    @Autowired
+    ResponseDtoSetter responseDtoSetter;
     @Override
     public ResponseEntity<ResponseDto> saveCustomer(NewCustomerDto newCustomer){
         try {
@@ -30,64 +31,50 @@ public class CustomerServiceImpl implements CustomerService {
                     .phoneNo(newCustomer.getPhoneNo())
                     .build();
             customerRepository.save(customer);
-            responseDto.setStatus(HttpStatus.CREATED); // Use CREATED for successful creation
-            responseDto.setDescription("Customer created successfully");
-            responseDto.setPayload(newCustomer);
+            return responseDtoSetter.responseDtoSetter(HttpStatus.CREATED,"Customer created successfully",newCustomer);
         } catch (Exception e) {
-            responseDto.setStatus(HttpStatus.BAD_REQUEST);
-            responseDto.setDescription("Something went wrong, please check your request and try again");
+            return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST,"Something went wrong, please check your request and try again");
         }
-       return  new ResponseEntity<>(responseDto, responseDto.getStatus());
 
     }
     @Override
     public ResponseEntity<ResponseDto> findAll(){
-        responseDto= new ResponseDto();
         List<CustomerResponseDto> customerResponseDtos= new ArrayList<>();
         List<Customer> customers= customerRepository.findAll();
         if(customers.isEmpty()){
-            responseDto.setStatus(HttpStatus.NO_CONTENT);
-            responseDto.setDescription("No Customer Found");
+           return responseDtoSetter.responseDtoSetter(HttpStatus.NO_CONTENT,"No Customer Found");
+
         }else{
         customers.forEach( customer->{
             CustomerResponseDto customerResponseDto=mapCustomerResponseDto(customer);
             customerResponseDtos.add(customerResponseDto);
         }
         );
-            responseDto.setStatus(HttpStatus.FOUND);
-            responseDto.setDescription("Customers Fetched Successfully");
-            responseDto.setPayload(customerResponseDtos);
+            return responseDtoSetter.responseDtoSetter(HttpStatus.FOUND,"Customers Fetched Successfully",customerResponseDtos);
         }
-        return  new ResponseEntity<>(responseDto, responseDto.getStatus());
+
     }
     @Override
     public ResponseEntity<ResponseDto> findCustomerById(long id){
-        responseDto= new ResponseDto();
         if(customerRepository.existsById(id)){
             Customer customer=customerRepository.findById(id).get();
             //calling mapCustomerResponseDto
             CustomerResponseDto customerResponseDto=mapCustomerResponseDto(customer);
-            responseDto.setStatus(HttpStatus.OK);
-            responseDto.setDescription("Customer Info Found");
-            responseDto.setPayload(customerResponseDto);
+            return responseDtoSetter.responseDtoSetter(HttpStatus.FOUND,"Customer Info Found",customerResponseDto);
+
         }else {
-            responseDto.setStatus(HttpStatus.NOT_FOUND);
-            responseDto.setDescription("No Customer with provided Id Found");
+            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND,"No Customer with provided Id Found");
+
         }
-        return new ResponseEntity<>(responseDto, responseDto.getStatus());
     }
     @Override
     public ResponseEntity<ResponseDto> deleteCustomerById(long id){
-        responseDto=new ResponseDto();
         try{
-            responseDto.setStatus(HttpStatus.OK);
-            responseDto.setDescription("Customer Successfully Deleted");
+            return responseDtoSetter.responseDtoSetter(HttpStatus.OK,"Customer Successfully Deleted");
 
         }catch(Exception e){
-            responseDto.setStatus(HttpStatus.NOT_FOUND);
-            responseDto.setDescription("Customer Not Found");
+            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND,"Customer Not Found");
         }
-        return new ResponseEntity<>(responseDto, responseDto.getStatus());
     }
     private CustomerResponseDto mapCustomerResponseDto(Customer customer){
         return CustomerResponseDto.builder()

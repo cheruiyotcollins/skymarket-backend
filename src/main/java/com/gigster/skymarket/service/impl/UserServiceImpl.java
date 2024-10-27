@@ -8,7 +8,9 @@ import com.gigster.skymarket.repository.RoleRepository;
 import com.gigster.skymarket.repository.UserRepository;
 import com.gigster.skymarket.security.JwtTokenProvider;
 import com.gigster.skymarket.service.UserService;
+import com.gigster.skymarket.setter.ResponseDtoSetter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,7 +32,8 @@ public class UserServiceImpl implements UserService {
     private PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
-    ResponseDto responseDto;
+    @Autowired
+    ResponseDtoSetter responseDtoSetter;
 
 
     public UserServiceImpl(AuthenticationManager authenticationManager,
@@ -47,16 +50,11 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public ResponseEntity<ResponseDto> register(SignUpRequest signUpRequest) {
-        responseDto= new ResponseDto();
         if(userRepository.existsByEmail(signUpRequest.getEmail())) {
-            responseDto.setStatus(HttpStatus.NOT_ACCEPTABLE);
-            responseDto.setDescription("Email Address already in use!");
-            return new ResponseEntity<>(responseDto, responseDto.getStatus());
+            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_ACCEPTABLE,"Email Address already in use!");
         }
         if(userRepository.existsByUsername(signUpRequest.getUsername())) {
-            responseDto.setStatus(HttpStatus.NOT_ACCEPTABLE);
-            responseDto.setDescription("Username is already taken!");
-            return new ResponseEntity<>(responseDto, responseDto.getStatus());
+            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_ACCEPTABLE,"Username is already taken!");
         }
         // todo encrypt password before saving
         User user = User.builder()
@@ -74,9 +72,8 @@ public class UserServiceImpl implements UserService {
 
         }
         userRepository.save(user);
-        responseDto.setStatus(HttpStatus.ACCEPTED);
-        responseDto.setDescription("User registered successfully");
-        return new ResponseEntity<>(responseDto, responseDto.getStatus());
+        return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED,"User registered successfully");
+
     }
     @Override
     public String login(LoginDto loginDto) {
@@ -97,16 +94,14 @@ public class UserServiceImpl implements UserService {
         return null;
     }
     @Override
-    public ResponseEntity<?> findUserById(long id){
+    public ResponseEntity<ResponseDto> findUserById(long id){
 
         try{
-
-            return new ResponseEntity<>( userRepository.findById(id).get(),HttpStatus.OK);
+            //todo ... get
+            return responseDtoSetter.responseDtoSetter(HttpStatus.OK,"User info", userRepository.findById(id).get());
 
         }catch(Exception e){
-            responseDto.setStatus(HttpStatus.BAD_REQUEST);
-            responseDto.setDescription("User Not Found");
-            return new ResponseEntity<>(responseDto,HttpStatus.BAD_REQUEST);
+            return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST, "User Not Found");
         }
     }
     //todo pagination
@@ -114,33 +109,29 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<?> findAll(){
 
         try{
+            return responseDtoSetter.responseDtoSetter(HttpStatus.OK,"User info", userRepository.findAll());
 
-            return new ResponseEntity<>( userRepository.findAll(),HttpStatus.OK);
 
         }catch(Exception e){
-            responseDto.setStatus(HttpStatus.BAD_REQUEST);
-            responseDto.setDescription("No User Found");
-            return new ResponseEntity<>(responseDto,HttpStatus.BAD_REQUEST);
+            return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST,"No User Found");
+
         }
     }
     @Override
     public ResponseEntity<?> deleteById(long id){
 
         try{
-            responseDto.setStatus(HttpStatus.ACCEPTED);
-            responseDto.setDescription("User deleted successfully");
             userRepository.deleteById(id);
-            return new ResponseEntity<>(responseDto,HttpStatus.OK);
+            return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED,"User deleted successfully");
+
 
         }catch(Exception e){
-            responseDto.setStatus(HttpStatus.BAD_REQUEST);
-            responseDto.setDescription("User with that id not found");
-            return new ResponseEntity<>(responseDto,HttpStatus.BAD_REQUEST);
+            return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST,"User with that id not found");
+
         }
     }
     @Override
     public ResponseEntity<?> getCurrentUser(String email) {
-        responseDto = new ResponseDto();
 
         try {
             // Fetch user by email, handle if user not found
@@ -155,23 +146,18 @@ public class UserServiceImpl implements UserService {
                     .build();
 
             // Set success response details
-            responseDto.setStatus(HttpStatus.FOUND);
-            responseDto.setDescription("Current User logged in");
-            responseDto.setPayload(currentUserDto);
+           return responseDtoSetter.responseDtoSetter(HttpStatus.FOUND,"Current User logged in", currentUserDto);
 
-            return new ResponseEntity<>(responseDto, responseDto.getStatus());
 
         } catch (ResourceNotFoundException ex) {
             // Handle user not found case
-            responseDto.setStatus(HttpStatus.NOT_FOUND);
-            responseDto.setDescription(ex.getMessage());
-            return new ResponseEntity<>(responseDto, responseDto.getStatus());
+            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND,ex.getMessage());
+
 
         } catch (Exception ex) {
             // Handle any other unexpected exceptions
-            responseDto.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-            responseDto.setDescription("An error occurred while fetching the user details");
-            return new ResponseEntity<>(responseDto, responseDto.getStatus());
+            return responseDtoSetter.responseDtoSetter(HttpStatus.INTERNAL_SERVER_ERROR,"An error occurred while fetching the user details");
+
         }
     }
 

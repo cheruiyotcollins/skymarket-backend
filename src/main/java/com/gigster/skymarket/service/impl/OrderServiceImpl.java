@@ -13,6 +13,7 @@ import com.gigster.skymarket.repository.OrderRepository;
 import com.gigster.skymarket.repository.ProductRepository;
 import com.gigster.skymarket.repository.UserRepository;
 import com.gigster.skymarket.service.OrderService;
+import com.gigster.skymarket.setter.ResponseDtoSetter;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,11 +34,13 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private ProductRepository productRepository;
-    ResponseDto responseDto;
+
     @Autowired
     NotificationServiceImpl notificationService;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    ResponseDtoSetter responseDtoSetter;
 
     // 1. Create a new Order
     @Override
@@ -150,36 +153,28 @@ public class OrderServiceImpl implements OrderService {
     // 5. Delete an order by ID (Admin)
     @Override
     public ResponseEntity<ResponseDto> deleteOrder(Long orderId) {
-        responseDto = new ResponseDto();
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found or could not be deleted"));
 
         orderRepository.delete(order);
-            responseDto.setStatus(HttpStatus.ACCEPTED);
-            responseDto.setDescription("Order deleted successfully");
+        return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED, "Order deleted successfully ");
 
-            return new ResponseEntity<>(responseDto, responseDto.getStatus());
     }
    //cancelling orders(Customers,admins)
    @Override
     public ResponseEntity<ResponseDto> cancelOrder(Long orderId) {
-        responseDto=new ResponseDto();
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
         if(order.getStatus().equals(OrderStatus.PENDING) || order.getStatus().equals(OrderStatus.PROCESSING)){
             order.setStatus(OrderStatus.CANCELLED);
             orderRepository.save(order);
-            responseDto.setStatus(HttpStatus.ACCEPTED);
-            responseDto.setDescription("Order Cancelled Successfully");
-            responseDto.setPayload(order);
+            return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED, "Order Cancelled Successfully",order);
+
         }else{
-            responseDto.setStatus(HttpStatus.NOT_ACCEPTABLE);
-            responseDto.setDescription("Orders currently being shipped or already delivered can not be cancelled");
+            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_ACCEPTABLE, "Orders currently being shipped or already delivered can not be cancelled");
+
         }
-        return new ResponseEntity<>(responseDto,responseDto.getStatus());
-
-
     }
 
     // Mapping OrderDto to Order

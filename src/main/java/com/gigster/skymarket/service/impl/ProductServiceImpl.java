@@ -7,6 +7,7 @@ import com.gigster.skymarket.model.Product;
 import com.gigster.skymarket.repository.CategoryRepository;
 import com.gigster.skymarket.repository.ProductRepository;
 import com.gigster.skymarket.service.ProductService;
+import com.gigster.skymarket.setter.ResponseDtoSetter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,78 +26,62 @@ public class ProductServiceImpl implements ProductService {
     }
     @Autowired
     CategoryRepository categoryRepository;
-    ResponseDto responseDto;
+    @Autowired
+    ResponseDtoSetter responseDtoSetter;
     @Override
     public ResponseEntity<ResponseDto> createProduct(NewProductDto newProductDto) {
-        responseDto= new ResponseDto();
         try {
             Product product = setProduct(newProductDto);
+            return responseDtoSetter.responseDtoSetter(HttpStatus.CREATED, "Product Added Successfully",productRepository.save(product));
 
-            responseDto.setStatus(HttpStatus.CREATED);
-            responseDto.setDescription("Product Added Successfully");
-            responseDto.setPayload(productRepository.save(product));
 
         } catch (Exception e) {
-            responseDto.setStatus(HttpStatus.BAD_REQUEST);
-            responseDto.setDescription("Something went wrong!!! please check your request and try again:>>>"+ e);
+             return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST, "Something went wrong!!! please check your request and try again:>>>"+ e);
 
         }
-
-        return new ResponseEntity<>(responseDto, responseDto.getStatus());
     }
     @Override
     public ResponseEntity<ResponseDto>getAllProducts() {
         //todo pagination
-        responseDto= new ResponseDto();
-        responseDto.setStatus(HttpStatus.OK);
-        responseDto.setDescription("Fetched List of All Products");
         //todo map Product to product dto
-        responseDto.setPayload(productRepository.findAll());
-        return new ResponseEntity<>(responseDto, responseDto.getStatus());
+        return responseDtoSetter.responseDtoSetter(HttpStatus.OK, "Fetched List of All Products",productRepository.findAll());
+
     }
     @Override
     public ResponseEntity<ResponseDto>getProductById(Long id) {
-        responseDto= new ResponseDto();
         Optional<Product> optionalProduct = productRepository.findById(id);
         if(optionalProduct.isPresent()){
-            responseDto.setStatus(HttpStatus.FOUND);
-            responseDto.setDescription("Product With Provided Fetched Successfully");
-            responseDto.setPayload(optionalProduct.get());
+            return responseDtoSetter.responseDtoSetter(HttpStatus.FOUND, "Product Fetched Successfully",optionalProduct.get());
+
         }else{
-            responseDto.setStatus(HttpStatus.FOUND);
-            responseDto.setDescription("Product not found with ID: "+ id);
+            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND, "Product not found with ID: "+ id);
+
         }
-        return new ResponseEntity<>(responseDto, responseDto.getStatus());
     }
     @Override
     public ResponseEntity<ResponseDto> updateProduct(Long id, NewProductDto newProductDto) {
-        responseDto= new ResponseDto();
         Optional<Product> optionalProduct = productRepository.findById(id);
         if (optionalProduct.isPresent()) {
             Product product = setProduct(newProductDto);
-             responseDto.setStatus(HttpStatus.ACCEPTED);
-             responseDto.setDescription("product Updated successfully");
-             responseDto.setPayload(productRepository.save(product));
+            return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED, "product Updated successfully",productRepository.save(product));
+
         } else {
-            responseDto.setStatus(HttpStatus.NOT_FOUND);
-            responseDto.setDescription("Product not found with ID:  " + id);
+            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND, "Product not found with ID: "+ id);
 
         }
-        return new ResponseEntity<>(responseDto, responseDto.getStatus());
+
     }
     @Override
     public ResponseEntity<ResponseDto> deleteProduct(Long id) {
-        responseDto= new ResponseDto();
+
         try{
             productRepository.deleteById(id);
-            responseDto.setStatus(HttpStatus.ACCEPTED);
-            responseDto.setDescription("Product Deleted Successfully");
+            return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED, "Product Deleted Successfully");
 
         }catch (Exception e){
-            responseDto.setStatus(HttpStatus.NOT_FOUND);
-            responseDto.setDescription("Product With Provided id not Found. err>>>   "+ e);
+            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND, "Product With Provided id not Found. err>>>   "+ e);
         }
-        return new ResponseEntity<>(responseDto, responseDto.getStatus());
+
     }
 
     private Product setProduct(NewProductDto newProductDto){
