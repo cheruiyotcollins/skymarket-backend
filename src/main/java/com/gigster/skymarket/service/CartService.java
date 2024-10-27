@@ -1,12 +1,15 @@
 package com.gigster.skymarket.service;
 
 import com.gigster.skymarket.dto.CartItemDto;
+import com.gigster.skymarket.dto.ResponseDto;
+import org.springframework.http.ResponseEntity;
+
 import java.util.List;
 
 public interface CartService {
 
     // Add an item to the cart with a specified quantity
-    void addItemToCart(Long productId, int quantity);
+    ResponseEntity<ResponseDto> addItemToCart(Long productId, int quantity);
 
     // Remove a specific item from the cart by product ID
     void removeItemFromCart(Long productId);
