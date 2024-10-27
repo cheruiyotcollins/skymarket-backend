@@ -56,10 +56,9 @@ public class UserServiceImpl implements UserService {
         if(userRepository.existsByUsername(signUpRequest.getUsername())) {
             return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_ACCEPTABLE,"Username is already taken!");
         }
-        // todo encrypt password before saving
         User user = User.builder()
                 .email(signUpRequest.getEmail())
-                .password(signUpRequest.getPassword())
+                .password(passwordEncoder.encode(signUpRequest.getPassword())) // Encrypt password here
                 .name(signUpRequest.getName())
                 .username(signUpRequest.getUsername())
                 .build();
