@@ -3,6 +3,7 @@ package com.gigster.skymarket.config;
 
 import com.gigster.skymarket.security.JwtAuthenticationEntryPoint;
 import com.gigster.skymarket.security.JwtAuthenticationFilter;
+import com.gigster.skymarket.service.CartItemService;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
@@ -88,6 +89,9 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET,"/api/customers/{id}").hasAuthority("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE,"/api/customers/{id}").hasAuthority("ADMIN")
                                 //Orders
+
+                                //carts
+                                .requestMatchers(HttpMethod.POST,"/api/carts/items").hasAnyAuthority("ADMIN","CUSTOMER")
 
                                 .anyRequest().authenticated()
                 )

@@ -5,6 +5,8 @@ import com.gigster.skymarket.exception.LendingAPIException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -16,58 +18,54 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    @Value("${app.jwt-secret}")
+    private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
+
+    @Value("${app.jwtSecret}")
     private String jwtSecret;
 
-    @Value("${app-jwt-expiration-milliseconds}")
-    private long jwtExpirationDate;
+    @Value("${app.jwtExpirationInMs}")
+    private int jwtExpirationInMs;
 
-    // generate JWT token
-    public String generateToken(Authentication authentication){
-        String username = authentication.getName();
+    public String generateToken(Authentication authentication) {
 
-        Date currentDate = new Date();
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
 
-        Date expireDate = new Date(currentDate.getTime() + jwtExpirationDate);
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
 
-        String token = Jwts.builder()
-                .setSubject(username)
+        return Jwts.builder()
+                .setSubject(Long.toString(userPrincipal.getId()))
                 .setIssuedAt(new Date())
-                .setExpiration(expireDate)
-                .signWith(key())
+                .setExpiration(expiryDate)
+                .signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
-        return token;
     }
 
-    private Key key(){
-        return Keys.hmacShaKeyFor(
-                Decoders.BASE64.decode(jwtSecret)
-        );
-    }
-
-    // get username from Jwt token
-    public String getUsername(String token){
+    public Long getUserIdFromJWT(String token) {
         Claims claims = Jwts.parser()
-                .setSigningKey(key())
+                .setSigningKey(jwtSecret)
                 .parseClaimsJws(token)
                 .getBody();
-        String username = claims.getSubject();
-        return username;
+
+        return Long.parseLong(claims.getSubject());
     }
 
-    // validate Jwt token
-    public boolean validateToken(String token){
-        try{
-            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
+    public boolean validateToken(String authToken) {
+        try {
+            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(authToken);
             return true;
+        } catch (SignatureException ex) {
+            logger.error("Invalid JWT signature");
         } catch (MalformedJwtException ex) {
-            throw new LendingAPIException(HttpStatus.BAD_REQUEST, "Invalid JWT token");
+            logger.error("Invalid JWT token");
         } catch (ExpiredJwtException ex) {
-            throw new LendingAPIException(HttpStatus.BAD_REQUEST, "Expired JWT token");
+            logger.error("Expired JWT token");
         } catch (UnsupportedJwtException ex) {
-            throw new LendingAPIException(HttpStatus.BAD_REQUEST, "Unsupported JWT token");
+            logger.error("Unsupported JWT token");
         } catch (IllegalArgumentException ex) {
-            throw new LendingAPIException(HttpStatus.BAD_REQUEST, "JWT claims string is empty.");
+            logger.error("JWT claims string is empty.");
         }
+        return false;
     }
 }
+

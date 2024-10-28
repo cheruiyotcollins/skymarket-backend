@@ -2,6 +2,7 @@ package com.gigster.skymarket.service.impl;
 
 import com.gigster.skymarket.dto.*;
 import com.gigster.skymarket.exception.ResourceNotFoundException;
+import com.gigster.skymarket.model.Customer;
 import com.gigster.skymarket.model.Role;
 import com.gigster.skymarket.model.User;
 import com.gigster.skymarket.repository.RoleRepository;
@@ -19,8 +20,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.gigster.skymarket.enums.RoleName;
 
 import java.util.Collections;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -29,7 +32,7 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired
@@ -63,13 +66,21 @@ public class UserServiceImpl implements UserService {
                 .username(signUpRequest.getUsername())
                 .build();
         // by default new user signup he/she is assigned CUSTOMER Role
-        if(roleRepository.findByName("CUSTOMER").isPresent()) {
-            Role userRole = roleRepository.findByName("CUSTOMER").get();
-            user.setRoles(Collections.singleton(userRole));
-            //todo then create a new customer
-//            Customer customer= new Customer();
+        if (roleRepository.findByName(RoleName.CUSTOMER).isPresent()) {
+            Optional<Role> userRole = roleRepository.findByName(RoleName.CUSTOMER);
 
+            userRole.ifPresent(role -> user.setRoles(Collections.singleton(role)));
+
+            // TODO: then create a new customer
+//            // Create a new customer each time a user signs up
+//            Customer customer = new Customer();
+//            customer.setUser(user);  // assuming Customer has a User relationship
+//            // Set other Customer details if necessary
+//
+//            // Save the customer if you have a CustomerRepository, for example:
+//            // customerRepository.save(customer);
         }
+
         userRepository.save(user);
         return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED,"User registered successfully");
 
@@ -88,7 +99,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<?> addRole(AddRoleRequest addRoleRequest) {
         Role role=new Role();
-        role.setName(addRoleRequest.getName());
+        role.setName(RoleName.fromString(addRoleRequest.getName()));
         roleRepository.save(role);
         return null;
     }

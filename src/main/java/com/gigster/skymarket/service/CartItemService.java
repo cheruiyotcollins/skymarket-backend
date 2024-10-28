@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface CartItemService {
     // Create: Add an item to the cart
-    ResponseEntity<ResponseDto> addItemToCart(Cart cart, CartItemDto cartItemDto);
+    ResponseEntity<ResponseDto> addItemToCart(CartItemDto cartItemDto);
 
     // Read: Get all items in the cart
     ResponseEntity<List<CartItemDto>> getCartItems(Long cartId);
