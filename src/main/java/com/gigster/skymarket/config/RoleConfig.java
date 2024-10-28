@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import com.gigster.skymarket.enums.RoleName;
 
 
 @Component
@@ -22,16 +23,13 @@ public class RoleConfig implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         log.info(":::::::::::checking if roles exist, if it doesn't add them::::::::::::");
-       String admin="ADMIN";
-       String customer="CUSTOMER";
-
-       if(roleRepository.findByName(admin).isEmpty()){
+       if(roleRepository.findByName(RoleName.ADMIN).isEmpty()){
            Role role=new Role();
-           role.setName(admin);
+           role.setName(RoleName.ADMIN);
            roleRepository.save(role);
-       }if(roleRepository.findByName(customer).isEmpty()){
+       }if(roleRepository.findByName(RoleName.CUSTOMER).isEmpty()){
             Role role=new Role();
-            role.setName(customer);
+            role.setName(RoleName.CUSTOMER);
             roleRepository.save(role);
         }
 

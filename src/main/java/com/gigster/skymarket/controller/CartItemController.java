@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping(value = "/api/cart/items")
+@RequestMapping(value = "/api/carts/items")
 @Slf4j
 public class CartItemController {
     @Autowired
@@ -23,10 +23,8 @@ public class CartItemController {
     @Autowired
     CartRepository cartRepository;
    @PostMapping
-    public ResponseEntity<ResponseDto> addCartITem(@RequestBody CartItemDto cartItemDto, long cartId){
-        Optional<Cart>  cart= cartRepository.findById(cartId);
-       cart.ifPresent(value -> cartItemService.addItemToCart(value, cartItemDto));
-       return null;
+    public ResponseEntity<ResponseDto> addCartITem(@RequestBody CartItemDto cartItemDto){
+       return cartItemService.addItemToCart(cartItemDto);
     }
     @GetMapping("/{id}")
     public ResponseEntity<List<CartItemDto>> findAll(@PathVariable long id){

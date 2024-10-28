@@ -4,7 +4,9 @@ import com.gigster.skymarket.dto.CartItemDto;
 import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.model.Cart;
 import com.gigster.skymarket.model.CartItem;
+import com.gigster.skymarket.model.Product;
 import com.gigster.skymarket.repository.CartItemRepository;
+import com.gigster.skymarket.repository.CartRepository;
 import com.gigster.skymarket.repository.ProductRepository;
 import com.gigster.skymarket.service.CartItemService;
 import com.gigster.skymarket.setter.ResponseDtoSetter;
@@ -14,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CartItemServiceImpl implements CartItemService {
@@ -24,16 +27,19 @@ public class CartItemServiceImpl implements CartItemService {
     ProductRepository productRepository;
     @Autowired
     ResponseDtoSetter responseDtoSetter;
+    @Autowired
+    CartRepository cartRepository;
 
 
     @Override
-    public ResponseEntity<ResponseDto> addItemToCart(Cart cart, CartItemDto cartItemDto) {
+    public ResponseEntity<ResponseDto> addItemToCart( CartItemDto cartItemDto) {
 
         try{
             CartItem cartItem= new CartItem();
-            cartItem.setCart(cart);
-            //todo avoid using get without is present
-            cartItem.setProduct(productRepository.findById(cartItemDto.getProductId()).get());
+            Optional<Cart> cart= cartRepository.findById(cartItemDto.getCartId());
+            cart.ifPresent(cartItem::setCart);
+            Optional<Product> product =productRepository.findById(cartItemDto.getProductId());
+            product.ifPresent(cartItem::setProduct);
             cartItem.setQuantity(cartItemDto.getQuantity());
             cartItemRepository.save(cartItem);
             return responseDtoSetter.responseDtoSetter(HttpStatus.CREATED,"Item added successfully", cartItemRepository.save(cartItem));
