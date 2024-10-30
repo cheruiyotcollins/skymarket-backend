@@ -11,6 +11,7 @@ import com.gigster.skymarket.repository.CartItemRepository;
 import com.gigster.skymarket.repository.CartRepository;
 import com.gigster.skymarket.service.CartService;
 import com.gigster.skymarket.setter.ResponseDtoSetter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
+@Slf4j
 public class CartServiceImpl implements CartService {
     @Autowired
     CartRepository cartRepository;
@@ -34,6 +36,11 @@ public class CartServiceImpl implements CartService {
             cart.setUser(cartDto.getUser());
         cartRepository.save(cart);
             return responseDtoSetter.responseDtoSetter(HttpStatus.CREATED,"Cart Added Successfully", cart);
+
+    }
+    @Override
+    public ResponseEntity<ResponseDto> getAllCarts() {
+        return responseDtoSetter.responseDtoSetter(HttpStatus.OK,"List Of Carts ", cartRepository.findAll());
 
     }
 
@@ -53,8 +60,8 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public List<CartItemDto> getAllCartItems() {
-        return List.of();
+    public ResponseEntity<ResponseDto> getAllCartItems() {
+        return responseDtoSetter.responseDtoSetter(HttpStatus.OK,"List Of All Carts", cartItemRepository.findAll());
     }
 
     @Override
@@ -65,5 +72,11 @@ public class CartServiceImpl implements CartService {
     @Override
     public CartItemDto getCartItemByProductId(Long productId) {
         return null;
+    }
+
+    @Override
+    public ResponseEntity<ResponseDto> findCartPerUserId(User user) {
+        log.info("fetching cart per User::::::::::::::::::::::::::::::::::::::::::::::::::::::::::");
+        return responseDtoSetter.responseDtoSetter(HttpStatus.OK,"Current User Cart", cartRepository.findByUser(user));
     }
 }
