@@ -12,6 +12,7 @@ public interface CartService {
 
     // Add an item to the cart with a specified quantity
     ResponseEntity<ResponseDto> addCart(CartDto cartDto);
+    public ResponseEntity<ResponseDto> getAllCarts();
 
     // Remove a specific item from the cart by product ID
     void removeItemFromCart(Long productId);
@@ -25,12 +26,14 @@ public interface CartService {
     // Additional CRUD methods:
 
     // Retrieve all items currently in the cart
-    List<CartItemDto> getAllCartItems();
+    ResponseEntity<ResponseDto> getAllCartItems();
 
     // Update the quantity of a specific item in the cart
     void updateCartItemQuantity(Long productId, int quantity);
 
     // Retrieve a single cart item by product ID
     CartItemDto getCartItemByProductId(Long productId);
+
+    ResponseEntity<ResponseDto> findCartPerUserId(User user);
 }
 
