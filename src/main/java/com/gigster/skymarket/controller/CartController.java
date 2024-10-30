@@ -4,6 +4,7 @@ import com.gigster.skymarket.dto.CartDto;
 import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.model.Role;
 import com.gigster.skymarket.model.User;
+import com.gigster.skymarket.security.CurrentUserV2;
 import com.gigster.skymarket.security.UserPrincipal;
 import com.gigster.skymarket.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,27 +24,10 @@ public class CartController {
     CartService cartService;
     @PostMapping
     public ResponseEntity<ResponseDto> addCart(){
-        UserPrincipal userPrincipal=getCurrentUser();
+        UserPrincipal userPrincipal= CurrentUserV2.getCurrentUser();
        CartDto cartDto= new CartDto();
-       cartDto.setUser(mapToUser(userPrincipal));
+       cartDto.setUser(CurrentUserV2.mapToUser(userPrincipal));
         return cartService.addCart(cartDto);
     }
-    public static UserPrincipal getCurrentUser() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (principal instanceof UserPrincipal) {
-            return (UserPrincipal) principal;
-        } else {
-            throw new IllegalStateException("Unexpected principal type");
-        }
-    }
-    public static User mapToUser(UserPrincipal userPrincipal) {
-        User user = new User();
-        user.setId(userPrincipal.getId());
-        user.setName(userPrincipal.getName());
-        user.setUsername(userPrincipal.getUsername());
-        user.setEmail(userPrincipal.getEmail());
-        user.setPassword(userPrincipal.getPassword());
-        user.setRoleId(userPrincipal.getRoleId());
-        return user;
-    }
+
 }
