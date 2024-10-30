@@ -10,10 +10,7 @@ import com.gigster.skymarket.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.stream.Collectors;
 
@@ -28,6 +25,15 @@ public class CartController {
        CartDto cartDto= new CartDto();
        cartDto.setUser(CurrentUserV2.mapToUser(userPrincipal));
         return cartService.addCart(cartDto);
+    }
+    @GetMapping
+    public ResponseEntity<ResponseDto> findAll(){
+        return cartService.getAllCarts();
+    }
+    @GetMapping({"/id"})
+    public ResponseEntity<ResponseDto> findCartByCustomerIdAll(){
+        UserPrincipal userPrincipal=  CurrentUserV2.getCurrentUser();
+        return cartService.findCartPerUserId(CurrentUserV2.mapToUser(userPrincipal));
     }
 
 }
