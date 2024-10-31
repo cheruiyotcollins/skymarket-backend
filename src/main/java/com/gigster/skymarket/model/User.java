@@ -45,13 +45,11 @@ public class User  {
     @Size(max = 15)
     private String username;
 
-
     @NaturalId
     @NotBlank
     @Size(max = 40)
     @Email
     private String email;
-
     @NotBlank
     @Size(max = 100)
     private String password;
@@ -61,6 +59,7 @@ public class User  {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
+    @JsonIgnore
     private Long roleId;
 
 }
