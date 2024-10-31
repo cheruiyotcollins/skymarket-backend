@@ -9,7 +9,7 @@ import com.gigster.skymarket.repository.CartItemRepository;
 import com.gigster.skymarket.repository.CartRepository;
 import com.gigster.skymarket.repository.ProductRepository;
 import com.gigster.skymarket.service.CartItemService;
-import com.gigster.skymarket.setter.ResponseDtoSetter;
+import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,25 +26,41 @@ public class CartItemServiceImpl implements CartItemService {
     @Autowired
     ProductRepository productRepository;
     @Autowired
-    ResponseDtoSetter responseDtoSetter;
+    ResponseDtoMapper responseDtoSetter;
     @Autowired
     CartRepository cartRepository;
 
 
     @Override
-    public ResponseEntity<ResponseDto> addItemToCart( CartItemDto cartItemDto) {
+    public ResponseEntity<ResponseDto> addItemToCart(CartItemDto cartItemDto) {
+        try {
+            Optional<Cart> cart = cartRepository.findById(cartItemDto.getCartId());
+            Optional<Product> product = productRepository.findById(cartItemDto.getProductId());
 
-        try{
-            CartItem cartItem= new CartItem();
-            Optional<Cart> cart= cartRepository.findById(cartItemDto.getCartId());
-            cart.ifPresent(cartItem::setCart);
-            Optional<Product> product =productRepository.findById(cartItemDto.getProductId());
-            product.ifPresent(cartItem::setProduct);
-            cartItem.setQuantity(cartItemDto.getQuantity());
-            cartItemRepository.save(cartItem);
-            return responseDtoSetter.responseDtoSetter(HttpStatus.CREATED,"Item added successfully", cartItemRepository.save(cartItem));
+            if (cart.isEmpty() || product.isEmpty()) {
+                return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST, "Invalid cart or product ID.");
+            }
+
+            // Check if the product already exists in the cart
+            Optional<CartItem> existingCartItem = cartItemRepository.findByCartAndProduct(cart.get(), product.get());
+
+            if (existingCartItem.isPresent()) {
+                // Update quantity of existing item
+                CartItem cartItem = existingCartItem.get();
+                cartItem.setQuantity(cartItem.getQuantity() + cartItemDto.getQuantity());
+                cartItemRepository.save(cartItem);
+            } else {
+                // Create new cart item
+                CartItem cartItem = new CartItem();
+                cartItem.setCart(cart.get());
+                cartItem.setProduct(product.get());
+                cartItem.setQuantity(cartItemDto.getQuantity());
+                cartItemRepository.save(cartItem);
+            }
+
+            return responseDtoSetter.responseDtoSetter(HttpStatus.CREATED, "Item added successfully");
         } catch (Exception e) {
-            return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST, "something went wrong please check your request: "+ e, new Object());
+            return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST, "Something went wrong. Please check your request: " + e, new Object());
         }
     }
 
