@@ -7,8 +7,10 @@ import com.gigster.skymarket.model.User;
 import com.gigster.skymarket.security.CurrentUserV2;
 import com.gigster.skymarket.security.UserPrincipal;
 import com.gigster.skymarket.service.CartService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/api/carts")
+@Slf4j
 public class CartController {
     @Autowired
     CartService cartService;
@@ -27,13 +30,13 @@ public class CartController {
         return cartService.addCart(cartDto);
     }
     @GetMapping
-    public ResponseEntity<ResponseDto> findAll(){
+    public ResponseEntity<ResponseDto> findAllCarts(){
         return cartService.getAllCarts();
     }
-    @GetMapping({"/id"})
-    public ResponseEntity<ResponseDto> findCartByCustomerIdAll(){
-        UserPrincipal userPrincipal=  CurrentUserV2.getCurrentUser();
-        return cartService.findCartPerUserId(CurrentUserV2.mapToUser(userPrincipal));
+    @GetMapping("/customer")
+    public ResponseEntity<ResponseDto> findCartByCustomerId(Authentication authentication){
+        String username=authentication.getName();
+        return cartService.findCartPerUser(username);
     }
 
 }

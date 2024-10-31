@@ -1,5 +1,6 @@
 package com.gigster.skymarket.model;
 
+import com.gigster.skymarket.enums.CategoryName;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,5 +15,5 @@ public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String categoryName;
+    private CategoryName categoryName;
 }

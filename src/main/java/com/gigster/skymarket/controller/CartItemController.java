@@ -19,9 +19,6 @@ import java.util.Optional;
 public class CartItemController {
     @Autowired
     CartItemService cartItemService;
-    //todo remove this
-    @Autowired
-    CartRepository cartRepository;
    @PostMapping
     public ResponseEntity<ResponseDto> addCartITem(@RequestBody CartItemDto cartItemDto){
        return cartItemService.addItemToCart(cartItemDto);

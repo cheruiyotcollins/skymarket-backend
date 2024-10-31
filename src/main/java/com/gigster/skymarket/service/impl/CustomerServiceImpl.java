@@ -6,7 +6,7 @@ import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.model.Customer;
 import com.gigster.skymarket.repository.CustomerRepository;
 import com.gigster.skymarket.service.CustomerService;
-import com.gigster.skymarket.setter.ResponseDtoSetter;
+import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +20,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     CustomerRepository customerRepository;
     @Autowired
-    ResponseDtoSetter responseDtoSetter;
+    ResponseDtoMapper responseDtoSetter;
     @Override
     public ResponseEntity<ResponseDto> saveCustomer(NewCustomerDto newCustomer){
         try {

@@ -3,7 +3,7 @@ package com.gigster.skymarket.controller;
 import com.gigster.skymarket.dto.OrderDto;
 import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.service.OrderService;
-import com.gigster.skymarket.setter.ResponseDtoSetter;
+import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class OrderController {
 
     //todo move this to service
     @Autowired
-    ResponseDtoSetter responseDtoSetter;
+    ResponseDtoMapper responseDtoSetter;
 
     // 1. CREATE: Add a new order
     @PostMapping
