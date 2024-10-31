@@ -2,8 +2,10 @@ package com.gigster.skymarket.service.impl;
 
 import com.gigster.skymarket.dto.*;
 import com.gigster.skymarket.exception.ResourceNotFoundException;
+import com.gigster.skymarket.model.Customer;
 import com.gigster.skymarket.model.Role;
 import com.gigster.skymarket.model.User;
+import com.gigster.skymarket.repository.CustomerRepository;
 import com.gigster.skymarket.repository.RoleRepository;
 import com.gigster.skymarket.repository.UserRepository;
 import com.gigster.skymarket.security.JwtTokenProvider;
@@ -21,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.gigster.skymarket.enums.RoleName;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -31,6 +34,7 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -41,11 +45,13 @@ public class UserServiceImpl implements UserService {
     public UserServiceImpl(AuthenticationManager authenticationManager,
                            UserRepository userRepository,
                            RoleRepository roleRepository,
+                           CustomerRepository customerRepository,
                            PasswordEncoder passwordEncoder,
                            JwtTokenProvider jwtTokenProvider) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.customerRepository = customerRepository;
 
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
@@ -60,25 +66,27 @@ public class UserServiceImpl implements UserService {
         }
         User user = User.builder()
                 .email(signUpRequest.getEmail())
-                .password(passwordEncoder.encode(signUpRequest.getPassword())) // Encrypt password here
-                .name(signUpRequest.getName())
+                .password(passwordEncoder.encode(signUpRequest.getPassword()))
+                .fullName(signUpRequest.getFullName())
                 .username(signUpRequest.getUsername())
                 .build();
-        // by default new user signup he/she is assigned CUSTOMER Role
+        // By default, when a new user signs up, they are assigned the CUSTOMER Role
         if (roleRepository.findByName(RoleName.CUSTOMER).isPresent()) {
             Optional<Role> userRole = roleRepository.findByName(RoleName.CUSTOMER);
 
             userRole.ifPresent(role -> user.setRoles(Collections.singleton(role)));
+            Customer customer = new Customer();
+            customer.setFullName(user.getFullName());
+            customer.setEmail(user.getEmail());
+            customer.setPhoneNo(user.getContact());
+            customer.setGender(user.getGender());
 
-            // TODO: then create a new customer
-//            // Create a new customer each time a user signs up
-//            Customer customer = new Customer();
-//            customer.setUser(user);  // assuming Customer has a User relationship
-//            // Set other Customer details if necessary
-//
-//            // Save the customer if you have a CustomerRepository, for example:
-//            // customerRepository.save(customer);
+            customer.setOrders(new ArrayList<>());
+
+            customerRepository.save(customer);
         }
+
+
 
         userRepository.save(user);
         return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED,"User registered successfully");
