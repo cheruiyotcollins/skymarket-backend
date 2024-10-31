@@ -17,7 +17,7 @@ public class CurrentUserV2 {
     public static User mapToUser(UserPrincipal userPrincipal) {
         User user = new User();
         user.setId(userPrincipal.getId());
-        user.setName(userPrincipal.getName());
+        user.setFullName(userPrincipal.getName());
         user.setUsername(userPrincipal.getUsername());
         user.setEmail(userPrincipal.getEmail());
         user.setPassword(userPrincipal.getPassword());
