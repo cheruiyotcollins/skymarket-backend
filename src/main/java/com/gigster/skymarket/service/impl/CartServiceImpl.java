@@ -1,23 +1,24 @@
 package com.gigster.skymarket.service.impl;
 
 
-import com.gigster.skymarket.dto.CartDto;
-import com.gigster.skymarket.dto.CartItemDto;
-import com.gigster.skymarket.dto.ResponseDto;
+import com.gigster.skymarket.dto.*;
 import com.gigster.skymarket.model.Cart;
-import com.gigster.skymarket.model.CartItem;
 import com.gigster.skymarket.model.User;
 import com.gigster.skymarket.repository.CartItemRepository;
 import com.gigster.skymarket.repository.CartRepository;
+import com.gigster.skymarket.repository.UserRepository;
 import com.gigster.skymarket.service.CartService;
-import com.gigster.skymarket.setter.ResponseDtoSetter;
+import com.gigster.skymarket.mapper.CartItemsToCartItemsDtoMapper;
+import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -26,9 +27,13 @@ public class CartServiceImpl implements CartService {
     CartRepository cartRepository;
     @Autowired
     CartItemRepository cartItemRepository;
+    @Autowired
+    UserRepository userRepository;
 
     @Autowired
-    ResponseDtoSetter responseDtoSetter;
+    ResponseDtoMapper responseDtoSetter;
+    @Autowired
+    CartItemsToCartItemsDtoMapper cartItemsToCartItemsDtoMapper;
 
     @Override
     public ResponseEntity<ResponseDto> addCart(CartDto cartDto) {
@@ -75,8 +80,23 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public ResponseEntity<ResponseDto> findCartPerUserId(User user) {
-        log.info("fetching cart per User::::::::::::::::::::::::::::::::::::::::::::::::::::::::::");
-        return responseDtoSetter.responseDtoSetter(HttpStatus.OK,"Current User Cart", cartRepository.findByUser(user));
+    public ResponseEntity<ResponseDto> findCartPerUser(String email) {
+        User user = userRepository.findByUsername(email).get();
+        Cart cart = cartRepository.findByUser(user).get();
+        // Map the cart items to a hashmap with total price and item list
+        HashMap<Double, List<CartItemDtoResponse>> cartItemsHashMap = cartItemsToCartItemsDtoMapper.mapCartItemsToCartItemsDto(cart.getCartItems());
+        // Since we have only one entry, retrieve it
+        Map.Entry<Double, List<CartItemDtoResponse>> entry = cartItemsHashMap.entrySet().iterator().next();
+        double totalPrice = entry.getKey();
+        List<CartItemDtoResponse> cartItemDtoList = entry.getValue();
+
+        // Create response DTO
+        CartDtoResponse cartDtoResponse = CartDtoResponse.builder()
+                .name(user.getName())
+                .cartItemDtoList(cartItemDtoList)
+                .totalPrice(totalPrice)  // Set actual total price here
+                .build();
+
+        return responseDtoSetter.responseDtoSetter(HttpStatus.OK, "Current User Cart", cartDtoResponse);
     }
 }
