@@ -2,14 +2,13 @@ package com.gigster.skymarket.service.impl;
 
 import com.gigster.skymarket.dto.*;
 import com.gigster.skymarket.exception.ResourceNotFoundException;
-import com.gigster.skymarket.model.Customer;
 import com.gigster.skymarket.model.Role;
 import com.gigster.skymarket.model.User;
 import com.gigster.skymarket.repository.RoleRepository;
 import com.gigster.skymarket.repository.UserRepository;
 import com.gigster.skymarket.security.JwtTokenProvider;
 import com.gigster.skymarket.service.UserService;
-import com.gigster.skymarket.setter.ResponseDtoSetter;
+import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,7 +35,7 @@ public class UserServiceImpl implements UserService {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    ResponseDtoSetter responseDtoSetter;
+    ResponseDtoMapper responseDtoSetter;
 
 
     public UserServiceImpl(AuthenticationManager authenticationManager,
