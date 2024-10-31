@@ -69,6 +69,8 @@ public class UserServiceImpl implements UserService {
                 .password(passwordEncoder.encode(signUpRequest.getPassword()))
                 .fullName(signUpRequest.getFullName())
                 .username(signUpRequest.getUsername())
+                .contact(signUpRequest.getContact())
+                .gender(signUpRequest.getGender())
                 .build();
         // By default, when a new user signs up, they are assigned the CUSTOMER Role
         if (roleRepository.findByName(RoleName.CUSTOMER).isPresent()) {
@@ -86,7 +88,7 @@ public class UserServiceImpl implements UserService {
             customerRepository.save(customer);
         }
 
-
+ log.info("this is the user:::::::::::::::::::::::::::::::::::::::::::::::::::"+ user);
 
         userRepository.save(user);
         return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED,"User registered successfully");
