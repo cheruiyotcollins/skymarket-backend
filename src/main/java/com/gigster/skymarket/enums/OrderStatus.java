@@ -3,7 +3,7 @@ package com.gigster.skymarket.enums;
 public enum OrderStatus {
     PENDING,
     PROCESSING,
-    SHIPPED,
+    SHIPPING,
     DELIVERED,
     CANCELLED
 }
