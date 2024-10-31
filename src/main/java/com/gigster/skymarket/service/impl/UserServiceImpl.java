@@ -77,6 +77,7 @@ public class UserServiceImpl implements UserService {
             Optional<Role> userRole = roleRepository.findByName(RoleName.CUSTOMER);
 
             userRole.ifPresent(role -> user.setRoles(Collections.singleton(role)));
+            //todo move this to customer service
             Customer customer = new Customer();
             customer.setFullName(user.getFullName());
             customer.setEmail(user.getEmail());
