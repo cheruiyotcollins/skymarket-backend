@@ -39,17 +39,24 @@ public class User  {
 
     @NotBlank
     @Size(max = 40)
-    private String name;
+    private String fullName;
 
     @NotBlank
     @Size(max = 15)
     private String username;
+
+    @NotBlank
+    private String contact;
 
     @NaturalId
     @NotBlank
     @Size(max = 40)
     @Email
     private String email;
+
+    @NotBlank
+    private String gender;
+
     @NotBlank
     @Size(max = 100)
     private String password;
