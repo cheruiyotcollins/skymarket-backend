@@ -7,7 +7,7 @@ import com.gigster.skymarket.model.Product;
 import com.gigster.skymarket.repository.CategoryRepository;
 import com.gigster.skymarket.repository.ProductRepository;
 import com.gigster.skymarket.service.ProductService;
-import com.gigster.skymarket.setter.ResponseDtoSetter;
+import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +27,7 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     CategoryRepository categoryRepository;
     @Autowired
-    ResponseDtoSetter responseDtoSetter;
+    ResponseDtoMapper responseDtoSetter;
     @Override
     public ResponseEntity<ResponseDto> createProduct(NewProductDto newProductDto) {
         try {

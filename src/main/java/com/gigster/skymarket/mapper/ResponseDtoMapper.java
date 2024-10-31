@@ -1,4 +1,4 @@
-package com.gigster.skymarket.setter;
+package com.gigster.skymarket.mapper;
 
 import com.gigster.skymarket.dto.ResponseDto;
 import org.springframework.http.HttpStatus;
@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ResponseDtoSetter {
+public class ResponseDtoMapper {
 
     // method overloading to handle null payloads
     public ResponseEntity<ResponseDto> responseDtoSetter(HttpStatus httpStatus, String description, Object payload){

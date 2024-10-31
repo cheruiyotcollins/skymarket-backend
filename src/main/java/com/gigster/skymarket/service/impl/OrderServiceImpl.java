@@ -13,7 +13,7 @@ import com.gigster.skymarket.repository.OrderRepository;
 import com.gigster.skymarket.repository.ProductRepository;
 import com.gigster.skymarket.repository.UserRepository;
 import com.gigster.skymarket.service.OrderService;
-import com.gigster.skymarket.setter.ResponseDtoSetter;
+import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -40,7 +40,7 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     UserRepository userRepository;
     @Autowired
-    ResponseDtoSetter responseDtoSetter;
+    ResponseDtoMapper responseDtoSetter;
 
     // 1. Create a new Order
     @Override
