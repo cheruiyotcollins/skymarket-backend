@@ -92,7 +92,7 @@ public class CartServiceImpl implements CartService {
 
         // Create response DTO
         CartDtoResponse cartDtoResponse = CartDtoResponse.builder()
-                .name(user.getName())
+                .name(user.getFullName())
                 .cartItemDtoList(cartItemDtoList)
                 .totalPrice(totalPrice)  // Set actual total price here
                 .build();
