@@ -1,15 +1,13 @@
 package com.gigster.skymarket.service;
 
-import com.gigster.skymarket.dto.CustomerResponseDto;
-import com.gigster.skymarket.dto.NewCustomerDto;
+import com.gigster.skymarket.dto.CustomerDto;
 import com.gigster.skymarket.dto.ResponseDto;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-
-import java.util.List;
 
 public interface CustomerService{
 
-    ResponseEntity<ResponseDto> saveCustomer(NewCustomerDto newCustomer);
+    ResponseEntity<ResponseDto> saveCustomer(CustomerDto newCustomer);
 
     ResponseEntity<ResponseDto> findAll();
 
@@ -17,4 +15,5 @@ public interface CustomerService{
 
     ResponseEntity<ResponseDto> deleteCustomerById(long id);
 
+    ResponseEntity<ResponseDto> updateCustomer(long id, @Valid CustomerDto updatedCustomer);
 }
