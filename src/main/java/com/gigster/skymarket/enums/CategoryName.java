@@ -1,5 +1,7 @@
 package com.gigster.skymarket.enums;
 
+import com.gigster.skymarket.model.Category;
+
 public enum CategoryName {
     ELECTRONICS,
     GROCERIES,
