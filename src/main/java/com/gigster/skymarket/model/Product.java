@@ -25,6 +25,8 @@ public class Product implements Serializable {
     @JoinColumn(name = "category_id", nullable = true)
     private Category category;
     private String manufacturer;
+    private String description;
+    private String imageUrl;
     private double price;
     private int stock;
 }
