@@ -2,6 +2,7 @@ package com.gigster.skymarket.mapper;
 
 import com.gigster.skymarket.dto.ProductDto;
 import com.gigster.skymarket.enums.CategoryName;
+import com.gigster.skymarket.model.Category;
 import com.gigster.skymarket.model.Product;
 import org.springframework.stereotype.Component;
 
@@ -38,11 +39,20 @@ public class ProductMapper {
         product.setProductName(productDto.getName());
         product.setDescription(productDto.getDescription());
         product.setPrice(productDto.getPrice());
-        // Assuming categoryName comes as a string, use the fromString method to convert
-        product.setCategory(CategoryName.fromString(productDto.getCategory()));
+
+        // Create a Category object using CategoryName from the DTO
+        if (productDto.getCategory() != null) {
+            Category category = new Category();
+            category.setCategoryName(CategoryName.fromString(productDto.getCategory()));
+            product.setCategory(category);
+        } else {
+            product.setCategory(null);
+        }
+
         product.setImageUrl(productDto.getImageUrl());
         return product;
     }
+
 
     // Map a list of Product entities to a list of ProductDto objects
     public List<ProductDto> toDtoList(List<Product> products) {
