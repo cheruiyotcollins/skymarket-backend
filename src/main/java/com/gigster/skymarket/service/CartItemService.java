@@ -3,7 +3,6 @@ package com.gigster.skymarket.service;
 
 import com.gigster.skymarket.dto.CartItemDto;
 import com.gigster.skymarket.dto.ResponseDto;
-import com.gigster.skymarket.model.Cart;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;

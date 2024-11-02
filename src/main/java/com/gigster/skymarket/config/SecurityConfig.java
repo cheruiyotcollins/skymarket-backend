@@ -3,7 +3,6 @@ package com.gigster.skymarket.config;
 
 import com.gigster.skymarket.security.JwtAuthenticationEntryPoint;
 import com.gigster.skymarket.security.JwtAuthenticationFilter;
-import com.gigster.skymarket.service.CartItemService;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
