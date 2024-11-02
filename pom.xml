@@ -118,6 +118,21 @@
 			<artifactId>jakarta.persistence-api</artifactId>
 			<version>3.1.0</version>
 		</dependency>
+
+			<!-- MapStruct Dependency -->
+			<dependency>
+				<groupId>org.mapstruct</groupId>
+				<artifactId>mapstruct</artifactId>
+				<version>1.6.1</version>
+			</dependency>
+			<!-- Annotation Processor for MapStruct -->
+			<dependency>
+				<groupId>org.mapstruct</groupId>
+				<artifactId>mapstruct-processor</artifactId>
+				<version>1.6.1</version>
+				<scope>provided</scope>
+			</dependency>
+
 	</dependencies>
 
 	<build>
