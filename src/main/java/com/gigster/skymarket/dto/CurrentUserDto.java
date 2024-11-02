@@ -10,6 +10,6 @@ import lombok.*;
 public class CurrentUserDto {
     private String name;
     private String email;
-    private String regNo;
+    private String username;
     private long role;
 }
