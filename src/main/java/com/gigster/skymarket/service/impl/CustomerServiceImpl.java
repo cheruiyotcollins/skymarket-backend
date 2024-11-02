@@ -9,13 +9,15 @@ import com.gigster.skymarket.service.CustomerService;
 import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
@@ -40,22 +42,33 @@ public class CustomerServiceImpl implements CustomerService {
 
     }
     @Override
-    public ResponseEntity<ResponseDto> findAll(){
-        List<CustomerResponseDto> customerResponseDtos= new ArrayList<>();
-        List<Customer> customers= customerRepository.findAll();
-        if(customers.isEmpty()){
-           return responseDtoSetter.responseDtoSetter(HttpStatus.NO_CONTENT,"No Customer Found");
+    public ResponseEntity<ResponseDto> findAllCustomers(Pageable pageable) {
+        Page<Customer> customerPage = customerRepository.findAll(pageable);
 
-        }else{
-        customers.forEach( customer->{
-            CustomerResponseDto customerResponseDto=mapCustomerResponseDto(customer);
-            customerResponseDtos.add(customerResponseDto);
-        }
-        );
-            return responseDtoSetter.responseDtoSetter(HttpStatus.FOUND,"Customers Fetched Successfully",customerResponseDtos);
-        }
+        if (customerPage.isEmpty()) {
+            return responseDtoSetter.responseDtoSetter(HttpStatus.NO_CONTENT, "No Customer Found!");
+        } else {
+            List<CustomerResponseDto> customerResponseDtos = customerPage.getContent()
+                    .stream()
+                    .map(this::mapCustomerResponseDto)
+                    .collect(Collectors.toList());
 
+            ResponseDto responseDto = responseDtoSetter.responseDtoSetter(
+                    HttpStatus.OK,
+                    "Customers Fetched Successfully.",
+                    customerResponseDtos
+            ).getBody();
+
+            assert responseDto != null;
+            responseDto.setTotalPages(customerPage.getTotalPages());
+            responseDto.setTotalElements(customerPage.getTotalElements());
+            responseDto.setCurrentPage(pageable.getPageNumber());
+            responseDto.setPageSize(pageable.getPageSize());
+
+            return ResponseEntity.ok(responseDto);
+        }
     }
+
     @Override
     public ResponseEntity<ResponseDto> findCustomerById(long id){
         if(customerRepository.existsById(id)){
