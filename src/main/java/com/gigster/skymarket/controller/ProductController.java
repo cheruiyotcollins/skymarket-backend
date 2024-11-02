@@ -2,13 +2,11 @@ package com.gigster.skymarket.controller;
 
 import com.gigster.skymarket.dto.NewProductDto;
 import com.gigster.skymarket.dto.ResponseDto;
-import com.gigster.skymarket.model.Product;
 import com.gigster.skymarket.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 @RestController
 @RequestMapping("/api/products")
@@ -20,26 +18,18 @@ public class ProductController {
     public ProductController(ProductService productService) {
         this.productService = productService;
     }
-
+    // no need to use add
     @PostMapping
     public ResponseEntity<?> createProduct(@RequestBody NewProductDto newProductDto) {
-
         return productService.createProduct(newProductDto);
     }
-
+    // no need to use get
     @GetMapping
-    public ResponseEntity<?> getAllProducts() {
-        return productService.getAllProducts();
+    public ResponseEntity<ResponseDto> getAllProducts(Pageable pageable) {
+        return productService.getAllProducts(pageable);
     }
 
-//    @GetMapping("/{id}")
-//    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
-//        return productService.getProductById(id)
-//                .map(ResponseEntity::ok)
-//                .orElse(ResponseEntity.notFound().build());
-//    }
-
-        @GetMapping("/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<ResponseDto> getProductById(@PathVariable Long id) {
         return productService.getProductById(id);
     }
