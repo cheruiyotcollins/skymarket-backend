@@ -6,8 +6,10 @@ import com.gigster.skymarket.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Pageable;
 
 @RestController
 @RequestMapping(value = "/api/customers")
@@ -22,9 +24,8 @@ public class CustomerController {
     }
 
     @GetMapping
-    // TODO: Add pagination
-    public ResponseEntity<ResponseDto> getAllCustomers() {
-        return customerService.findAll();
+    public ResponseEntity<ResponseDto> getAllCustomers(Pageable pageable) {
+        return customerService.findAllCustomers(pageable);
     }
 
     @GetMapping("/{id}")
