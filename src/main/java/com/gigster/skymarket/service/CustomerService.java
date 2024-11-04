@@ -5,11 +5,13 @@ import com.gigster.skymarket.dto.ResponseDto;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 
+import org.springframework.data.domain.Pageable;
+
 public interface CustomerService{
 
     ResponseEntity<ResponseDto> saveCustomer(CustomerDto newCustomer);
 
-    ResponseEntity<ResponseDto> findAll();
+    ResponseEntity<ResponseDto> findAllCustomers(Pageable pageable);
 
     ResponseEntity<ResponseDto> findCustomerById(long id);
 

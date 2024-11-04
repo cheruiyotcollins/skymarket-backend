@@ -18,12 +18,12 @@ public class ProductController {
     public ProductController(ProductService productService) {
         this.productService = productService;
     }
-    // no need to use add
+
     @PostMapping
     public ResponseEntity<?> createProduct(@RequestBody NewProductDto newProductDto) {
         return productService.createProduct(newProductDto);
     }
-    // no need to use get
+
     @GetMapping
     public ResponseEntity<ResponseDto> getAllProducts(Pageable pageable) {
         return productService.getAllProducts(pageable);
