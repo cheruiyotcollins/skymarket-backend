@@ -13,6 +13,8 @@ import com.gigster.skymarket.service.UserService;
 import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,7 +27,9 @@ import com.gigster.skymarket.enums.RoleName;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -124,18 +128,29 @@ public class UserServiceImpl implements UserService {
             return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST, "User Not Found");
         }
     }
-    //todo pagination
+
     @Override
-    public ResponseEntity<?> findAll(){
+    public ResponseEntity<ResponseDto> getAllUsers(Pageable pageable) {
+        Page<User> userPage = userRepository.findAll(pageable);
 
-        try{
-            return responseDtoSetter.responseDtoSetter(HttpStatus.OK,"User info", userRepository.findAll());
+        List<UserResponseDto> userResponseDtos = userPage.getContent()
+                .stream()
+                .map(this::mapUserResponseDto)
+                .collect(Collectors.toList());
 
+        ResponseDto responseDto = responseDtoSetter.responseDtoSetter(
+                HttpStatus.OK,
+                "Fetched List of All Users.",
+                userResponseDtos
+        ).getBody();
 
-        }catch(Exception e){
-            return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST,"No User Found");
+        assert responseDto != null;
+        responseDto.setTotalPages(userPage.getTotalPages());
+        responseDto.setTotalElements(userPage.getTotalElements());
+        responseDto.setCurrentPage(pageable.getPageNumber());
+        responseDto.setPageSize(pageable.getPageSize());
 
-        }
+        return ResponseEntity.ok(responseDto);
     }
     @Override
     public ResponseEntity<?> deleteById(long id){
@@ -179,6 +194,14 @@ public class UserServiceImpl implements UserService {
             return responseDtoSetter.responseDtoSetter(HttpStatus.INTERNAL_SERVER_ERROR,"An error occurred while fetching the user details");
 
         }
+    }
+
+    private UserResponseDto mapUserResponseDto(User user){
+        return UserResponseDto.builder()
+                .email(user.getEmail())
+                .username(user.getUsername())
+//               TODO: build role.
+                .build();
     }
 
 }
