@@ -3,16 +3,12 @@ package com.gigster.skymarket.dto;
 import com.gigster.skymarket.enums.RoleName;
 import com.gigster.skymarket.model.Role;
 import com.gigster.skymarket.model.User;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Setter
-@Getter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDto {
@@ -27,9 +23,6 @@ public class UserDto {
                     .map(Role::getName)
                     .collect(Collectors.toSet());
         }
-
-
-
 
 }
 
