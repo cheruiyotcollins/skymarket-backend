@@ -16,6 +16,8 @@ import com.gigster.skymarket.service.OrderService;
 import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -84,12 +86,29 @@ public class OrderServiceImpl implements OrderService {
 
         return mapToOrderDto(order);
     }
+
     @Override
-    public List<OrderDto> getAllOrders() {
-        List<Order> orders = orderRepository.findAll();
-        return orders.stream()
+    public ResponseEntity<ResponseDto> getAllOrders(Pageable pageable) {
+        Page<Order> orderPage = orderRepository.findAll(pageable);
+
+        List<OrderDto> orderDtos = orderPage.getContent()
+                .stream()
                 .map(this::mapToOrderDto)
-                .collect(Collectors.toList());
+                .toList();
+
+        ResponseDto responseDto = responseDtoSetter.responseDtoSetter(
+                HttpStatus.OK,
+                "Fetched List of All Orders.",
+                orderDtos
+        ).getBody();
+
+        assert responseDto != null;
+        responseDto.setTotalPages(orderPage.getTotalPages());
+        responseDto.setTotalElements(orderPage.getTotalElements());
+        responseDto.setCurrentPage(pageable.getPageNumber());
+        responseDto.setPageSize(pageable.getPageSize());
+
+        return ResponseEntity.ok(responseDto);
     }
 
     // 3. Retrieve a single order by ID

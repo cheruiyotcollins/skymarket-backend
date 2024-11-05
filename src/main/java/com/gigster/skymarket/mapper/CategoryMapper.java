@@ -1,7 +1,6 @@
 package com.gigster.skymarket.mapper;
 
 import com.gigster.skymarket.dto.CategoryDto;
-import com.gigster.skymarket.enums.CategoryName;
 import com.gigster.skymarket.model.Category;
 import org.mapstruct.Mapper;
 

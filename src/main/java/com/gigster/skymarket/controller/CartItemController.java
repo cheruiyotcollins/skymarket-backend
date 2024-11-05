@@ -17,7 +17,7 @@ public class CartItemController {
     @Autowired
     CartItemService cartItemService;
    @PostMapping
-    public ResponseEntity<ResponseDto> addCartITem(@RequestBody CartItemDto cartItemDto){
+    public ResponseEntity<ResponseDto> addCartItem(@RequestBody CartItemDto cartItemDto){
        return cartItemService.addItemToCart(cartItemDto);
     }
     @GetMapping("/{id}")

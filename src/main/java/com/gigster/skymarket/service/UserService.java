@@ -1,6 +1,7 @@
 package com.gigster.skymarket.service;
 
 import com.gigster.skymarket.dto.*;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
 public interface UserService {
@@ -13,7 +14,7 @@ public interface UserService {
 
     ResponseEntity<?> findUserById(long id);
 
-    ResponseEntity<?> findAll();
+    ResponseEntity<ResponseDto> getAllUsers(Pageable pageable);
 
     ResponseEntity<?> deleteById(long id);
 

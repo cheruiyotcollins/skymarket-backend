@@ -2,6 +2,7 @@ package com.gigster.skymarket.service.impl;
 
 
 import com.gigster.skymarket.dto.*;
+import com.gigster.skymarket.mapper.CartMapper;
 import com.gigster.skymarket.model.Cart;
 import com.gigster.skymarket.model.User;
 import com.gigster.skymarket.repository.CartItemRepository;
@@ -12,6 +13,8 @@ import com.gigster.skymarket.mapper.CartItemsToCartItemsDtoMapper;
 import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -25,13 +28,19 @@ import java.util.Map;
 public class CartServiceImpl implements CartService {
     @Autowired
     CartRepository cartRepository;
+
     @Autowired
     CartItemRepository cartItemRepository;
+
     @Autowired
     UserRepository userRepository;
 
     @Autowired
     ResponseDtoMapper responseDtoSetter;
+
+    @Autowired
+    CartMapper cartMapper;
+
     @Autowired
     CartItemsToCartItemsDtoMapper cartItemsToCartItemsDtoMapper;
 
@@ -44,9 +53,27 @@ public class CartServiceImpl implements CartService {
 
     }
     @Override
-    public ResponseEntity<ResponseDto> getAllCarts() {
-        return responseDtoSetter.responseDtoSetter(HttpStatus.OK,"List Of Carts ", cartRepository.findAll());
+    public ResponseEntity<ResponseDto> getAllCarts(Pageable pageable) {
+        Page<Cart> cartPage = cartRepository.findAll(pageable);
 
+        List<CartDto> cartDtos = cartPage.getContent()
+                .stream()
+                .map(cartMapper::toDto)
+                .toList();
+
+        ResponseDto responseDto = responseDtoSetter.responseDtoSetter(
+                HttpStatus.OK,
+                "Fetched List of All Carts.",
+                cartDtos
+        ).getBody();
+
+        assert responseDto != null;
+        responseDto.setTotalPages(cartPage.getTotalPages());
+        responseDto.setTotalElements(cartPage.getTotalElements());
+        responseDto.setCurrentPage(pageable.getPageNumber());
+        responseDto.setPageSize(pageable.getPageSize());
+
+        return ResponseEntity.ok(responseDto);
     }
 
     @Override

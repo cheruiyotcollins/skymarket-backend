@@ -7,6 +7,7 @@ import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -38,15 +39,8 @@ public class OrderController {
 
     // 2. READ: Get all orders
     @GetMapping
-    public ResponseEntity<ResponseDto> getAllOrders() {
-        List<OrderDto> orders = orderService.getAllOrders();
-        if (!orders.isEmpty()) {
-            return responseDtoSetter.responseDtoSetter(HttpStatus.OK, "List of all orders",orders);
-        } else {
-            return responseDtoSetter.responseDtoSetter(HttpStatus.OK, "No orders found");
-
-        }
-
+    public ResponseEntity<ResponseDto> getAllOrders(Pageable pageable) {
+        return orderService.getAllOrders(pageable);
     }
 
     // 3. READ: Get order by ID

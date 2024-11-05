@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -84,9 +85,8 @@ public class UserController {
             @ApiResponse(responseCode = "404",description = "no user found",content = @Content),
             @ApiResponse(responseCode = "400",description = "Bad Request",content = @Content)})
     @GetMapping
-    public ResponseEntity<?> findAll(){
-        return userService.findAll();
-
+    public ResponseEntity<ResponseDto> getAllUsers(Pageable pageable) {
+        return userService.getAllUsers(pageable);
     }
     @Operation(summary = "Delete User By Id")
     @ApiResponses(value = {
