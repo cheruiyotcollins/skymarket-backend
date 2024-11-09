@@ -58,6 +58,7 @@ public class OrderServiceImpl implements OrderService {
         if (products.isEmpty()) {
             throw new RuntimeException("Products not found");
         }
+        // todo delete cart once an order has been placed successfully
 
         Order order = mapToOrder(orderDto, customer, products);
         order.setStatus(OrderStatus.PENDING);
