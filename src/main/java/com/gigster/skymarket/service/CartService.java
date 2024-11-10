@@ -36,6 +36,6 @@ public interface CartService {
     // Retrieve a single cart item by product ID
     CartItemDto getCartItemByProductId(Long productId);
 
-    ResponseEntity<ResponseDto> findCartPerUser(String username);
+    ResponseEntity<ResponseDto> findCartPerCustomer(String username);
 }
 

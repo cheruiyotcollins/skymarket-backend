@@ -1,11 +1,13 @@
 package com.gigster.skymarket.security;
 
 import com.gigster.skymarket.model.User;
+import com.gigster.skymarket.model.Customer;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CurrentUserV2 {
+
     public static UserPrincipal getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         if (principal instanceof UserPrincipal) {
@@ -14,6 +16,7 @@ public class CurrentUserV2 {
             throw new IllegalStateException("Unexpected principal type");
         }
     }
+
     public static User mapToUser(UserPrincipal userPrincipal) {
         User user = new User();
         user.setId(userPrincipal.getId());
@@ -23,5 +26,14 @@ public class CurrentUserV2 {
         user.setPassword(userPrincipal.getPassword());
         user.setRoleId(userPrincipal.getRoleId());
         return user;
+    }
+
+    public static Customer mapToCustomer(UserPrincipal userPrincipal) {
+        Customer customer = new Customer();
+        customer.setId(userPrincipal.getId());
+        customer.setFullName(userPrincipal.getName());
+        customer.setEmail(userPrincipal.getEmail());
+        customer.setPhoneNo(userPrincipal.getPhoneNo());
+        return customer;
     }
 }

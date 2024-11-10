@@ -4,14 +4,8 @@ import com.gigster.skymarket.dto.OrderDto;
 import com.gigster.skymarket.dto.OrderProductDto;
 import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.enums.OrderStatus;
-import com.gigster.skymarket.model.Customer;
-import com.gigster.skymarket.model.Order;
-import com.gigster.skymarket.model.OrderProduct;
-import com.gigster.skymarket.model.Product;
-import com.gigster.skymarket.repository.CustomerRepository;
-import com.gigster.skymarket.repository.OrderRepository;
-import com.gigster.skymarket.repository.ProductRepository;
-import com.gigster.skymarket.repository.UserRepository;
+import com.gigster.skymarket.model.*;
+import com.gigster.skymarket.repository.*;
 import com.gigster.skymarket.service.OrderService;
 import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import jakarta.persistence.EntityNotFoundException;
@@ -35,12 +29,17 @@ public class OrderServiceImpl implements OrderService {
     private CustomerRepository customerRepository;
 
     @Autowired
+    private CartRepository cartRepository;
+
+    @Autowired
     private ProductRepository productRepository;
 
     @Autowired
-    NotificationServiceImpl notificationService;
+    private NotificationServiceImpl notificationService;
+
     @Autowired
     UserRepository userRepository;
+
     @Autowired
     ResponseDtoMapper responseDtoSetter;
 
@@ -62,27 +61,13 @@ public class OrderServiceImpl implements OrderService {
         Order order = mapToOrder(orderDto, customer, products);
         order.setStatus(OrderStatus.PENDING);
         order = orderRepository.save(order);
-        Order finalOrder = order;
-        //Sending the email via notification service
-        new Thread(new Runnable() {
-            public void run() {
-                String sendTo = customer.getEmail();
-                String subject = "Order Confirmation";
-                String emailBody = "Dear " + customer.getFullName() + "," + "\n\n" +
-                        "Thank you for your recent order. We are pleased to confirm that your order has been received and is now being processed." + "\n" +
-                        "Order Details:" + "\n" +
-                        "Order Number: " + finalOrder.getOrderNumber() + "\n" +  // Assuming you have an order object
-                        "Order Date: " + finalOrder.getOrderDate() + "\n" +
-                        "Total Amount: KES " + finalOrder.getTotalAmount() + "\n\n" +
-                        "We will notify you once your order has been shipped. You can track the status of your order by logging into your account." + "\n\n" +
-                        "If you have any questions, please feel free to contact our customer service team." + "\n\n" +
-                        "Regards," + "\n" +
-                        "SkyMarket Online Store Team";
 
+        notificationService.sendOrderConfirmationEmail(customer, order);
 
-                notificationService.sendMail(sendTo, subject, emailBody);
-            }
-        }).start();
+        // Completely deleting the cart after a successful order.
+        cartRepository.findByCustomer(customer)
+                .ifPresent(cartRepository::delete);
+
 
         return mapToOrderDto(order);
     }
