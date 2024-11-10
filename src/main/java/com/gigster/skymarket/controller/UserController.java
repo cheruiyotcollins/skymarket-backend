@@ -65,14 +65,14 @@ public class UserController {
         return userService.register(signUpRequest);
 
     }
-    @Operation(summary = "Find User By  his/her Id")
+    @Operation(summary = "Retrieve User by ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "302", description = "User found",
                     content = {@Content(mediaType = "application/json",schema = @Schema(implementation = User.class))}),
             @ApiResponse(responseCode = "401",description = "Unauthorized user",content = @Content),
             @ApiResponse(responseCode = "404",description = "User not found",content = @Content),
             @ApiResponse(responseCode = "400",description = "Bad Request",content = @Content)})
-    @GetMapping("/id/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> findUserById(@PathVariable long id){
         return userService.findUserById(id);
 
