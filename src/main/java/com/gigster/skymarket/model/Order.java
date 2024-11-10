@@ -1,8 +1,12 @@
 package com.gigster.skymarket.model;
 
 import com.gigster.skymarket.enums.OrderStatus;
+import com.gigster.skymarket.utils.DateUtils;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -12,6 +16,9 @@ import java.util.List;
 @Entity
 @Table(name="orders")
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Order implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,4 +35,6 @@ public class Order implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
+    @Builder.Default
+    private String createdOn= DateUtils.dateNowString();
 }

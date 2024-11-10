@@ -24,7 +24,7 @@ public class CartController {
     public ResponseEntity<ResponseDto> addCart(){
         UserPrincipal userPrincipal= CurrentUserV2.getCurrentUser();
        CartDto cartDto= new CartDto();
-       cartDto.setUser(CurrentUserV2.mapToUser(userPrincipal));
+       cartDto.setCustomer(CurrentUserV2.mapToCustomer(userPrincipal));
         return cartService.addCart(cartDto);
     }
 
@@ -36,7 +36,7 @@ public class CartController {
     @GetMapping("/customer")
     public ResponseEntity<ResponseDto> findCartByCustomerId(Authentication authentication){
         String username=authentication.getName();
-        return cartService.findCartPerUser(username);
+        return cartService.findCartPerCustomer(username);
     }
 
 }

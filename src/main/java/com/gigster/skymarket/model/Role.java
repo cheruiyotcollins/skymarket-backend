@@ -2,14 +2,12 @@ package com.gigster.skymarket.model;
 
 import com.gigster.skymarket.enums.RoleName;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.NaturalId;
 
-@Getter
-@Setter
+import java.util.Objects;
+
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -21,6 +19,19 @@ public class Role {
 
     @Enumerated(EnumType.STRING)
     @NaturalId
-    @Column(length = 60)
+    @Column(length = 60, unique = true)
     private RoleName name;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Role role = (Role) o;
+        return name == role.name;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
 }
