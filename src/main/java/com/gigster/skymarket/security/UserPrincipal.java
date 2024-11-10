@@ -2,123 +2,62 @@ package com.gigster.skymarket.security;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.gigster.skymarket.model.User;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@RequiredArgsConstructor
 public class UserPrincipal implements UserDetails {
-    private Long id;
 
-    private String name;
+    @EqualsAndHashCode.Include
+    private final Long id;
 
-    private String username;
-
-    private String email;
+    private final String name;
+    private final String username;
+    private final String email;
+    private final String phoneNo;
 
     @JsonIgnore
-    private String password;
-    private  Long roleId;
-
-    private Collection<? extends GrantedAuthority> authorities;
-
-    public UserPrincipal(Long id, String name, String username, String email, String password, Collection<? extends GrantedAuthority> authorities,Long RoleId) {
-        this.id = id;
-        this.name = name;
-        this.username = username;
-        this.email = email;
-        this.password = password;
-        this.authorities = authorities;
-        this.roleId=roleId;
-    }
+    private final String password;
+    private final Long roleId;
+    private final Collection<? extends GrantedAuthority> authorities;
 
     public static UserPrincipal create(User user) {
-        List<GrantedAuthority> authorities = user.getRoles().stream().map(role ->
-                new SimpleGrantedAuthority(role.getName().name())
-        ).collect(Collectors.toList());
-
         return new UserPrincipal(
                 user.getId(),
                 user.getFullName(),
                 user.getUsername(),
                 user.getEmail(),
+                user.getContact(),
                 user.getPassword(),
-                authorities,
-                user.getRoleId()
-
+                user.getRoleId(),
+                mapRolesToAuthorities(user)
         );
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-    public Long getRoleId() {return roleId;}
-
-    @Override
-    public String getUsername() {
-        return username;
+    private static List<GrantedAuthority> mapRolesToAuthorities(User user) {
+        return user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority(role.getName().name()))
+                .collect(Collectors.toList());
     }
 
     @Override
-    public String getPassword() {
-        return password;
-    }
-
-
-
-
+    public boolean isAccountNonExpired() { return true; }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
-    }
+    public boolean isAccountNonLocked() { return true; }
 
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+    public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UserPrincipal that = (UserPrincipal) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-
-        return Objects.hash(id);
-    }
+    public boolean isEnabled() { return true; }
 }
-
-
-
