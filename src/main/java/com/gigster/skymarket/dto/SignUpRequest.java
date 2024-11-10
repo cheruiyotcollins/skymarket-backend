@@ -37,6 +37,6 @@ public class SignUpRequest {
 
     private String gender;
 
-    private long roleId;
+    private String roleName;
 
 }
