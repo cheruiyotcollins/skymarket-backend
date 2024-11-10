@@ -75,6 +75,16 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
+    @Override
+    public ResponseEntity<ResponseDto> findById(Long categoryId) {
+        Optional<Category> categoryOpt = categoryRepository.findById(categoryId);
+        if (categoryOpt.isPresent()) {
+            return responseDtoSetter.responseDtoSetter(HttpStatus.FOUND, "Category retrieved successfully", categoryOpt.get());
+        } else {
+            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND, "Category not found");
+        }
+    }
+
 
     @Override
     public ResponseEntity<ResponseDto> updateCategory(Long categoryId, String newCategoryName) {
@@ -94,16 +104,6 @@ public class CategoryServiceImpl implements CategoryService {
         if (categoryRepository.existsById(categoryId)) {
             categoryRepository.deleteById(categoryId);
             return responseDtoSetter.responseDtoSetter(HttpStatus.OK, "Category deleted successfully");
-        } else {
-            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND, "Category not found");
-        }
-    }
-
-    @Override
-    public ResponseEntity<ResponseDto> findById(Long categoryId) {
-        Optional<Category> categoryOpt = categoryRepository.findById(categoryId);
-        if (categoryOpt.isPresent()) {
-            return responseDtoSetter.responseDtoSetter(HttpStatus.FOUND, "Category retrieved successfully", categoryOpt.get());
         } else {
             return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND, "Category not found");
         }
