@@ -1,14 +1,16 @@
 package com.gigster.skymarket.dto;
 
 import com.gigster.skymarket.enums.OrderStatus;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class OrderDto {
     private Long orderId;
     private String orderNumber;
@@ -18,4 +20,6 @@ public class OrderDto {
     private Long customerId;
     @Setter
     private List<OrderProductDto> orderProducts;
+    @Temporal(TemporalType.TIMESTAMP)
+    private String CreatedOn;
 }
