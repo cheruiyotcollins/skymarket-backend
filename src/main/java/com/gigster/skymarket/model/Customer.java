@@ -10,13 +10,11 @@ import java.util.List;
 
 
 @Entity
-@Table(name="customers")
 @Data
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Table(name= "customers")
 public class Customer implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
