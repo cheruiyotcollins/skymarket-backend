@@ -62,12 +62,15 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public ResponseEntity<ResponseDto> register(SignUpRequest signUpRequest) {
-        if(userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_ACCEPTABLE,"Email Address already in use!");
+        // Check if email or username already exists
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_ACCEPTABLE, "Email Address already in use!");
         }
-        if(userRepository.existsByUsername(signUpRequest.getUsername())) {
-            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_ACCEPTABLE,"Username is already taken!");
+        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_ACCEPTABLE, "Username is already taken!");
         }
+
+        // Create the User with basic details
         User user = User.builder()
                 .email(signUpRequest.getEmail())
                 .password(passwordEncoder.encode(signUpRequest.getPassword()))
@@ -76,29 +79,35 @@ public class UserServiceImpl implements UserService {
                 .contact(signUpRequest.getContact())
                 .gender(signUpRequest.getGender())
                 .build();
-        // By default, when a new user signs up, they are assigned the CUSTOMER Role
-        if (roleRepository.findByName(RoleName.CUSTOMER).isPresent()) {
-            Optional<Role> userRole = roleRepository.findByName(RoleName.CUSTOMER);
 
-            userRole.ifPresent(role -> user.setRoles(Collections.singleton(role)));
-            //todo move this to customer service
+        // Determine role based on SignUpRequest's roleName or assign CUSTOMER by default
+        String roleName = signUpRequest.getRoleName() != null ? signUpRequest.getRoleName() : "CUSTOMER";
+        Role role = roleRepository.findByName(RoleName.valueOf(roleName.toUpperCase()))
+                .orElseThrow(() -> new RuntimeException("Role not found!"));
+
+        // Assign the role to the user
+        user.setRoles(Collections.singleton(role));
+
+        // Additional logic if the role is CUSTOMER
+        if ("CUSTOMER".equalsIgnoreCase(roleName)) {
             Customer customer = new Customer();
             customer.setFullName(user.getFullName());
             customer.setEmail(user.getEmail());
             customer.setPhoneNo(user.getContact());
             customer.setGender(user.getGender());
-
             customer.setOrders(new ArrayList<>());
 
             customerRepository.save(customer);
         }
 
- log.info("this is the user:::::::::::::::::::::::::::::::::::::::::::::::::::"+ user);
-
+        // Save user to the repository
         userRepository.save(user);
-        return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED,"User registered successfully");
 
+        log.info("Registered user: " + user);
+
+        return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED, "User registered successfully");
     }
+
     @Override
     public String login(LoginDto loginDto) {
 
@@ -117,15 +126,21 @@ public class UserServiceImpl implements UserService {
         roleRepository.save(role);
         return null;
     }
+
     @Override
-    public ResponseEntity<ResponseDto> findUserById(long id){
+    public ResponseEntity<ResponseDto> findUserById(long id) {
 
-        try{
-            //todo ... get
-            return responseDtoSetter.responseDtoSetter(HttpStatus.OK,"User info", userRepository.findById(id).get());
+        try {
+            Optional<User> userOptional = userRepository.findById(id);
 
-        }catch(Exception e){
-            return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST, "User Not Found");
+            if (userOptional.isPresent()) {
+                return responseDtoSetter.responseDtoSetter(HttpStatus.OK, "User info", userOptional.get());
+            } else {
+                return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND, "User Not Found");
+            }
+
+        } catch (Exception e) {
+            return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST, "An error occurred while retrieving user info");
         }
     }
 
