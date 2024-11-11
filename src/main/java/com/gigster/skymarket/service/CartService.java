@@ -3,11 +3,8 @@ package com.gigster.skymarket.service;
 import com.gigster.skymarket.dto.CartDto;
 import com.gigster.skymarket.dto.CartItemDto;
 import com.gigster.skymarket.dto.ResponseDto;
-import com.gigster.skymarket.model.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-
-import java.util.List;
 
 public interface CartService {
 
@@ -27,9 +24,6 @@ public interface CartService {
 
     // Additional CRUD methods:
 
-    // Retrieve all items currently in the cart
-    ResponseEntity<ResponseDto> getAllCartItems();
-
     // Update the quantity of a specific item in the cart
     void updateCartItemQuantity(Long productId, int quantity);
 
@@ -37,5 +31,6 @@ public interface CartService {
     CartItemDto getCartItemByProductId(Long productId);
 
     ResponseEntity<ResponseDto> findCartPerCustomer(String username);
+
 }
 
