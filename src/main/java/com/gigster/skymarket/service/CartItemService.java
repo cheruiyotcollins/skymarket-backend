@@ -1,25 +1,24 @@
 package com.gigster.skymarket.service;
 
-
-import com.gigster.skymarket.dto.CartItemDto;
 import com.gigster.skymarket.dto.ResponseDto;
+import com.gigster.skymarket.model.Cart;
+import com.gigster.skymarket.model.Product;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
+import java.util.Optional;
 
 public interface CartItemService {
-    // Create: Add an item to the cart
-    ResponseEntity<ResponseDto> addItemToCart(CartItemDto cartItemDto);
+    ResponseEntity<ResponseDto> addOrUpdateCartItem(Optional<Cart> cart, Optional<Product> product, int quantity);
 
-    // Read: Get all items in the cart
-    ResponseEntity<List<CartItemDto>> getCartItems(Long cartId);
+    ResponseEntity<ResponseDto> getCartItem(Long cartId, Long itemId);
 
-    // Update: Update an item quantity in the cart
+    //TODO: To check later if this is the better pagination logic or the other one.
+    ResponseEntity<ResponseDto> getAllCartItems(Long cartId, Pageable pageable);
+
     ResponseEntity<ResponseDto> updateCartItem(Long cartId, Long itemId, int quantity);
 
-    // Delete: Remove an item from the cart
     ResponseEntity<ResponseDto> removeItemFromCart(Long cartId, Long itemId);
 
-    // Delete: Clear all items from the cart
     ResponseEntity<ResponseDto> clearCart(Long cartId);
 }
