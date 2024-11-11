@@ -52,6 +52,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ResponseEntity<ResponseDto> getAllProducts(Pageable pageable) {
+        // todo add image url to response
         Page<Product> productPage = productRepository.findAll(pageable);
 
         List<ProductDto> productDtos = productPage.getContent()
