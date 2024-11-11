@@ -1,6 +1,7 @@
 package com.gigster.skymarket.service.impl;
 
 import com.gigster.skymarket.dto.*;
+import com.gigster.skymarket.exception.FirstLoginException;
 import com.gigster.skymarket.exception.ResourceNotFoundException;
 import com.gigster.skymarket.model.Customer;
 import com.gigster.skymarket.model.Role;
@@ -9,6 +10,7 @@ import com.gigster.skymarket.repository.CustomerRepository;
 import com.gigster.skymarket.repository.RoleRepository;
 import com.gigster.skymarket.repository.UserRepository;
 import com.gigster.skymarket.security.JwtTokenProvider;
+import com.gigster.skymarket.security.UserPrincipal;
 import com.gigster.skymarket.service.UserService;
 import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.gigster.skymarket.enums.RoleName;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -78,6 +81,7 @@ public class UserServiceImpl implements UserService {
                 .username(signUpRequest.getUsername())
                 .contact(signUpRequest.getContact())
                 .gender(signUpRequest.getGender())
+                .firstLogin(false)
                 .build();
 
         // Determine role based on SignUpRequest's roleName or assign CUSTOMER by default
@@ -86,7 +90,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("Role not found!"));
 
         // Assign the role to the user
-        user.setRoles(Collections.singleton(role));
+        user.setRole(role);
 
         // Additional logic if the role is CUSTOMER
         if ("CUSTOMER".equalsIgnoreCase(roleName)) {
@@ -107,18 +111,29 @@ public class UserServiceImpl implements UserService {
 
         return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED, "User registered successfully");
     }
-
     @Override
-    public String login(LoginDto loginDto) {
-
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                loginDto.getUsername(), loginDto.getPassword()));
+    public LoginResponse login(LoginDto loginDto) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword())
+        );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        User user = userRepository.findById(userPrincipal.getId()).orElseThrow();
 
-        return jwtTokenProvider.generateToken(authentication);
+        // Check if this is the user's first login
+        boolean firstLogin = user.getFirstLogin();
+
+        // If not the first login, generate a token
+        String token = firstLogin ? null : jwtTokenProvider.generateToken(authentication);
+
+        return new LoginResponse(token, firstLogin);
     }
+
+
+
+
     @Override
     public ResponseEntity<?> addRole(AddRoleRequest addRoleRequest) {
         Role role=new Role();
@@ -192,7 +207,7 @@ public class UserServiceImpl implements UserService {
             CurrentUserDto currentUserDto = CurrentUserDto.builder()
                     .name(user.getUsername())
                     .email(user.getEmail())
-                    .role(user.getRoles().iterator().next().getId())
+                    .role(user.getRole().getId())
                     .build();
 
             // Set success response details
@@ -207,9 +222,18 @@ public class UserServiceImpl implements UserService {
         } catch (Exception ex) {
             // Handle any other unexpected exceptions
             return responseDtoSetter.responseDtoSetter(HttpStatus.INTERNAL_SERVER_ERROR,"An error occurred while fetching the user details");
-
         }
     }
+
+    @Override
+    public ResponseEntity<?> updatePassword(String newPassword, Principal principal) {
+        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setFirstLogin(false);
+        userRepository.save(user);
+        return responseDtoSetter.responseDtoSetter(HttpStatus.OK,"Password updated successfully");
+    }
+
 
     private UserResponseDto mapUserResponseDto(User user){
         return UserResponseDto.builder()
