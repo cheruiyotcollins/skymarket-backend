@@ -1,37 +1,36 @@
 package com.gigster.skymarket.config;
 
-
-import com.gigster.skymarket.repository.RoleRepository;
-import com.gigster.skymarket.repository.UserRepository;
-import com.gigster.skymarket.model.Role;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
 import com.gigster.skymarket.enums.RoleName;
-
+import com.gigster.skymarket.model.Role;
+import com.gigster.skymarket.repository.RoleRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
 public class RoleConfig implements CommandLineRunner {
-    @Autowired
-    RoleRepository roleRepository;
-    @Autowired
-    UserRepository userRepository;
-    private PasswordEncoder passwordEncoder;
+
+    private final RoleRepository roleRepository;
+
+    public RoleConfig(RoleRepository roleRepository) {
+        this.roleRepository = roleRepository;
+    }
+
     @Override
-    public void run(String... args) throws Exception {
-        log.info(":::::::::::checking if roles exist, if it doesn't add them::::::::::::");
-       if(roleRepository.findByName(RoleName.ADMIN).isEmpty()){
-           Role role=new Role();
-           role.setName(RoleName.ADMIN);
-           roleRepository.save(role);
-       }if(roleRepository.findByName(RoleName.CUSTOMER).isEmpty()){
-            Role role=new Role();
-            role.setName(RoleName.CUSTOMER);
+    public void run(String... args) {
+        log.info("Checking if roles exist, and adding them if they don't");
+
+        if(roleRepository.findByName(RoleName.ADMIN).isEmpty()) {
+            Role role = new Role();
+            role.setName(RoleName.ADMIN);
             roleRepository.save(role);
         }
 
+        if(roleRepository.findByName(RoleName.CUSTOMER).isEmpty()) {
+            Role role = new Role();
+            role.setName(RoleName.CUSTOMER);
+            roleRepository.save(role);
+        }
     }
 }
