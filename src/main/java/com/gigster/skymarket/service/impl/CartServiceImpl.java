@@ -93,11 +93,6 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public ResponseEntity<ResponseDto> getAllCartItems() {
-        return responseDtoSetter.responseDtoSetter(HttpStatus.OK, "List Of All Carts", cartItemRepository.findAll());
-    }
-
-    @Override
     public void updateCartItemQuantity(Long productId, int quantity) {
 
     }
