@@ -27,7 +27,6 @@ public class UserPrincipal implements UserDetails {
 
     @JsonIgnore
     private final String password;
-    private final Long roleId;
     private final Collection<? extends GrantedAuthority> authorities;
 
     public static UserPrincipal create(User user) {
@@ -38,15 +37,12 @@ public class UserPrincipal implements UserDetails {
                 user.getEmail(),
                 user.getContact(),
                 user.getPassword(),
-                user.getRoleId(),
                 mapRolesToAuthorities(user)
         );
     }
 
     private static List<GrantedAuthority> mapRolesToAuthorities(User user) {
-        return user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName().name()))
-                .collect(Collectors.toList());
+        return List.of(new SimpleGrantedAuthority(user.getRole().getName().name()));
     }
 
     @Override

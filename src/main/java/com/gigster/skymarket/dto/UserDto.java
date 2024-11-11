@@ -14,14 +14,12 @@ import java.util.stream.Collectors;
 public class UserDto {
         private String email;
         private String username;
-        private Set<RoleName> roles;
+        private RoleName role;
 
         public UserDto(User user) {
             this.email = user.getEmail();
             this.username = user.getUsername();
-            this.roles = user.getRoles().stream()
-                    .map(Role::getName)
-                    .collect(Collectors.toSet());
+            this.role = user.getRole().getName();
         }
 
 }
