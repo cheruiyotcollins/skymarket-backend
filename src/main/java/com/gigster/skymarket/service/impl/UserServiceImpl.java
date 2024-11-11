@@ -1,7 +1,6 @@
 package com.gigster.skymarket.service.impl;
 
 import com.gigster.skymarket.dto.*;
-import com.gigster.skymarket.exception.FirstLoginException;
 import com.gigster.skymarket.exception.ResourceNotFoundException;
 import com.gigster.skymarket.model.Customer;
 import com.gigster.skymarket.model.Role;
