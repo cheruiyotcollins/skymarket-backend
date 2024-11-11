@@ -11,12 +11,15 @@ import com.gigster.skymarket.repository.ProductRepository;
 import com.gigster.skymarket.service.CartItemService;
 import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CartItemServiceImpl implements CartItemService {
@@ -25,54 +28,140 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Autowired
     ProductRepository productRepository;
+
     @Autowired
     ResponseDtoMapper responseDtoSetter;
+
     @Autowired
     CartRepository cartRepository;
 
-
     @Override
-    public ResponseEntity<ResponseDto> addItemToCart(CartItemDto cartItemDto) {
-        try {
-            Optional<Cart> cart = cartRepository.findById(cartItemDto.getCartId());
-            Optional<Product> product = productRepository.findById(cartItemDto.getProductId());
+    public ResponseEntity<ResponseDto> addOrUpdateCartItem(Optional<Cart> cart, Optional<Product> product, int quantity) {
+        // Check if both cart and product are present
+        if (cart.isPresent() && product.isPresent()) {
+            Long cartId = cart.get().getId();
+            Long productId = product.get().getId();
 
-            if (cart.isEmpty() || product.isEmpty()) {
-                return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST, "Invalid cart or product ID.");
-            }
-
-            // Check if the product already exists in the cart
-            Optional<CartItem> existingCartItem = cartItemRepository.findByCartAndProduct(cart.get(), product.get());
+            Optional<CartItem> existingCartItem = cartItemRepository.findByCartIdAndItemId(cartId, productId);
 
             if (existingCartItem.isPresent()) {
-                // Update quantity of existing item
+                // Update the quantity of the existing cart item.
                 CartItem cartItem = existingCartItem.get();
-                cartItem.setQuantity(cartItem.getQuantity() + cartItemDto.getQuantity());
+                cartItem.setQuantity(cartItem.getQuantity() + quantity);
                 cartItemRepository.save(cartItem);
-            } else {
-                // Create new cart item
-                CartItem cartItem = new CartItem();
-                cartItem.setCart(cart.get());
-                cartItem.setProduct(product.get());
-                cartItem.setQuantity(cartItemDto.getQuantity());
-                cartItemRepository.save(cartItem);
-            }
 
-            return responseDtoSetter.responseDtoSetter(HttpStatus.CREATED, "Item added successfully");
-        } catch (Exception e) {
-            return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST, "Something went wrong. Please check your request: " + e, new Object());
+                ResponseDto response = ResponseDto.builder()
+                        .status(HttpStatus.OK)
+                        .description("Cart item updated successfully")
+                        .payload(mapToDto(cartItem))
+                        .build();
+
+                return ResponseEntity.ok(response);
+            } else {
+                CartItem newCartItem = new CartItem();
+                newCartItem.setCart(cart.get());
+                newCartItem.setProduct(product.get());
+                newCartItem.setQuantity(quantity);
+
+                cartItemRepository.save(newCartItem);
+
+                ResponseDto response = ResponseDto.builder()
+                        .status(HttpStatus.CREATED)
+                        .description("Cart item added successfully")
+                        .payload(mapToDto(newCartItem))
+                        .build();
+
+                return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            }
+        } else {
+            String missingResource = cart.isEmpty() ? "Cart" : "Product";
+
+            ResponseDto response = ResponseDto.builder()
+                    .status(HttpStatus.NOT_FOUND)
+                    .description(missingResource + " not found")
+                    .payload(null)
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
 
     @Override
-    public ResponseEntity<List<CartItemDto>> getCartItems(Long cartId) {
-        return null;
+    public ResponseEntity<ResponseDto> getCartItem(Long cartId, Long itemId) {
+        Optional<CartItem> cartItemOptional = cartItemRepository.findByCartIdAndItemId(cartId, itemId);
+
+        if (cartItemOptional.isPresent()) {
+            CartItemDto cartItemDto = mapToDto(cartItemOptional.get());
+
+            ResponseDto response = ResponseDto.builder()
+                    .status(HttpStatus.OK)
+                    .description("Item retrieved successfully")
+                    .payload(cartItemDto)
+                    .build();
+
+            return ResponseEntity.ok(response);
+        } else {
+            ResponseDto response = ResponseDto.builder()
+                    .status(HttpStatus.NOT_FOUND)
+                    .description("Item not found in cart.")
+                    .payload(null)
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
     }
+
+    //TODO: To check later if this is the better pagination logic or the other one.
+    @Override
+    public ResponseEntity<ResponseDto> getAllCartItems(Long cartId, Pageable pageable) {
+        Page<CartItem> cartItemsPage = cartItemRepository.findByCartId(cartId, pageable);
+        List<CartItemDto> cartItemDtos = cartItemsPage.getContent()
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .status(HttpStatus.OK)
+                .description("List of All Cart Items.")
+                .payload(cartItemDtos)
+                .totalPages(cartItemsPage.getTotalPages())
+                .totalElements(cartItemsPage.getTotalElements())
+                .currentPage(cartItemsPage.getNumber())
+                .pageSize(cartItemsPage.getSize())
+                .build();
+
+        return ResponseEntity.ok(responseDto);
+}
+
 
     @Override
     public ResponseEntity<ResponseDto> updateCartItem(Long cartId, Long itemId, int quantity) {
-        return null;
+        Optional<CartItem> cartItemOptional = cartItemRepository.findByCartIdAndItemId(cartId, itemId);
+
+        if (cartItemOptional.isPresent()) {
+            CartItem cartItem = cartItemOptional.get();
+            cartItem.setQuantity(quantity);
+            cartItemRepository.save(cartItem);
+
+            CartItemDto cartItemDto = mapToDto(cartItem);
+            ResponseDto response = ResponseDto.builder()
+                    .status(HttpStatus.OK)
+                    .description("Cart item updated successfully.")
+                    .payload(cartItemDto)
+                    .build();
+
+            return ResponseEntity.ok(response);
+        } else {
+            ResponseDto response = ResponseDto.builder()
+                    .status(HttpStatus.NOT_FOUND)
+                    .description("Item not found in cart.")
+                    .payload(null)
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
     }
+
 
     @Override
     public ResponseEntity<ResponseDto> removeItemFromCart(Long cartId, Long itemId) {
@@ -83,5 +172,16 @@ public class CartItemServiceImpl implements CartItemService {
     public ResponseEntity<ResponseDto> clearCart(Long cartId) {
         return null;
     }
+
+    // Method to map CartItem to CartItemDto.
+    private CartItemDto mapToDto(CartItem cartItem) {
+        return CartItemDto.builder()
+                .productId(cartItem.getProduct().getId())
+                .cartId(cartItem.getCart().getId())
+                .quantity(cartItem.getQuantity())
+                .subtotal(cartItem.getSubtotal())
+                .build();
+    }
+
 
 }
