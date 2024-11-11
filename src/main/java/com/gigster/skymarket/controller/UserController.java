@@ -12,11 +12,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 @RestController
 @RequestMapping(value = "/api/users/auth")
 @Slf4j
@@ -44,11 +46,18 @@ public class UserController {
             @ApiResponse(responseCode = "400",description = "Bad Request",content = @Content)})
     @PreAuthorize("permitAll()")
     @PostMapping(value = "/signin")
-    public ResponseEntity<JWTAuthResponse> login(@RequestBody LoginDto loginDto){
-        String token = userService.login(loginDto);
+    public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
+        LoginResponse loginResponse = userService.login(loginDto);
 
+        if (loginResponse.isFirstLogin()) {
+            // Return a 403 response indicating that a password change is required
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("First login detected. Please change your password.");
+        }
+
+        // If not the first login, return the JWT token in the response
         JWTAuthResponse jwtAuthResponse = new JWTAuthResponse();
-        jwtAuthResponse.setAccessToken(token);
+        jwtAuthResponse.setAccessToken(loginResponse.getToken());
 
         return ResponseEntity.ok(jwtAuthResponse);
     }
@@ -123,5 +132,10 @@ public class UserController {
 
         return userService.getCurrentUser(authentication.getName());
     }
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestParam String newPassword, Principal principal) {
+        return userService.updatePassword(newPassword,principal);
+    }
+
 
 }
