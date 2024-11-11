@@ -4,11 +4,13 @@ import com.gigster.skymarket.dto.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
+import java.security.Principal;
+
 public interface UserService {
 
     ResponseEntity<ResponseDto> register(SignUpRequest signUpRequest);
 
-    String login(LoginDto loginDto);
+    LoginResponse login(LoginDto loginDto);
 
     ResponseEntity<?> addRole(AddRoleRequest addRoleRequest);
 
@@ -19,4 +21,5 @@ public interface UserService {
     ResponseEntity<?> deleteById(long id);
 
     ResponseEntity<?> getCurrentUser(String email);
+    ResponseEntity<?> updatePassword(String newPassword, Principal principal);
 }

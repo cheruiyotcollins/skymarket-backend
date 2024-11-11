@@ -1,7 +1,10 @@
 package com.gigster.skymarket.security;
 
+import com.gigster.skymarket.enums.RoleName;
+import com.gigster.skymarket.model.Role;
 import com.gigster.skymarket.model.User;
 import com.gigster.skymarket.model.Customer;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +27,15 @@ public class CurrentUserV2 {
         user.setUsername(userPrincipal.getUsername());
         user.setEmail(userPrincipal.getEmail());
         user.setPassword(userPrincipal.getPassword());
-        user.setRoleId(userPrincipal.getRoleId());
+
+        // Get the first authority and map it to the user's role
+        GrantedAuthority authority = userPrincipal.getAuthorities().stream().findFirst().orElse(null);
+        if (authority != null) {
+            Role role = new Role();
+            role.setName(RoleName.valueOf(authority.getAuthority()));
+            user.setRole(role);
+        }
+
         return user;
     }
 
