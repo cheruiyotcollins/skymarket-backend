@@ -4,6 +4,7 @@ package com.gigster.skymarket.service.impl;
 import com.gigster.skymarket.dto.*;
 import com.gigster.skymarket.mapper.CartMapper;
 import com.gigster.skymarket.model.Cart;
+import com.gigster.skymarket.model.CartItem;
 import com.gigster.skymarket.model.Customer;
 import com.gigster.skymarket.repository.CartItemRepository;
 import com.gigster.skymarket.repository.CartRepository;
@@ -11,6 +12,7 @@ import com.gigster.skymarket.repository.CustomerRepository;
 import com.gigster.skymarket.service.CartService;
 import com.gigster.skymarket.mapper.CartItemsToCartItemsDtoMapper;
 import com.gigster.skymarket.mapper.ResponseDtoMapper;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -78,13 +80,102 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public void removeItemFromCart(Long productId) {
+    @Transactional
+    public ResponseEntity<ResponseDto> removeItemFromCart(Long productId) {
+        try {
+            // Fetch the cart item by productId
+            CartItem cartItem = cartItemRepository.findByProductId(productId)
+                    .orElseThrow(() -> new RuntimeException("Cart item not found for product ID: " + productId));
 
+            // Fetch the associated cart and remove the item
+            Cart cart = cartItem.getCart();
+            cart.getCartItems().remove(cartItem);
+
+            // Delete the cart item from the repository
+            cartItemRepository.delete(cartItem);
+
+            // Recalculate and update the total price
+            double newTotalPrice = cart.getCartItems().stream()
+                    .mapToDouble(CartItem::getSubtotal)
+                    .sum();
+            cart.setTotalPrice(newTotalPrice);
+
+            // Save the updated cart if not empty, else delete the cart
+            if (cart.getCartItems().isEmpty()) {
+                cartRepository.delete(cart);
+                log.info("Cart is empty. Cart with ID {} has been deleted.", cart.getId());
+            } else {
+                cartRepository.save(cart);
+            }
+
+            // Log and build success response
+            log.info("Cart item with product ID {} removed successfully. New total price: {}", productId, newTotalPrice);
+            ResponseDto response = ResponseDto.builder()
+                    .status(HttpStatus.OK)
+                    .description("Product removed from cart successfully.")
+                    .build();
+
+            return ResponseEntity.ok(response);
+
+        } catch (RuntimeException e) {
+            // Handle errors and build failure response
+            log.error("Failed to remove product from cart: {}", e.getMessage());
+            ResponseDto response = ResponseDto.builder()
+                    .status(HttpStatus.NOT_FOUND)
+                    .description("Failed to remove product from cart: " + e.getMessage())
+                    .build();
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
     }
 
-    @Override
-    public void clearCart() {
 
+    @Override
+    @Transactional
+    public ResponseEntity<ResponseDto> clearCart(Long customerId) {
+        try {
+            // Fetch the cart for the given customer
+            Cart cart = cartRepository.findByCustomerId(customerId)
+                    .orElseThrow(() -> new RuntimeException("Cart not found for customer ID: " + customerId));
+
+            // Check if the cart is already empty
+            if (cart.getCartItems().isEmpty()) {
+                return ResponseEntity.ok(
+                        ResponseDto.builder()
+                                .status(HttpStatus.OK)
+                                .description("Cart is already empty.")
+                                .payload(null)
+                                .build()
+                );
+            }
+
+            // Clear all items from the cart
+            cartItemRepository.deleteAll(cart.getCartItems());
+            cart.getCartItems().clear();
+
+            // Set total price to zero and save the updated cart
+            cart.setTotalPrice(0.0);
+            cartRepository.save(cart);
+
+            // Return success response
+            return ResponseEntity.ok(
+                    ResponseDto.builder()
+                            .status(HttpStatus.OK)
+                            .description("All items removed from cart successfully.")
+                            .payload(null)
+                            .build()
+            );
+
+        } catch (RuntimeException e) {
+            // Handle errors (e.g., cart not found)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    ResponseDto.builder()
+                            .status(HttpStatus.NOT_FOUND)
+                            .description("Failed to clear cart: " + e.getMessage())
+                            .payload(null)
+                            .build()
+            );
+        }
     }
 
     @Override
@@ -93,22 +184,12 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public void updateCartItemQuantity(Long productId, int quantity) {
-
-    }
-
-    @Override
-    public CartItemDto getCartItemByProductId(Long productId) {
-        return null;
-    }
-
-    @Override
     public ResponseEntity<ResponseDto> findCartPerCustomer(String email) {
         // Fetch the customer using the email
         Customer customer = customerRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Customer not found!"));
 
         // Fetch the cart associated with the customer
-        Cart cart = cartRepository.findByCustomer(customer).orElseThrow(() -> new RuntimeException("Cart not found!"));
+        Cart cart = cartRepository.findByCustomerId(customer.getId()).orElseThrow(() -> new RuntimeException("Cart not found!"));
 
         // Map the cart items to a hashmap with total price and item list
         HashMap<Double, List<CartItemDtoResponse>> cartItemsHashMap = cartItemsToCartItemsDtoMapper.mapCartItemsToCartItemsDto(cart.getCartItems());
