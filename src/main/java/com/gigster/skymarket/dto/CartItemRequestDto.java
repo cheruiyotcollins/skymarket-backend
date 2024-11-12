@@ -6,12 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class CartItemDto {
-    private Long productId;
+@NoArgsConstructor
+@Builder
+public class CartItemRequestDto {
     private Long cartId;
+    private Long productId;
     private int quantity;
-    private double subtotal;
 }
+

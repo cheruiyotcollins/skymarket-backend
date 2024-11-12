@@ -1,12 +1,19 @@
 package com.gigster.skymarket.repository;
 
-import com.gigster.skymarket.model.Cart;
 import com.gigster.skymarket.model.CartItem;
-import com.gigster.skymarket.model.Product;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+@Repository
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
-    Optional<CartItem> findByCartAndProduct(Cart cart, Product product);
+
+    Optional<CartItem> findByCartIdAndProductId(Long cartId, Long productId);
+
+    Page<CartItem> findByCartId(Long cartId, Pageable pageable);
+
+    Optional<CartItem> findByProductId(Long productId);
 }

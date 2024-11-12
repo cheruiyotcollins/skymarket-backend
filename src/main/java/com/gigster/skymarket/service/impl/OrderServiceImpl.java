@@ -67,7 +67,7 @@ public class OrderServiceImpl implements OrderService {
         notificationService.sendOrderConfirmationEmail(customer, order);
 
         // Completely deleting the cart after a successful order.
-        cartRepository.findByCustomer(customer)
+        cartRepository.findByCustomerId(customer.getId())
                 .ifPresent(cartRepository::delete);
 
 

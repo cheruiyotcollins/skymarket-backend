@@ -33,10 +33,24 @@ public class CartController {
         return cartService.getAllCarts(pageable);
     }
 
-    @GetMapping("/customer")
+    @GetMapping("/customerId")
     public ResponseEntity<ResponseDto> findCartByCustomerId(Authentication authentication){
         String username=authentication.getName();
         return cartService.findCartPerCustomer(username);
     }
 
+    @DeleteMapping("/remove/{productId}")
+    public ResponseEntity<ResponseDto> removeItemFromCart(@PathVariable Long productId, Authentication authentication) {
+        UserPrincipal userPrincipal = CurrentUserV2.getCurrentUser();
+        return ResponseEntity.ok(cartService.removeItemFromCart(productId).getBody());
+    }
+
+    @DeleteMapping("/clear/{customerId}")
+    public ResponseEntity<ResponseDto> clearCart(@PathVariable Long customerId) {
+        return cartService.clearCart(customerId);
+    }
+
 }
+
+
+
