@@ -162,17 +162,6 @@ public class CartItemServiceImpl implements CartItemService {
         }
     }
 
-
-    @Override
-    public ResponseEntity<ResponseDto> removeItemFromCart(Long cartId, Long itemId) {
-        return null;
-    }
-
-    @Override
-    public ResponseEntity<ResponseDto> clearCart(Long cartId) {
-        return null;
-    }
-
     // Method to map CartItem to CartItemDto.
     private CartItemDto mapToDto(CartItem cartItem) {
         return CartItemDto.builder()
@@ -182,6 +171,5 @@ public class CartItemServiceImpl implements CartItemService {
                 .subtotal(cartItem.getSubtotal())
                 .build();
     }
-
 
 }
