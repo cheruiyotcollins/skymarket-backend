@@ -42,6 +42,13 @@ public class CartItemController {
         return cartItemService.addOrUpdateCartItem(cart, product, request.getQuantity());
     }
 
+    @GetMapping("/{cartId}/{itemId}")
+    public ResponseEntity<ResponseDto> getCartItem(
+            @PathVariable Long cartId,
+            @PathVariable Long itemId) {
+        return cartItemService.getCartItem(cartId, itemId);
+    }
+
     @GetMapping("/{cartId}")
     public ResponseEntity<ResponseDto> getAllCartItems(
             @PathVariable("cartId") Long cartId,
@@ -50,5 +57,13 @@ public class CartItemController {
             @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
         return cartItemService.getAllCartItems(cartId, pageable);
+    }
+
+    @PutMapping("/{cartId}/{itemId}")
+    public ResponseEntity<ResponseDto> updateCartItem(
+            @PathVariable Long cartId,
+            @PathVariable Long itemId,
+            @RequestParam int quantity) {
+        return cartItemService.updateCartItem(cartId, itemId, quantity);
     }
 }
