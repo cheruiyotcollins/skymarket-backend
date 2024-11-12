@@ -1,28 +1,54 @@
 package com.gigster.skymarket.controller;
 
 import com.gigster.skymarket.dto.CartItemDto;
+import com.gigster.skymarket.dto.CartItemRequestDto;
 import com.gigster.skymarket.dto.ResponseDto;
+import com.gigster.skymarket.model.Cart;
+import com.gigster.skymarket.model.Product;
+import com.gigster.skymarket.repository.CartRepository;
+import com.gigster.skymarket.repository.ProductRepository;
 import com.gigster.skymarket.service.CartItemService;
+import com.gigster.skymarket.service.CartService;
+import com.gigster.skymarket.service.ProductService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Optional;
 
 @RestController
-@RequestMapping(value = "/api/carts/items")
+@RequestMapping(value = "/api/carts-items")
 @Slf4j
 public class CartItemController {
+
     @Autowired
-    CartItemService cartItemService;
-   @PostMapping
-    public ResponseEntity<ResponseDto> addCartItem(@RequestBody CartItemDto cartItemDto){
-       return cartItemService.addItemToCart(cartItemDto);
+    private CartItemService cartItemService;
+
+    @Autowired
+    private CartRepository cartRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @PostMapping
+    public ResponseEntity<ResponseDto> addOrUpdateCartItem(@RequestBody CartItemRequestDto request) {
+        Optional<Cart> cart = cartRepository.findById(request.getCartId());
+        Optional<Product> product = productRepository.findById(request.getProductId());
+
+        return cartItemService.addOrUpdateCartItem(cart, product, request.getQuantity());
     }
-    @GetMapping("/{id}")
-    public ResponseEntity<List<CartItemDto>> findAll(@PathVariable long id){
-        return cartItemService.getCartItems(id);
+
+    @GetMapping("/{cartId}")
+    public ResponseEntity<ResponseDto> getAllCartItems(
+            @PathVariable("cartId") Long cartId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
+        return cartItemService.getAllCartItems(cartId, pageable);
     }
 }
-
