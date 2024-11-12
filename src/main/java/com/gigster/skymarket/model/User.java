@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -62,4 +63,6 @@ public class User  {
     @JoinColumn(name = "role_id")
     private Role role;
     private Boolean firstLogin = true;
+    private String resetCode;
+    private LocalDateTime resetCodeExpiry;
 }

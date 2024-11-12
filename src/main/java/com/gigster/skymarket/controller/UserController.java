@@ -136,6 +136,16 @@ public class UserController {
     public ResponseEntity<?> changePassword(@RequestParam String newPassword, Principal principal) {
         return userService.updatePassword(newPassword,principal);
     }
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+        return userService.forgotPassword(email);
+    }
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestParam String email,
+                                           @RequestParam String resetCode,
+                                           @RequestParam String newPassword) {
+        return userService.resetPassword(email, resetCode, newPassword);
+    }
 
 
 }

@@ -10,6 +10,7 @@ import com.gigster.skymarket.repository.RoleRepository;
 import com.gigster.skymarket.repository.UserRepository;
 import com.gigster.skymarket.security.JwtTokenProvider;
 import com.gigster.skymarket.security.UserPrincipal;
+import com.gigster.skymarket.service.NotificationService;
 import com.gigster.skymarket.service.UserService;
 import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -22,15 +23,17 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.gigster.skymarket.enums.RoleName;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,6 +46,7 @@ public class UserServiceImpl implements UserService {
     private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final NotificationService notificationService;
 
     @Autowired
     ResponseDtoMapper responseDtoSetter;
@@ -53,7 +57,8 @@ public class UserServiceImpl implements UserService {
                            RoleRepository roleRepository,
                            CustomerRepository customerRepository,
                            PasswordEncoder passwordEncoder,
-                           JwtTokenProvider jwtTokenProvider) {
+                           JwtTokenProvider jwtTokenProvider,
+                           NotificationService notificationService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -61,6 +66,7 @@ public class UserServiceImpl implements UserService {
 
         this.passwordEncoder = passwordEncoder;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.notificationService=notificationService;
     }
     @Override
     public ResponseEntity<ResponseDto> register(SignUpRequest signUpRequest) {
@@ -231,6 +237,46 @@ public class UserServiceImpl implements UserService {
         user.setFirstLogin(false);
         userRepository.save(user);
         return responseDtoSetter.responseDtoSetter(HttpStatus.OK,"Password updated successfully");
+    }
+
+    @Override
+    public ResponseEntity<?> forgotPassword(String email) {
+        // Find the user by email
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+
+        // Generate a verification code (e.g., a 6-digit code)
+        String verificationCode = String.format("%06d", new Random().nextInt(999999));
+
+        // Save the verification code and expiration time to the user's account
+        user.setResetCode(verificationCode);
+        user.setResetCodeExpiry(LocalDateTime.now().plusMinutes(15)); // Code expires in 15 minutes
+        userRepository.save(user);
+
+        // Send email with the code
+        String subject = "Password Reset Request";
+        String message = "Your password reset code is " + verificationCode + ". This code expires in 15 minutes.";
+        notificationService.sendMail(email, subject, message);
+
+        return ResponseEntity.ok("Password reset code sent to email.");
+    }
+
+    @Override
+    public ResponseEntity<?> resetPassword(String email, String resetCode, String newPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+
+        if (!user.getResetCode().equals(resetCode) || LocalDateTime.now().isAfter(user.getResetCodeExpiry())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired reset code.");
+        }
+
+        // Update the user's password
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setResetCode(null);
+        user.setResetCodeExpiry(null);
+        userRepository.save(user);
+
+        return ResponseEntity.ok("Password has been successfully reset.");
     }
 
 
