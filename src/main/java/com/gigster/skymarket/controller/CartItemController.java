@@ -1,6 +1,5 @@
 package com.gigster.skymarket.controller;
 
-import com.gigster.skymarket.dto.CartItemDto;
 import com.gigster.skymarket.dto.CartItemRequestDto;
 import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.model.Cart;
@@ -8,8 +7,6 @@ import com.gigster.skymarket.model.Product;
 import com.gigster.skymarket.repository.CartRepository;
 import com.gigster.skymarket.repository.ProductRepository;
 import com.gigster.skymarket.service.CartItemService;
-import com.gigster.skymarket.service.CartService;
-import com.gigster.skymarket.service.ProductService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;

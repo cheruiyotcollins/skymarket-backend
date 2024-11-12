@@ -1,7 +1,6 @@
 package com.gigster.skymarket.service;
 
 import com.gigster.skymarket.dto.CartDto;
-import com.gigster.skymarket.dto.CartItemDto;
 import com.gigster.skymarket.dto.ResponseDto;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
