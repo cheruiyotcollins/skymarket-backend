@@ -42,7 +42,7 @@ public class CartItemServiceImpl implements CartItemService {
             Long cartId = cart.get().getId();
             Long productId = product.get().getId();
 
-            Optional<CartItem> existingCartItem = cartItemRepository.findByCartIdAndItemId(cartId, productId);
+            Optional<CartItem> existingCartItem = cartItemRepository.findByCartIdAndProductId(cartId, productId);
 
             if (existingCartItem.isPresent()) {
                 // Update the quantity of the existing cart item.
@@ -88,7 +88,7 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public ResponseEntity<ResponseDto> getCartItem(Long cartId, Long itemId) {
-        Optional<CartItem> cartItemOptional = cartItemRepository.findByCartIdAndItemId(cartId, itemId);
+        Optional<CartItem> cartItemOptional = cartItemRepository.findByCartIdAndProductId(cartId, itemId);
 
         if (cartItemOptional.isPresent()) {
             CartItemDto cartItemDto = mapToDto(cartItemOptional.get());
@@ -136,7 +136,7 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public ResponseEntity<ResponseDto> updateCartItem(Long cartId, Long itemId, int quantity) {
-        Optional<CartItem> cartItemOptional = cartItemRepository.findByCartIdAndItemId(cartId, itemId);
+        Optional<CartItem> cartItemOptional = cartItemRepository.findByCartIdAndProductId(cartId, itemId);
 
         if (cartItemOptional.isPresent()) {
             CartItem cartItem = cartItemOptional.get();
