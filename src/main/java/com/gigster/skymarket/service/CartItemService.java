@@ -17,8 +17,4 @@ public interface CartItemService {
     ResponseEntity<ResponseDto> getAllCartItems(Long cartId, Pageable pageable);
 
     ResponseEntity<ResponseDto> updateCartItem(Long cartId, Long itemId, int quantity);
-
-    ResponseEntity<ResponseDto> removeItemFromCart(Long cartId, Long itemId);
-
-    ResponseEntity<ResponseDto> clearCart(Long cartId);
 }
