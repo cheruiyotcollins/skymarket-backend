@@ -22,4 +22,8 @@ public interface UserService {
 
     ResponseEntity<?> getCurrentUser(String email);
     ResponseEntity<?> updatePassword(String newPassword, Principal principal);
+
+    ResponseEntity<?> forgotPassword(String email);
+
+    ResponseEntity<?> resetPassword(String email, String resetCode, String newPassword);
 }
