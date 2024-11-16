@@ -14,11 +14,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name="orders")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name="orders")
 public class Order implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,13 +28,18 @@ public class Order implements Serializable {
     private List<OrderProduct> orderProducts = new ArrayList<>();  // List of OrderProduct to handle product-quantity pair
 
     private String orderNumber;
+
     private double totalAmount;
+
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
+
     private LocalDateTime orderDate;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
+
     @Builder.Default
     private String createdOn= DateUtils.dateNowString();
 }
