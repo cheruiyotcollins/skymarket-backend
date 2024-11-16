@@ -27,12 +27,14 @@ public class OrderController {
     // 1. CREATE: Add a new order
     @PostMapping
     public ResponseEntity<ResponseDto> createOrder(@Valid @RequestBody OrderDto orderDto) {
-        try {
-            orderService.createOrder(orderDto);
-            return responseDtoSetter.responseDtoSetter(HttpStatus.CREATED, "Order created successfully",orderDto);
-        } catch (Exception e) {
-            return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST, "Failed to create order+>>>"+e);
-        }
+        return orderService.createOrder(orderDto);
+    }
+
+
+    // 3. READ: Get order by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseDto> getOrderById(@PathVariable Long id) {
+        return orderService.getOrderById(id);
     }
 
     // 2. READ: Get all orders
@@ -41,39 +43,22 @@ public class OrderController {
         return orderService.getAllOrders(pageable);
     }
 
-    // 3. READ: Get order by ID
-    @GetMapping("/{id}")
-    public ResponseEntity<ResponseDto> getOrderById(@PathVariable Long id) {
-        try {
-            OrderDto order = orderService.getOrderById(id);
-            return responseDtoSetter.responseDtoSetter(HttpStatus.OK, "Order details",order);
-        } catch (Exception e) {
-            log.error("Error fetching order by id: {}", e.getMessage());
-            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND, "Order not found");
-        }
-    }
-
     // 4. UPDATE: Update an existing order
     @PutMapping("/{id}")
     public ResponseEntity<ResponseDto> updateOrder(@PathVariable Long id, @Valid @RequestBody OrderDto orderDto) {
-        try {
-            OrderDto updatedOrder = orderService.updateOrder(id, orderDto);
-            return responseDtoSetter.responseDtoSetter(HttpStatus.OK, "Order updated successfully",updatedOrder);
-        } catch (Exception e) {
-            log.error("Error updating order: {}", e.getMessage());
-            return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST, "Failed to update order");
-        }
+        return orderService.updateOrder(id, orderDto);
+    }
+    // 5. PATCH: Cancel an order
+    @PatchMapping("/{id}")
+    public ResponseEntity<ResponseDto> cancelOrder(@PathVariable Long id) {
+        return orderService.cancelOrder(id);
     }
 
-    // 5. DELETE: Delete an order by ID, admin
+    // 6. DELETE: Delete an order by ID, admin
     @DeleteMapping("/{id}")
     public ResponseEntity<ResponseDto> deleteOrder(@PathVariable Long id) {
        return orderService.deleteOrder(id);
 
     }
-    // use patch for partial update
-    @PatchMapping("/id/{id}")
-    public ResponseEntity<ResponseDto> cancelOrder(@PathVariable Long id){
-        return orderService.cancelOrder(id);
-    }
+
 }
