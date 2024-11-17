@@ -37,6 +37,7 @@ public class UserController {
     public ResponseEntity<ResponseDto> register(@RequestBody SignUpRequest signUpRequest){
         return userService.register(signUpRequest);
     }
+
     @Operation(summary = "User sign in")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User Logged In Successfully",
@@ -61,6 +62,7 @@ public class UserController {
 
         return ResponseEntity.ok(jwtAuthResponse);
     }
+
     @Operation(summary = "Update User Info")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "User Information Updated Successfully",
@@ -74,6 +76,7 @@ public class UserController {
         return userService.register(signUpRequest);
 
     }
+
     @Operation(summary = "Retrieve User by ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "302", description = "User found",
@@ -86,6 +89,7 @@ public class UserController {
         return userService.findUserById(id);
 
     }
+
     @Operation(summary = "List All Users")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "302", description = "returned list of users",
@@ -97,6 +101,7 @@ public class UserController {
     public ResponseEntity<ResponseDto> getAllUsers(Pageable pageable) {
         return userService.getAllUsers(pageable);
     }
+
     @Operation(summary = "Delete User By Id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User Deleted Successfully",
@@ -109,6 +114,7 @@ public class UserController {
         return userService.deleteById(id);
 
     }
+
     @Operation(summary = "Create New Role")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Role Created Successfully",
@@ -120,6 +126,7 @@ public class UserController {
     public ResponseEntity<?> addRole(@RequestBody AddRoleRequest addRoleRequest){
         return userService.addRole(addRoleRequest);
     }
+
     @Operation(summary = "Find Current User")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Role Created Successfully",
@@ -132,20 +139,22 @@ public class UserController {
 
         return userService.getCurrentUser(authentication.getName());
     }
-    @PostMapping("/change-password")
+
+    @PutMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestParam String newPassword, Principal principal) {
         return userService.updatePassword(newPassword,principal);
     }
+
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
         return userService.forgotPassword(email);
     }
-    @PostMapping("/reset-password")
+
+    @PutMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestParam String email,
                                            @RequestParam String resetCode,
                                            @RequestParam String newPassword) {
         return userService.resetPassword(email, resetCode, newPassword);
     }
-
 
 }
