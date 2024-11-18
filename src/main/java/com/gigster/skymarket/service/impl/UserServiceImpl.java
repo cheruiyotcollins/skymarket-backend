@@ -68,6 +68,7 @@ public class UserServiceImpl implements UserService {
         this.jwtTokenProvider = jwtTokenProvider;
         this.notificationService=notificationService;
     }
+
     @Override
     public ResponseEntity<ResponseDto> register(SignUpRequest signUpRequest) {
         // Check if email or username already exists
@@ -116,6 +117,7 @@ public class UserServiceImpl implements UserService {
 
         return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED, "User registered successfully");
     }
+
     @Override
     public LoginResponse login(LoginDto loginDto) {
         Authentication authentication = authenticationManager.authenticate(
@@ -135,9 +137,6 @@ public class UserServiceImpl implements UserService {
 
         return new LoginResponse(token, firstLogin);
     }
-
-
-
 
     @Override
     public ResponseEntity<?> addRole(AddRoleRequest addRoleRequest) {
@@ -187,6 +186,7 @@ public class UserServiceImpl implements UserService {
 
         return ResponseEntity.ok(responseDto);
     }
+
     @Override
     public ResponseEntity<?> deleteById(long id){
 
@@ -200,6 +200,7 @@ public class UserServiceImpl implements UserService {
 
         }
     }
+
     @Override
     public ResponseEntity<?> getCurrentUser(String email) {
 
@@ -278,7 +279,6 @@ public class UserServiceImpl implements UserService {
 
         return ResponseEntity.ok("Password has been successfully reset.");
     }
-
 
     private UserResponseDto mapUserResponseDto(User user){
         return UserResponseDto.builder()

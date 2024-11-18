@@ -8,8 +8,6 @@ import lombok.*;
 @Entity
 @Table(name="categories")
 @Data
-@Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Category {

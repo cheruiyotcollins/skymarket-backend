@@ -7,13 +7,13 @@ import org.springframework.http.ResponseEntity;
 
 public interface OrderService {
 
-    OrderDto createOrder(OrderDto orderDto);
+    ResponseEntity<ResponseDto> createOrder(OrderDto orderDto);
 
     ResponseEntity<ResponseDto> getAllOrders(Pageable pageable);
 
-    OrderDto getOrderById(Long orderId);
+    ResponseEntity<ResponseDto> getOrderById(Long orderId);
 
-    OrderDto updateOrder(Long orderId, OrderDto orderDto);
+    ResponseEntity<ResponseDto> updateOrder(Long orderId, OrderDto orderDto);
 
     ResponseEntity<ResponseDto> deleteOrder(Long orderId);
 

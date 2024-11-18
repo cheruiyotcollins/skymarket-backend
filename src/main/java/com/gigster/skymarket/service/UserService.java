@@ -21,6 +21,7 @@ public interface UserService {
     ResponseEntity<?> deleteById(long id);
 
     ResponseEntity<?> getCurrentUser(String email);
+
     ResponseEntity<?> updatePassword(String newPassword, Principal principal);
 
     ResponseEntity<?> forgotPassword(String email);
