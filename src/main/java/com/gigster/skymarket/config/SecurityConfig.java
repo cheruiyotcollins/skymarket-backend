@@ -1,6 +1,5 @@
 package com.gigster.skymarket.config;
 
-
 import com.gigster.skymarket.security.JwtAuthenticationEntryPoint;
 import com.gigster.skymarket.security.JwtAuthenticationFilter;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
@@ -12,6 +11,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -29,20 +29,20 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 )
 public class SecurityConfig {
 
-    private UserDetailsService userDetailsService;
+    private final UserDetailsService userDetailsService;
     private final JwtAuthenticationEntryPoint authenticationEntryPoint;
     private final JwtAuthenticationFilter authenticationFilter;
 
     public SecurityConfig(UserDetailsService userDetailsService,
                           JwtAuthenticationEntryPoint authenticationEntryPoint,
-                          JwtAuthenticationFilter authenticationFilter){
+                          JwtAuthenticationFilter authenticationFilter) {
         this.userDetailsService = userDetailsService;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.authenticationFilter = authenticationFilter;
     }
 
     @Bean
-    public static PasswordEncoder passwordEncoder(){
+    public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -53,44 +53,42 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-                http.csrf().disable()
-                 .authorizeHttpRequests((authorize) ->
-
+        http.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests((authorize) ->
                         authorize
-                                //ALL PERMITTED
-                                //Swagger UI
+                                // Publicly accessible endpoints.
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("/v3/**").permitAll()
-                                // Users
                                 .requestMatchers("/api/users/auth/signup").permitAll()
                                 .requestMatchers("/api/users/auth/signin").permitAll()
+                                .requestMatchers("/api/products/{id}").permitAll()
+                                .requestMatchers("/api/products").permitAll()
+
+                                // Endpoints requiring specific roles.
+                                //  User endpoints.
                                 .requestMatchers("/api/users/auth/current").hasAnyAuthority("ADMIN", "CUSTOMER")
-                                // products permits
-                                .requestMatchers(HttpMethod.GET,"/api/products/{id}").permitAll()
-                                .requestMatchers(HttpMethod.GET,"/api/products").permitAll()
-
-                                //ADMIN PERMITS
-                                //users
                                 .requestMatchers("/api/users/auth/update").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.GET,"/api/users/auth").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.GET,"/api/users/auth/id/*").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.GET,"/api/users/auth").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/users/auth").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/users/auth/id/*").hasAuthority("ADMIN")
                                 .requestMatchers("/api/users/auth/new/role").hasAuthority("ADMIN")
-
-                                //products
-                                .requestMatchers(HttpMethod.PUT,"/api/products/{id}").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.DELETE,"/api/products/{id}").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.POST,"/api/products/{id}").hasAuthority("ADMIN")
-
-                                //customers
-                                .requestMatchers(HttpMethod.POST,"/api/customers").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.GET,"/api/customers").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.GET,"/api/customers/{id}").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.DELETE,"/api/customers/{id}").hasAuthority("ADMIN")
-                                //Orders
-
-                                //carts
-                                .requestMatchers(HttpMethod.POST,"/api/carts/items").hasAnyAuthority("ADMIN","CUSTOMER")
+                                //  Product endpoints.
+                                .requestMatchers(HttpMethod.PUT, "/api/products/{id}").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/api/products/{id}").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/api/products/{id}").hasAuthority("ADMIN")
+                                //  Customer endpoints.
+                                .requestMatchers(HttpMethod.POST, "/api/customers").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/customers").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/customers/{id}").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/api/customers/{id}").hasAuthority("ADMIN")
+                                //  Cart items endpoints.
+                                .requestMatchers(HttpMethod.POST, "/api/carts/items").hasAnyAuthority("ADMIN", "CUSTOMER")
+                                //  Order endpoints.
+                                .requestMatchers(HttpMethod.POST, "/api/orders").hasAnyAuthority("ADMIN", "CUSTOMER")
+                                .requestMatchers(HttpMethod.GET, "/api/orders/{id}").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/orders").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/api/orders/{id}").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.PATCH, "/api/orders/{id}").hasAnyAuthority("ADMIN", "CUSTOMER")
+                                .requestMatchers(HttpMethod.DELETE, "/api/orders/{id}").hasAuthority("ADMIN")
 
                                 .anyRequest().authenticated()
                 )
