@@ -133,7 +133,6 @@ public class CartItemServiceImpl implements CartItemService {
         return ResponseEntity.ok(responseDto);
 }
 
-
     @Override
     public ResponseEntity<ResponseDto> updateCartItem(Long cartId, Long itemId, int quantity) {
         Optional<CartItem> cartItemOptional = cartItemRepository.findByCartIdAndProductId(cartId, itemId);

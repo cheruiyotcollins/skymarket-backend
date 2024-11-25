@@ -8,7 +8,6 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +19,6 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    //todo move this to service
     @Autowired
     ResponseDtoMapper responseDtoSetter;
 
@@ -30,14 +28,13 @@ public class OrderController {
         return orderService.createOrder(orderDto);
     }
 
-
-    // 3. READ: Get order by ID
+    // 3. READ: Get order by ID, admin
     @GetMapping("/{id}")
     public ResponseEntity<ResponseDto> getOrderById(@PathVariable Long id) {
         return orderService.getOrderById(id);
     }
 
-    // 2. READ: Get all orders
+    // 2. READ: Get all orders, admin
     @GetMapping
     public ResponseEntity<ResponseDto> getAllOrders(Pageable pageable) {
         return orderService.getAllOrders(pageable);
@@ -48,6 +45,7 @@ public class OrderController {
     public ResponseEntity<ResponseDto> updateOrder(@PathVariable Long id, @Valid @RequestBody OrderDto orderDto) {
         return orderService.updateOrder(id, orderDto);
     }
+
     // 5. PATCH: Cancel an order
     @PatchMapping("/{id}")
     public ResponseEntity<ResponseDto> cancelOrder(@PathVariable Long id) {
