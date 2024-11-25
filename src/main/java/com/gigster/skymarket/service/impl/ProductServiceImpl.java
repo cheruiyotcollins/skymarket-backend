@@ -10,14 +10,18 @@ import com.gigster.skymarket.repository.CategoryRepository;
 import com.gigster.skymarket.repository.ProductRepository;
 import com.gigster.skymarket.service.ProductService;
 import com.gigster.skymarket.mapper.ResponseDtoMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -51,13 +55,26 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public ResponseEntity<ResponseDto> getProductById(Long id) {
+        Optional<Product> optionalProduct = productRepository.findById(id);
+        if (optionalProduct.isPresent()) {
+            return responseDtoSetter.responseDtoSetter(HttpStatus.FOUND, "Product Fetched Successfully", optionalProduct.get());
+        } else {
+            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND, "Product not found with ID: " + id);
+        }
+    }
+
+    @Override
     public ResponseEntity<ResponseDto> getAllProducts(Pageable pageable) {
-        // todo add image url to response
         Page<Product> productPage = productRepository.findAll(pageable);
 
         List<ProductDto> productDtos = productPage.getContent()
                 .stream()
-                .map(productMapper::toDto)
+                .map(product -> {
+                    ProductDto dto = productMapper.toDto(product);
+                    dto.setImageUrl(generateImageUrl(product.getImageUrl()));
+                    return dto;
+                })
                 .collect(Collectors.toList());
 
         ResponseDto responseDto = responseDtoSetter.responseDtoSetter(
@@ -75,14 +92,14 @@ public class ProductServiceImpl implements ProductService {
         return ResponseEntity.ok(responseDto);
     }
 
-    @Override
-    public ResponseEntity<ResponseDto> getProductById(Long id) {
-        Optional<Product> optionalProduct = productRepository.findById(id);
-        if (optionalProduct.isPresent()) {
-            return responseDtoSetter.responseDtoSetter(HttpStatus.FOUND, "Product Fetched Successfully", optionalProduct.get());
-        } else {
-            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND, "Product not found with ID: " + id);
+    private String generateImageUrl(String imageUrl) {
+        if (imageUrl.startsWith("http")) {
+            return imageUrl;
         }
+
+        HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getRequest();
+        String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/images/";
+        return baseUrl + imageUrl;
     }
 
     @Override
