@@ -4,11 +4,13 @@ import com.gigster.skymarket.dto.OrderDto;
 import com.gigster.skymarket.dto.OrderProductDto;
 import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.enums.OrderStatus;
+import com.gigster.skymarket.exception.InsufficientStockException;
 import com.gigster.skymarket.model.*;
 import com.gigster.skymarket.repository.*;
 import com.gigster.skymarket.service.OrderService;
 import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,33 +47,32 @@ public class OrderServiceImpl implements OrderService {
 
     // 1. Create a new Order
     @Override
+    @Transactional
     public ResponseEntity<ResponseDto> createOrder(OrderDto orderDto) {
         try {
-            // Fetch customer
             Customer customer = customerRepository.findById(orderDto.getCustomerId())
-                    .orElseThrow(() -> new RuntimeException("Customer not found!"));
+                    .orElseThrow(() -> new RuntimeException("We could not find your account. Please check your details or try again later."));
 
-            // Fetch products
             List<Long> productIds = orderDto.getOrderProducts()
                     .stream()
                     .map(OrderProductDto::getProductId)
                     .collect(Collectors.toList());
-            List<Product> products = productRepository.findAllById(productIds);
+
+            List<Product> products = productRepository.findAllByIdsWithLock(productIds);
 
             if (products.isEmpty()) {
-                throw new RuntimeException("Products not found!");
+                throw new RuntimeException("Some products in your cart are no longer available. Please review your order.");
             }
 
-            // Stock validation - ensure each product has enough stock
+        // Stock validation - ensure each product has enough stock
             for (OrderProductDto orderProductDto : orderDto.getOrderProducts()) {
                 Product product = products.stream()
                         .filter(p -> Long.valueOf(p.getId()).equals(orderProductDto.getProductId()))
                         .findFirst()
-                        .orElseThrow(() -> new RuntimeException("Product is out of stock."));
+                        .orElseThrow(() -> new RuntimeException("The product you selected is out of stock. Please try another or check back later."));
 
-                // Validate if ordered quantity is less than or equal to available stock
                 if (orderProductDto.getQuantity() > product.getStock()) {
-                    throw new RuntimeException("Insufficient stock for product: " + product.getProductName());
+                    throw new RuntimeException("Sorry, we do not have enough stock for the product: " + product.getProductName() + ". Please adjust the quantity or choose a different product.");
                 }
             }
 
@@ -79,24 +80,22 @@ public class OrderServiceImpl implements OrderService {
             Order order = mapToOrder(orderDto, customer, products);
             order.setStatus(OrderStatus.PENDING);
 
-            // Concurrency control using optimistic locking or synchronized block.
-            synchronized (this) {
-                order = orderRepository.save(order);
-                // Deduct stock after the order is saved (in the synchronized block to ensure consistency)
-                for (OrderProductDto orderProductDto : orderDto.getOrderProducts()) {
-                    Product product = products.stream()
-                            .filter(p -> p.getId() == orderProductDto.getProductId())
-                            .findFirst()
-                            .orElseThrow(() -> new RuntimeException("Product not found!"));
+            // Concurrency control using pessimistic locking
+            order = orderRepository.save(order);
 
-                    // Update the stock by deducting the ordered quantity
-                    int updatedStock = product.getStock() - orderProductDto.getQuantity();
-                    if (updatedStock < 0) {
-                        throw new RuntimeException("Not enough stock available for product: " + product.getProductName());
-                    }
-                    product.setStock(updatedStock);
-                    productRepository.save(product);
+            // Deduct stock after the order is saved
+            for (OrderProductDto orderProductDto : orderDto.getOrderProducts()) {
+                Product product = productRepository.findByIdWithLock(orderProductDto.getProductId())
+                        .orElseThrow(() -> new InsufficientStockException("The product you selected is no longer available. Please review your order."));
+
+                // Update the stock by deducting the ordered quantity
+                int updatedStock = product.getStock() - orderProductDto.getQuantity();
+                if (updatedStock < 0) {
+                    throw new InsufficientStockException("We don’t have enough stock for: " + product.getProductName() + ". Please choose a different quantity or product.");
                 }
+
+                product.setStock(updatedStock);
+                productRepository.save(product);
             }
 
             // Send order confirmation email
@@ -106,27 +105,24 @@ public class OrderServiceImpl implements OrderService {
             cartRepository.findByCustomerId(customer.getId())
                     .ifPresent(cartRepository::delete);
 
-            // Construct ResponseDto and return it wrapped in ResponseEntity
             ResponseDto response = ResponseDto.builder()
                     .status(HttpStatus.CREATED)
-                    .description("Order created successfully")
-                    .payload(mapToOrderDto(order))  // Assuming mapToOrderDto is your method to convert Order to OrderDto
+                    .description("Your order has been successfully created.")
+                    .payload(mapToOrderDto(order))
                     .build();
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (Exception e) {
-            // If an error occurs, return a BAD_REQUEST response with error details
             ResponseDto errorResponse = ResponseDto.builder()
                     .status(HttpStatus.BAD_REQUEST)
-                    .description("Failed to create order: " + e.getMessage())
+                    .description("Failed to process your order: " + e.getMessage())
                     .payload(null)
                     .build();
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
-
 
     // 3. Retrieve a single order by ID
     @Override
@@ -184,18 +180,15 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public ResponseEntity<ResponseDto> updateOrder(Long orderId, OrderDto orderDto) {
         try {
-            // Fetch the existing order
             Order existingOrder = orderRepository.findById(orderId)
                     .orElseThrow(() -> new RuntimeException("Order not found"));
 
-            // Fetch the customer associated with the order
             Customer customer = customerRepository.findById(orderDto.getCustomerId())
                     .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-            // Fetch products based on IDs from the orderDto
             List<Long> productIds = orderDto.getOrderProducts()
                     .stream()
-                    .map(OrderProductDto::getProductId)  // Assuming OrderProductDto has a getProductId() method
+                    .map(OrderProductDto::getProductId)
                     .collect(Collectors.toList());
 
             List<Product> products = productRepository.findAllById(productIds);
@@ -208,48 +201,42 @@ public class OrderServiceImpl implements OrderService {
             existingOrder.setTotalAmount(orderDto.getTotalAmount());
             existingOrder.setStatus(orderDto.getStatus());
             existingOrder.setOrderDate(orderDto.getOrderDate());
-            existingOrder.setCustomer(customer);  // Update customer
+            existingOrder.setCustomer(customer);
 
             // Create OrderProduct instances
             List<OrderProduct> orderProducts = new ArrayList<>();
             for (Product product : products) {
                 OrderProduct orderProduct = new OrderProduct();
-                orderProduct.setOrder(existingOrder);  // Set the current order
-                orderProduct.setProduct(product);      // Set the product
-                orderProduct.setQuantity(1);           // Default quantity, or use orderDto.getQuantity() if needed
+                orderProduct.setOrder(existingOrder);
+                orderProduct.setProduct(product);
+                orderProduct.setQuantity(1);
                 orderProducts.add(orderProduct);
             }
 
-            // Set the updated list of OrderProducts
             existingOrder.setOrderProducts(orderProducts);
 
-            // Save the updated order in the database
             existingOrder = orderRepository.save(existingOrder);
 
-            // Convert the updated order to DTO
-            OrderDto updatedOrderDto = mapToOrderDto(existingOrder);  // Assuming mapToOrderDto converts an Order to OrderDto
+            OrderDto updatedOrderDto = mapToOrderDto(existingOrder);
 
-            // Create the responseDto to return
             ResponseDto response = ResponseDto.builder()
                     .status(HttpStatus.OK)
                     .description("Order updated successfully")
                     .payload(updatedOrderDto)
                     .build();
 
-            // Return ResponseEntity with ResponseDto
-            return ResponseEntity.ok(response);  // Use ResponseEntity.ok() to wrap the response
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             // In case of errors, return a ResponseDto with the error message
             ResponseDto errorResponse = ResponseDto.builder()
                     .status(HttpStatus.BAD_REQUEST)
                     .description(e.getMessage())
-                    .payload(null)  // No payload in case of error
+                    .payload(null)
                     .build();
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
-
 
     // 5. Delete an order by ID (Admin)
     @Override
@@ -328,7 +315,7 @@ public class OrderServiceImpl implements OrderService {
                     return dto;
                 })
                 .collect(Collectors.toList());
-        orderDto.setOrderProducts(orderProductDtos);  // Set the list of OrderProductDtos
+        orderDto.setOrderProducts(orderProductDtos);
 
         return orderDto;
     }
