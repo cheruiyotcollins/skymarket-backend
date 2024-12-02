@@ -43,4 +43,9 @@ public class ProductController {
     public ResponseEntity<ResponseDto> deleteProduct(@PathVariable Long id) {
         return productService.deleteProduct(id);
     }
+
+    @PutMapping("/{id}/restock")
+    public ResponseEntity<ResponseDto> restockProduct(@PathVariable Long id, @RequestParam int stock) {
+        return productService.restockProduct(id, stock);
+    }
 }
