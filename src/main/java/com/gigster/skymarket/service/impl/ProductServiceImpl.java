@@ -123,6 +123,19 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+    @Override
+    public ResponseEntity<ResponseDto> restockProduct(Long id, int stock) {
+        Optional<Product> optionalProduct = productRepository.findById(id);
+        if (optionalProduct.isPresent()) {
+            Product product = optionalProduct.get();
+            product.setStock(stock);
+            productRepository.save(product);
+            return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED, "Product restocked successfully", product);
+        } else {
+            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND, "Product not found with ID: " + id);
+        }
+    }
+
     private Product setProduct(NewProductDto newProductDto) {
         Product product = Product.builder()
                 .productName(newProductDto.getProductName())
