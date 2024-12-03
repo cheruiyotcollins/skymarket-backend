@@ -44,7 +44,7 @@ public class ProductController {
         return productService.deleteProduct(id);
     }
 
-    @PutMapping("/{id}/restock")
+    @PatchMapping("/{id}/restock")
     public ResponseEntity<ResponseDto> restockProduct(@PathVariable Long id, @RequestParam int stock) {
         return productService.restockProduct(id, stock);
     }
