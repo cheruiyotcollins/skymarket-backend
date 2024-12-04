@@ -1,10 +1,8 @@
 package com.gigster.skymarket.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.PositiveOrZero;
+import lombok.*;
 
 import java.io.Serializable;
 
@@ -15,18 +13,29 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Product implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Column(nullable = false, unique = true)
     private String productName;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id", nullable = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "category_id")
     private Category category;
+
     private String manufacturer;
+
+    @Column(length = 1000) // Set a limit on description length
     private String description;
+
     private String imageUrl;
+
+    @Column(nullable = false)
+    @PositiveOrZero
     private double price;
+
+    @Column(nullable = false)
     private int stock;
 }
