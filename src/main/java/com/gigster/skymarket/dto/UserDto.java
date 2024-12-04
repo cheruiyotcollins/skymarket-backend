@@ -1,12 +1,8 @@
 package com.gigster.skymarket.dto;
 
 import com.gigster.skymarket.enums.RoleName;
-import com.gigster.skymarket.model.Role;
 import com.gigster.skymarket.model.User;
 import lombok.*;
-
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
