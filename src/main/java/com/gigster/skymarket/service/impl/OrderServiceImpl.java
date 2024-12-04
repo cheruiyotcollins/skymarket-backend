@@ -5,6 +5,7 @@ import com.gigster.skymarket.dto.OrderProductDto;
 import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.enums.OrderStatus;
 import com.gigster.skymarket.exception.InsufficientStockException;
+import com.gigster.skymarket.exception.OrderNotFoundException;
 import com.gigster.skymarket.model.*;
 import com.gigster.skymarket.repository.*;
 import com.gigster.skymarket.service.OrderService;
@@ -19,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -78,7 +80,7 @@ public class OrderServiceImpl implements OrderService {
 
             // Create order and set status
             Order order = mapToOrder(orderDto, customer, products);
-            order.setStatus(OrderStatus.PENDING);
+            order.setStatus(OrderStatus.PENDING_PAYMENT);
 
             // Concurrency control using pessimistic locking
             order = orderRepository.save(order);
@@ -248,25 +250,41 @@ public class OrderServiceImpl implements OrderService {
         return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED, "Order deleted successfully ");
 
     }
-   //cancelling orders(Customers,admins)
-   @Override
+
+    // Cancelling orders (Customers, admins)
+    @Override
     public ResponseEntity<ResponseDto> cancelOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with ID: " + orderId));
 
-        if(order.getStatus().equals(OrderStatus.PENDING) || order.getStatus().equals(OrderStatus.PROCESSING)){
+        // Check if the order is in a cancellable state
+        if (isCancellable(order.getStatus())) {
             order.setStatus(OrderStatus.CANCELLED);
             orderRepository.save(order);
-            return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED, "Order Cancelled Successfully",order);
-
-        }else{
-            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_ACCEPTABLE, "Orders currently being shipped or already delivered can not be cancelled");
-
+            return responseDtoSetter.responseDtoSetter(
+                    HttpStatus.ACCEPTED,
+                    "Order cancelled successfully.",
+                    order
+            );
         }
+
+        // Handle invalid cancellation attempt
+        return responseDtoSetter.responseDtoSetter(
+                HttpStatus.NOT_ACCEPTABLE,
+                "Orders currently being shipped or already delivered cannot be cancelled."
+        );
+    }
+
+    // Method to determine if an order can be cancelled.
+    private boolean isCancellable(OrderStatus status) {
+        return EnumSet.of(
+                OrderStatus.PENDING_PAYMENT,
+                OrderStatus.PAYMENT_CONFIRMED,
+                OrderStatus.PROCESSING
+        ).contains(status);
     }
 
     // Mapping OrderDto to Order
-
     private Order mapToOrder(OrderDto orderDto, Customer customer, List<Product> products) {
         Order order = new Order();
         order.setId(orderDto.getOrderId());
@@ -294,8 +312,8 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderProducts(orderProducts);  // Set the list of OrderProducts
         return order;
     }
-    // Mapping Order to OrderDto
 
+    // Mapping Order to OrderDto
     private OrderDto mapToOrderDto(Order order) {
         OrderDto orderDto = new OrderDto();
         orderDto.setOrderId(order.getId());

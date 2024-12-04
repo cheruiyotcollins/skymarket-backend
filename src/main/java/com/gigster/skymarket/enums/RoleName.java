@@ -1,7 +1,5 @@
 package com.gigster.skymarket.enums;
 
-import java.net.ProtocolFamily;
-
 public enum RoleName {
     ADMIN,
     CUSTOMER;
