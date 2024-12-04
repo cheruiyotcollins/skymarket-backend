@@ -8,8 +8,7 @@ import org.springframework.http.ResponseEntity;
 
 public interface CartService {
 
-    // Add an item to the cart with a specified quantity
-    ResponseEntity<ResponseDto> addCart(CartDto cartDto);
+    ResponseEntity<ResponseDto> addCart(Long customerId);
 
     ResponseEntity<ResponseDto> getAllCarts(Pageable pageable);
 
