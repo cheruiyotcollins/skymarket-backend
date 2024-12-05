@@ -35,7 +35,7 @@ public class AdminConfig implements CommandLineRunner {
             user.setFullName("Admin");
             user.setEmail("admin@gmail.com");
             user.setUsername("admin");
-            user.setContact("0700000000");
+            user.setContact("+254700000000");
             user.setPassword(passwordEncoder.encode("password"));
             user.setGender("Undefined");
             user.setFirstLogin(true); // Add this flag to User entity

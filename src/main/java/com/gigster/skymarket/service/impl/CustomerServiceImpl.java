@@ -21,10 +21,13 @@ import java.util.stream.Collectors;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
+
     @Autowired
     CustomerRepository customerRepository;
+
     @Autowired
     ResponseDtoMapper responseDtoSetter;
+
     @Override
     public ResponseEntity<ResponseDto> saveCustomer(CustomerDto newCustomer){
         try {
@@ -41,6 +44,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
     }
+
     @Override
     public ResponseEntity<ResponseDto> findAllCustomers(Pageable pageable) {
         Page<Customer> customerPage = customerRepository.findAll(pageable);
@@ -82,6 +86,7 @@ public class CustomerServiceImpl implements CustomerService {
 
         }
     }
+
     @Override
     public ResponseEntity<ResponseDto> deleteCustomerById(long id){
         try{
@@ -92,6 +97,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
     }
+
     @Override
     public ResponseEntity<ResponseDto> updateCustomer(long id, @Valid CustomerDto updatedCustomer) {
         try {
@@ -100,7 +106,7 @@ public class CustomerServiceImpl implements CustomerService {
                 Customer existingCustomer = customerOpt.get();
 
                 Customer updatedCustomerEntity = Customer.builder()
-                        .id(existingCustomer.getId()) // Retain the existing ID
+                        .customerId(existingCustomer.getCustomerId()) // Retain the existing ID
                         .email(updatedCustomer.getEmail())
                         .gender(updatedCustomer.getGender())
                         .fullName(updatedCustomer.getFullName())

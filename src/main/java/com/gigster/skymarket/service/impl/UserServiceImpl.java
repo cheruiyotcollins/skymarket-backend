@@ -113,7 +113,7 @@ public class UserServiceImpl implements UserService {
         // Save user to the repository
         userRepository.save(user);
 
-        log.info("Registered user: " + user);
+        log.info("Registered user: {}", user);
 
         return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED, "User registered successfully");
     }
