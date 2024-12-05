@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CustomerResponseDto {
+    private Long customerId;
     private String fullName;
     private String email;
     private String phoneNo;
     private String gender;
 }
-

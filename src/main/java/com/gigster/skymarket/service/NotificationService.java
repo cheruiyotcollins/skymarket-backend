@@ -6,6 +6,6 @@ public interface NotificationService {
     void sendMail(String to, String subject, String body);
 
 //    TODO: To be implemented in future(current option is Twilio).
-//    // Method to send SMS
+//    Method to send SMS
 //    void sendSms(String to, String message);
 }

@@ -28,7 +28,6 @@ public class CurrentUserV2 {
         user.setEmail(userPrincipal.getEmail());
         user.setPassword(userPrincipal.getPassword());
 
-        // Get the first authority and map it to the user's role
         GrantedAuthority authority = userPrincipal.getAuthorities().stream().findFirst().orElse(null);
         if (authority != null) {
             Role role = new Role();
@@ -40,11 +39,17 @@ public class CurrentUserV2 {
     }
 
     public static Customer mapToCustomer(UserPrincipal userPrincipal) {
+        if (userPrincipal == null) {
+            throw new IllegalStateException("UserPrincipal cannot be null");
+        }
+
+        // Create a new Customer and populate it using the UserPrincipal
         Customer customer = new Customer();
-        customer.setId(userPrincipal.getId());
+        customer.setCustomerId(userPrincipal.getId());
         customer.setFullName(userPrincipal.getName());
         customer.setEmail(userPrincipal.getEmail());
         customer.setPhoneNo(userPrincipal.getPhoneNo());
+
         return customer;
     }
 }

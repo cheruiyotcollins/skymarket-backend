@@ -1,6 +1,5 @@
 package com.gigster.skymarket.service.impl;
 
-
 import com.gigster.skymarket.dto.*;
 import com.gigster.skymarket.mapper.CartMapper;
 import com.gigster.skymarket.model.Cart;
@@ -47,12 +46,47 @@ public class CartServiceImpl implements CartService {
     CartItemsToCartItemsDtoMapper cartItemsToCartItemsDtoMapper;
 
     @Override
-    public ResponseEntity<ResponseDto> addCart(CartDto cartDto) {
-        Cart cart = new Cart();
-        cart.setCustomer(cartDto.getCustomer());
-        cartRepository.save(cart);
-        return responseDtoSetter.responseDtoSetter(HttpStatus.CREATED, "Cart Added Successfully", cart);
+    public ResponseEntity<ResponseDto> addCart(Long customerId) {
+        log.info("Creating cart for customer ID: {}", customerId);
 
+        try {
+            Customer customer = customerRepository.findById(customerId)
+                    .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
+
+            // Check if the customer already has a cart
+            if (cartRepository.findByCustomerId(customerId).isPresent()) {
+                log.warn("Customer ID {} already has a cart.", customerId);
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                        ResponseDto.builder()
+                                .status(HttpStatus.CONFLICT)
+                                .description("Customer already has a cart.")
+                                .build()
+                );
+            }
+
+            Cart cart = new Cart();
+            cart.setCustomer(customer);
+            cart.setTotalPrice(0.0);
+            cartRepository.save(cart);
+
+            log.info("Cart created successfully for customer ID: {}", customer.getCustomerId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(
+                    ResponseDto.builder()
+                            .status(HttpStatus.CREATED)
+                            .description("Cart added successfully.")
+                            .payload(cart)
+                            .build()
+            );
+
+        } catch (RuntimeException e) {
+            log.error("Failed to create cart for customer ID {}: {}", customerId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    ResponseDto.builder()
+                            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .description("Failed to create cart: " + e.getMessage())
+                            .build()
+            );
+        }
     }
 
     @Override
@@ -129,7 +163,6 @@ public class CartServiceImpl implements CartService {
         }
     }
 
-
     @Override
     @Transactional
     public ResponseEntity<ResponseDto> clearCart(Long customerId) {
@@ -189,7 +222,7 @@ public class CartServiceImpl implements CartService {
         Customer customer = customerRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Customer not found!"));
 
         // Fetch the cart associated with the customer
-        Cart cart = cartRepository.findByCustomerId(customer.getId()).orElseThrow(() -> new RuntimeException("Cart not found!"));
+        Cart cart = cartRepository.findByCustomerId(customer.getCustomerId()).orElseThrow(() -> new RuntimeException("Cart not found!"));
 
         // Map the cart items to a hashmap with total price and item list
         HashMap<Double, List<CartItemDtoResponse>> cartItemsHashMap = cartItemsToCartItemsDtoMapper.mapCartItemsToCartItemsDto(cart.getCartItems());

@@ -28,8 +28,6 @@ public class DateUtils {
         return  LocalDateTime.now();
     }
 
-
-
     public static int day(){
         return Integer.valueOf(dayTodayInArray()[0]);
     }
