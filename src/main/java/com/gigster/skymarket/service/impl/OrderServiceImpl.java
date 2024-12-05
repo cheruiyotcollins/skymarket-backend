@@ -104,7 +104,7 @@ public class OrderServiceImpl implements OrderService {
             notificationService.sendOrderConfirmationEmail(customer, order);
 
             // Clean up the cart after successful order
-            cartRepository.findByCustomerId(customer.getId())
+            cartRepository.findByCustomerId(customer.getCustomerId())
                     .ifPresent(cartRepository::delete);
 
             ResponseDto response = ResponseDto.builder()
@@ -321,7 +321,7 @@ public class OrderServiceImpl implements OrderService {
         orderDto.setTotalAmount(order.getTotalAmount());
         orderDto.setStatus(order.getStatus());
         orderDto.setOrderDate(order.getOrderDate());
-        orderDto.setCustomerId(order.getCustomer().getId());
+        orderDto.setCustomerId(order.getCustomer().getCustomerId());
 
         // Map OrderProducts to OrderProductDto
         List<OrderProductDto> orderProductDtos = order.getOrderProducts()
