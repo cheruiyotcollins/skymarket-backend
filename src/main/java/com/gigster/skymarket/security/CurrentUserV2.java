@@ -45,7 +45,7 @@ public class CurrentUserV2 {
 
         // Create a new Customer and populate it using the UserPrincipal
         Customer customer = new Customer();
-        customer.setId(userPrincipal.getId());
+        customer.setCustomerId(userPrincipal.getId());
         customer.setFullName(userPrincipal.getName());
         customer.setEmail(userPrincipal.getEmail());
         customer.setPhoneNo(userPrincipal.getPhoneNo());
