@@ -5,7 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
 
-public interface CategoryService{
+public interface CategoryService {
     ResponseEntity<ResponseDto> addCategory(String categoryName);
 
     ResponseEntity<ResponseDto> getAllCategories(Pageable pageable);
@@ -15,7 +15,5 @@ public interface CategoryService{
     ResponseEntity<ResponseDto> updateCategory(Long categoryId, String newCategoryName);
 
     ResponseEntity<ResponseDto> deleteCategory(Long categoryId);
-
-
 
 }
