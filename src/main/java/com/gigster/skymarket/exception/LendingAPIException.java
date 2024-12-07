@@ -1,9 +1,11 @@
 package com.gigster.skymarket.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 public class LendingAPIException extends RuntimeException {
 
+    @Getter
     private HttpStatus status;
     private String message;
 
@@ -16,10 +18,6 @@ public class LendingAPIException extends RuntimeException {
         super(message);
         this.status = status;
         this.message = message1;
-    }
-
-    public HttpStatus getStatus() {
-        return status;
     }
 
     @Override
