@@ -5,9 +5,11 @@ import com.gigster.skymarket.mapper.CartMapper;
 import com.gigster.skymarket.model.Cart;
 import com.gigster.skymarket.model.CartItem;
 import com.gigster.skymarket.model.Customer;
+import com.gigster.skymarket.model.User;
 import com.gigster.skymarket.repository.CartItemRepository;
 import com.gigster.skymarket.repository.CartRepository;
 import com.gigster.skymarket.repository.CustomerRepository;
+import com.gigster.skymarket.repository.UserRepository;
 import com.gigster.skymarket.service.CartService;
 import com.gigster.skymarket.mapper.CartItemsToCartItemsDtoMapper;
 import com.gigster.skymarket.mapper.ResponseDtoMapper;
@@ -29,6 +31,9 @@ import java.util.Map;
 public class CartServiceImpl implements CartService {
     @Autowired
     CartRepository cartRepository;
+
+    @Autowired
+    UserRepository userRepository;
 
     @Autowired
     CartItemRepository cartItemRepository;
@@ -53,8 +58,19 @@ public class CartServiceImpl implements CartService {
             Customer customer = customerRepository.findById(customerId)
                     .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
 
+            // If customer exists, check if the user table is also updated correctly
+            if (userRepository.existsByCustomerId(customerId)) {
+                log.warn("Customer ID {} already has a user record.", customerId);
+            } else {
+                log.info("Customer ID {} does not have a corresponding user record.", customerId);
+                // Add the user record as needed
+                User user = new User();
+                user.setCustomerId(customer.getCustomerId());
+                userRepository.save(user);
+            }
+
             // Check if the customer already has a cart
-            if (cartRepository.findByCustomerId(customerId).isPresent()) {
+            if (cartRepository.existsByCustomerId(customerId)) {
                 log.warn("Customer ID {} already has a cart.", customerId);
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(
                         ResponseDto.builder()
@@ -64,6 +80,7 @@ public class CartServiceImpl implements CartService {
                 );
             }
 
+            // Proceed to create the cart
             Cart cart = new Cart();
             cart.setCustomer(customer);
             cart.setTotalPrice(0.0);
@@ -241,4 +258,3 @@ public class CartServiceImpl implements CartService {
     }
 
 }
-

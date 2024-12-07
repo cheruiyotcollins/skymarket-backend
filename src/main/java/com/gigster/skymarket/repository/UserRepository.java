@@ -23,4 +23,7 @@ public interface UserRepository extends JpaRepository<User,Long> {
     @Query("SELECT COUNT(u) FROM User u JOIN u.role r WHERE r.name = :roleName")
     int countByRoleName(@Param("roleName") RoleName roleName);
 
+    @Query("SELECT COUNT(c) > 0 FROM Cart c WHERE c.customer.customerId = :customerId")
+    boolean existsByCustomerId(@Param("customerId") Long customerId);
+
 }
