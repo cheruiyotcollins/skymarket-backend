@@ -30,10 +30,7 @@ import com.gigster.skymarket.enums.RoleName;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -96,7 +93,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("Role not found!"));
 
         // Assign the role to the user
-        user.setRole(role);
+        user.setRoles(Set.of(role));
 
         // Additional logic if the role is CUSTOMER
         if ("CUSTOMER".equalsIgnoreCase(roleName)) {
@@ -205,28 +202,25 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<?> getCurrentUser(String email) {
 
         try {
-            // Fetch user by email, handle if user not found
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new RuntimeException("User with email " + email + "not found"));
 
-            // Build the CurrentUserDto object
             CurrentUserDto currentUserDto = CurrentUserDto.builder()
                     .name(user.getUsername())
                     .email(user.getEmail())
-                    .role(user.getRole().getId())
+                    .role(user.getRoles()
+                            .stream()
+                            .map(role -> role.getName().getRoleName())
+                            .collect(Collectors.joining(", "))) // Join the roles into a single String
                     .build();
 
-            // Set success response details
            return responseDtoSetter.responseDtoSetter(HttpStatus.FOUND,"Current User logged in", currentUserDto);
 
 
         } catch (ResourceNotFoundException ex) {
-            // Handle user not found case
             return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND,ex.getMessage());
 
-
         } catch (Exception ex) {
-            // Handle any other unexpected exceptions
             return responseDtoSetter.responseDtoSetter(HttpStatus.INTERNAL_SERVER_ERROR,"An error occurred while fetching the user details");
         }
     }
