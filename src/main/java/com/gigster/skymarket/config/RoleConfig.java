@@ -21,15 +21,15 @@ public class RoleConfig implements CommandLineRunner {
     public void run(String... args) {
         log.info("Checking if roles exist, and adding them if they don't");
 
-        if(roleRepository.findByName(RoleName.ADMIN).isEmpty()) {
+        if(roleRepository.findByName(RoleName.ROLE_ADMIN).isEmpty()) {
             Role role = new Role();
-            role.setName(RoleName.ADMIN);
+            role.setName(RoleName.ROLE_ADMIN);
             roleRepository.save(role);
         }
 
-        if(roleRepository.findByName(RoleName.CUSTOMER).isEmpty()) {
+        if(roleRepository.findByName(RoleName.ROLE_CUSTOMER).isEmpty()) {
             Role role = new Role();
-            role.setName(RoleName.CUSTOMER);
+            role.setName(RoleName.ROLE_CUSTOMER);
             roleRepository.save(role);
         }
     }
