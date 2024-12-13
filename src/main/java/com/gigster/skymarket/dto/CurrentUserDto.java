@@ -11,5 +11,5 @@ public class CurrentUserDto {
     private String name;
     private String email;
     private String username;
-    private long role;
+    private String role;
 }
