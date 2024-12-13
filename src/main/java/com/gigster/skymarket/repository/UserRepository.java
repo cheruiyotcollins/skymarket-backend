@@ -9,9 +9,11 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User,Long> {
+public interface UserRepository extends JpaRepository<User, Long> {
+
     Optional<User> findByEmail(String email);
-    @EntityGraph(attributePaths = "role")
+
+    @EntityGraph(attributePaths = "roles")
     Optional<User> findByUsernameOrEmail(String username, String email);
 
     Optional<User> findByUsername(String username);
@@ -20,7 +22,7 @@ public interface UserRepository extends JpaRepository<User,Long> {
 
     Boolean existsByEmail(String email);
 
-    @Query("SELECT COUNT(u) FROM User u JOIN u.role r WHERE r.name = :roleName")
+    @Query("SELECT COUNT(u) FROM User u JOIN u.roles r WHERE r.name = :roleName")
     int countByRoleName(@Param("roleName") RoleName roleName);
 
     @Query("SELECT COUNT(c) > 0 FROM Cart c WHERE c.customer.customerId = :customerId")
