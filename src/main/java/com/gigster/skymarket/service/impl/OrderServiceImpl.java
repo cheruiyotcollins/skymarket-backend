@@ -50,9 +50,6 @@ public class OrderServiceImpl implements OrderService {
     private NotificationServiceImpl notificationService;
 
     @Autowired
-    UserRepository userRepository;
-
-    @Autowired
     ResponseDtoMapper responseDtoSetter;
 
     // 1. Create a new Order.
@@ -60,7 +57,6 @@ public class OrderServiceImpl implements OrderService {
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     @Retryable(
             value = DeadlockLoserDataAccessException.class,
-            maxAttempts = 3,
             backoff = @Backoff(delay = 100)
     )
     public ResponseEntity<ResponseDto> createOrder(OrderDto orderDto) {
