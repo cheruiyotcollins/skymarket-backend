@@ -28,18 +28,16 @@ public class DateUtils {
         return  LocalDateTime.now();
     }
 
-
-
     public static int day(){
-        return Integer.valueOf(dayTodayInArray()[0]);
+        return Integer.parseInt(dayTodayInArray()[0]);
     }
 
     public static int month(){
-        return Integer.valueOf(dayTodayInArray()[1]);
+        return Integer.parseInt(dayTodayInArray()[1]);
     }
 
     public static int year(){
-        return Integer.valueOf(dayTodayInArray()[2]);
+        return Integer.parseInt(dayTodayInArray()[2]);
     }
 
     public static boolean dayBeforeToday(String dateGiven){

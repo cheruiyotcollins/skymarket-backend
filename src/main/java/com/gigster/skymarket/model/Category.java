@@ -6,16 +6,31 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name="categories")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
+@Table(name = "categories")
 public class Category {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, unique = true)
     private CategoryName categoryName;
+
+    @Column(length = 1000)
     private String description;
+
+    @Column(nullable = false, updatable = false)
+    private String createdDate = DateUtils.dateNowString();
+
+    @Column(nullable = false)
     private String updatedDate = DateUtils.dateNowString();
-//    private Long parentid;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Category parent;
 }

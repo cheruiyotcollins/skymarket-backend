@@ -10,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -36,12 +37,14 @@ public class UserPrincipal implements UserDetails {
                 user.getEmail(),
                 user.getContact(),
                 user.getPassword(),
-                mapRolesToAuthorities(user)
+                mapRolesToAuthorities(user)  // Map all roles to authorities
         );
     }
 
     private static List<GrantedAuthority> mapRolesToAuthorities(User user) {
-        return List.of(new SimpleGrantedAuthority(user.getRole().getName().name()));
+        return user.getRoles().stream()  // Assuming `user.getRoles()` returns a collection of roles
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))  // Add ROLE_ prefix
+                .collect(Collectors.toList());
     }
 
     @Override

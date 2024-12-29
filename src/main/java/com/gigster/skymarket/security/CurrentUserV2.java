@@ -4,9 +4,10 @@ import com.gigster.skymarket.enums.RoleName;
 import com.gigster.skymarket.model.Role;
 import com.gigster.skymarket.model.User;
 import com.gigster.skymarket.model.Customer;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
 
 @Service
 public class CurrentUserV2 {
@@ -28,23 +29,33 @@ public class CurrentUserV2 {
         user.setEmail(userPrincipal.getEmail());
         user.setPassword(userPrincipal.getPassword());
 
-        // Get the first authority and map it to the user's role
-        GrantedAuthority authority = userPrincipal.getAuthorities().stream().findFirst().orElse(null);
-        if (authority != null) {
-            Role role = new Role();
-            role.setName(RoleName.valueOf(authority.getAuthority()));
-            user.setRole(role);
+        // Initialize the roles set if it's null
+        if (user.getRoles() == null) {
+            user.setRoles(new HashSet<>());
         }
+
+        // Iterate over the authorities and add each role to the roles set
+        userPrincipal.getAuthorities().forEach(authority -> {
+            Role role = new Role();
+            role.setName(RoleName.valueOf(authority.getAuthority())); // Convert authority to RoleName
+            user.getRoles().add(role);  // Add the role to the user's roles set
+        });
 
         return user;
     }
 
     public static Customer mapToCustomer(UserPrincipal userPrincipal) {
+        if (userPrincipal == null) {
+            throw new IllegalStateException("UserPrincipal cannot be null");
+        }
+
+        // Create a new Customer and populate it using the UserPrincipal
         Customer customer = new Customer();
-        customer.setId(userPrincipal.getId());
+        customer.setCustomerId(userPrincipal.getId());
         customer.setFullName(userPrincipal.getName());
         customer.setEmail(userPrincipal.getEmail());
         customer.setPhoneNo(userPrincipal.getPhoneNo());
+
         return customer;
     }
 }
