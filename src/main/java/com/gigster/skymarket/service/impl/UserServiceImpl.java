@@ -87,8 +87,8 @@ public class UserServiceImpl implements UserService {
                 .firstLogin(false)
                 .build();
 
-        // Determine role based on SignUpRequest's roleName or assign CUSTOMER by default
-        String roleName = signUpRequest.getRoleName() != null ? signUpRequest.getRoleName() : "CUSTOMER";
+        // Determine role based on SignUpRequest's roleName or assign ROLE_CUSTOMER by default
+        String roleName = signUpRequest.getRoleName() != null ? signUpRequest.getRoleName() : "ROLE_CUSTOMER";
         Role role = roleRepository.findByName(RoleName.valueOf(roleName.toUpperCase()))
                 .orElseThrow(() -> new RuntimeException("Role not found!"));
 
@@ -96,8 +96,9 @@ public class UserServiceImpl implements UserService {
         user.setRoles(Set.of(role));
 
         // Additional logic if the role is CUSTOMER
-        if ("CUSTOMER".equalsIgnoreCase(roleName)) {
+        if ("ROLE_CUSTOMER".equalsIgnoreCase(roleName)) {
             Customer customer = new Customer();
+            customer.setCustomerId(user.getCustomerId());
             customer.setFullName(user.getFullName());
             customer.setEmail(user.getEmail());
             customer.setPhoneNo(user.getContact());
