@@ -21,6 +21,9 @@ public class Product implements Serializable {
     @Column(nullable = false, unique = true)
     private String productName;
 
+    @Column(nullable = false, unique = true)
+    private Long productId;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "category_id")
     private Category category;

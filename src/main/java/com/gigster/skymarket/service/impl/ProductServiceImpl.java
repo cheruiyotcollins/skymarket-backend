@@ -65,29 +65,21 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ResponseEntity<ResponseDto> getAllProducts(Pageable pageable) {
-        Page<Product> productPage = productRepository.findAll(pageable);
-
-        List<ProductDto> productDtos = productPage.getContent()
+    public ResponseEntity<ResponseDto> getAllProducts(Long productId, Pageable pageable) {
+        Page<Product> productsPage = productRepository.findByProductId(productId, pageable);
+        List<ProductDto> ProductDtos = productsPage.getContent()
                 .stream()
-                .map(product -> {
-                    ProductDto dto = productMapper.toDto(product);
-                    dto.setImageUrl(generateImageUrl(product.getImageUrl()));
-                    return dto;
-                })
+                .map(this::mapToDto)
                 .collect(Collectors.toList());
 
-        ResponseDto responseDto = responseDtoSetter.responseDtoSetter(
-                HttpStatus.OK,
-                "Fetched List of All Products.",
-                productDtos
-        ).getBody();
-
-        assert responseDto != null;
-        responseDto.setTotalPages(productPage.getTotalPages());
-        responseDto.setTotalElements(productPage.getTotalElements());
-        responseDto.setCurrentPage(pageable.getPageNumber());
-        responseDto.setPageSize(pageable.getPageSize());
+        ResponseDto responseDto = ResponseDto.builder()
+                .status(HttpStatus.OK)
+                .payload(ProductDtos)
+                .totalPages(productsPage.getTotalPages())
+                .totalElements(productsPage.getTotalElements())
+                .currentPage(productsPage.getNumber())
+                .pageSize(productsPage.getSize())
+                .build();
 
         return ResponseEntity.ok(responseDto);
     }
@@ -148,4 +140,17 @@ public class ProductServiceImpl implements ProductService {
         category.ifPresent(product::setCategory);
         return product;
     }
+
+    // Method to map Product to ProductDto.
+    private ProductDto mapToDto(Product product) {
+        return ProductDto.builder()
+                .name(product.getProductName())
+                .productId(product.getProductId())
+                .categoryId(product.getCategory().getId())
+                .description(product.getDescription())
+                .price(product.getPrice())
+                .imageUrl(product.getImageUrl())
+                .build();
+    }
+
 }

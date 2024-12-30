@@ -19,11 +19,10 @@ public class ProductMapper {
         }
 
         return ProductDto.builder()
-                .id(product.getId())
                 .name(product.getProductName())
                 .description(product.getDescription())
                 .price(product.getPrice())
-                .category(product.getCategory() != null ? product.getCategory().getCategoryName().name() : null)
+                .categoryId(product.getCategory() != null ? Long.valueOf(product.getCategory().getCategoryName().name()) : null)
                 .imageUrl(product.getImageUrl())
                 .build();
     }
@@ -35,15 +34,14 @@ public class ProductMapper {
         }
 
         Product product = new Product();
-        product.setId(productDto.getId());
         product.setProductName(productDto.getName());
         product.setDescription(productDto.getDescription());
         product.setPrice(productDto.getPrice());
 
         // Create a Category object using CategoryName from the DTO
-        if (productDto.getCategory() != null) {
+        if (productDto.getCategoryId() != null) {
             Category category = new Category();
-            category.setCategoryName(CategoryName.fromString(productDto.getCategory()));
+            category.setCategoryName(CategoryName.fromString(String.valueOf(productDto.getCategoryId())));
             product.setCategory(category);
         } else {
             product.setCategory(null);
@@ -52,7 +50,6 @@ public class ProductMapper {
         product.setImageUrl(productDto.getImageUrl());
         return product;
     }
-
 
     // Map a list of Product entities to a list of ProductDto objects
     public List<ProductDto> toDtoList(List<Product> products) {
