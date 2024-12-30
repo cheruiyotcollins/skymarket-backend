@@ -232,6 +232,7 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setFirstLogin(false);
         userRepository.save(user);
+        //todo ensure that when password is changed for admin on first login, set first login to false
         return responseDtoSetter.responseDtoSetter(HttpStatus.OK,"Password updated successfully");
     }
 

@@ -1,7 +1,7 @@
 # Getting Started
 
 
-## About SkyMarket Backend System 
+## About SkyMarket Backend System
 This system uses JWT authentication and Password encryption using BCrypt Role-based authorization with Spring Security Customized access denied handling Technologies
 
 Spring Boot 3.0 Spring Security JSON Web Tokens (JWT) BCrypt Maven Getting Started
@@ -10,7 +10,7 @@ In this project MySql db have been used, make sure that this is installed in you
 when Mysql server is up, create database schema called `skymarket` as this is the one that the application will use and will auto generate all the required tables
 The app has two authentication users for easier testing
 1. Normal user (username/password=```customer/customer```)
-2. Admin user(username/password=```admin/admin```) 
+2. Admin user(username/password=```admin/admin```)
 3. After F setting up the project as per the  guidelines below and your application has started, create user admin and member, check swagger documentation for user signup api  (member and admin Roles wil be automatically inserted when application starts).
  After signing in using the created user, you will be granted a bearer token which should be used for authentication, add to header of every request.
 
