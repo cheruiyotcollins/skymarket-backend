@@ -4,6 +4,8 @@ import com.gigster.skymarket.dto.NewProductDto;
 import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Pageable;
@@ -24,14 +26,20 @@ public class ProductController {
         return productService.createProduct(newProductDto);
     }
 
-    @GetMapping
-    public ResponseEntity<ResponseDto> getAllProducts(Pageable pageable) {
-        return productService.getAllProducts(pageable);
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<ResponseDto> getProductById(@PathVariable Long id) {
         return productService.getProductById(id);
+    }
+
+    @GetMapping
+    public ResponseEntity<ResponseDto> getAllProducts(
+            @PathVariable("productId") Long productId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
+        return productService.getAllProducts(productId, pageable);
     }
 
     @PutMapping("/{id}")
