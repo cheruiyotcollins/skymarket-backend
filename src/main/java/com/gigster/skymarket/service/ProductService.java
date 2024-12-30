@@ -10,9 +10,9 @@ public interface ProductService {
 
     ResponseEntity<ResponseDto> createProduct(NewProductDto newProductDto);
 
-    ResponseEntity<ResponseDto> getAllProducts(Pageable pageable);
-
     ResponseEntity<ResponseDto> getProductById(Long id);
+
+    ResponseEntity<ResponseDto> getAllProducts(Long productId, Pageable pageable);
 
     ResponseEntity<ResponseDto> updateProduct(Long id, NewProductDto newProductDto);
 
