@@ -52,9 +52,10 @@ public class UserController {
 
         if (loginResponse.isFirstLogin()) {
             // Return a 403 response indicating that a password change is required
-            //todo add a more comprensive response for frontend consumption
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body("First login detected. Please change your password.");
+            //todo test first login response
+            loginResponse.setSuccess(0);
+           loginResponse.setMessage("First login detected. Please change your password.");
+            return new ResponseEntity<>(loginResponse, HttpStatus.FORBIDDEN);
         }
 
         // If not the first login, return the JWT token in the response
