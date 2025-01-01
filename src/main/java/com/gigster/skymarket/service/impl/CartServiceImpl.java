@@ -52,26 +52,21 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public ResponseEntity<ResponseDto> addCart(Long customerId) {
-        log.info("Creating cart for customer ID: {}", customerId);
-
         try {
+            // Check if the customer exists in the database using the provided customerId
             Customer customer = customerRepository.findById(customerId)
                     .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
 
-            // If customer exists, check if the user table is also updated correctly
-            if (userRepository.existsByCustomerId(customerId)) {
-                log.warn("Customer ID {} already has a user record.", customerId);
-            } else {
-                log.info("Customer ID {} does not have a corresponding user record.", customerId);
-                // Add the user record as needed
+            // Check if the user record exists for the customer
+            if (!userRepository.existsByCustomerId(customerId)) {
+                // If the user doesn't exist, create a new user record associated with the customerId
                 User user = new User();
-                user.setCustomerId(customer.getCustomerId());
+                user.setCustomerId(customerId);  // Associate user with the customerId
                 userRepository.save(user);
             }
 
             // Check if the customer already has a cart
             if (cartRepository.existsByCustomerId(customerId)) {
-                log.warn("Customer ID {} already has a cart.", customerId);
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(
                         ResponseDto.builder()
                                 .status(HttpStatus.CONFLICT)
@@ -82,11 +77,10 @@ public class CartServiceImpl implements CartService {
 
             // Proceed to create the cart
             Cart cart = new Cart();
-            cart.setCustomer(customer);
-            cart.setTotalPrice(0.0);
+            cart.setCustomer(customer);  // Associate the cart with the customer
+            cart.setTotalPrice(0.0);      // Initialize the cart with a total price of 0.0
             cartRepository.save(cart);
 
-            log.info("Cart created successfully for customer ID: {}", customer.getCustomerId());
             return ResponseEntity.status(HttpStatus.CREATED).body(
                     ResponseDto.builder()
                             .status(HttpStatus.CREATED)
@@ -96,7 +90,6 @@ public class CartServiceImpl implements CartService {
             );
 
         } catch (RuntimeException e) {
-            log.error("Failed to create cart for customer ID {}: {}", customerId, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                     ResponseDto.builder()
                             .status(HttpStatus.INTERNAL_SERVER_ERROR)
