@@ -18,6 +18,7 @@ public class OrderDto {
     private OrderStatus status;
     private LocalDateTime orderDate;
     private Long customerId;
+    private Long cartId;
     @Setter
     private List<OrderProductDto> orderProducts;
     @Temporal(TemporalType.TIMESTAMP)
