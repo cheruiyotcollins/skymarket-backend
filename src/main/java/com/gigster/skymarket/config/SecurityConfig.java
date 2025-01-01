@@ -59,8 +59,8 @@ public class SecurityConfig {
                                 // Publicly accessible endpoints.
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("/v3/**").permitAll()
-                                .requestMatchers("/api/users/auth/signup").permitAll()
-                                .requestMatchers("/api/users/auth/signin").permitAll()
+                                .requestMatchers("/api/v1/users/auth/signup").permitAll()
+                                .requestMatchers("/api/v1/users/auth/signin").permitAll()
                                 .requestMatchers("/api/products/{id}").permitAll()
                                 .requestMatchers("/api/products").permitAll()
 
