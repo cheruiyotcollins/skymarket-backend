@@ -12,7 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "/api/carts")
+@RequestMapping(value = "/api/v1/carts")
 @Slf4j
 public class CartController {
 
