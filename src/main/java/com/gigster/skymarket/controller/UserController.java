@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 @RestController
-@RequestMapping(value = "/api/users/auth")
+@RequestMapping(value = "/api/v1/users/auth")
 @Slf4j
 public class UserController {
     @Autowired
