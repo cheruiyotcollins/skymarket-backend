@@ -27,6 +27,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.gigster.skymarket.enums.RoleName;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
@@ -67,6 +68,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<ResponseDto> register(SignUpRequest signUpRequest) {
         // Check if email or username already exists
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
@@ -76,7 +78,49 @@ public class UserServiceImpl implements UserService {
             return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_ACCEPTABLE, "Username is already taken!");
         }
 
-        // Create the User with basic details
+        // Determine if the user is an admin
+        boolean isAdmin = signUpRequest.getRoleName() != null && signUpRequest.getRoleName().equalsIgnoreCase("ROLE_ADMIN");
+
+        if (isAdmin) {
+            // Create the User without a Customer entity for admin users
+            User adminUser = User.builder()
+                    .email(signUpRequest.getEmail())
+                    .password(passwordEncoder.encode(signUpRequest.getPassword()))
+                    .fullName(signUpRequest.getFullName())
+                    .username(signUpRequest.getUsername())
+                    .contact(signUpRequest.getContact())
+                    .gender(signUpRequest.getGender())
+                    .firstLogin(true)
+                    .build();
+
+            // Assign the admin role
+            Role adminRole = roleRepository.findByName(RoleName.valueOf("ROLE_ADMIN"))
+                    .orElseThrow(() -> new RuntimeException("Admin role not found!"));
+            adminUser.setRoles(Set.of(adminRole));
+
+            // Save the Admin User
+            userRepository.save(adminUser);
+
+            log.info("Registered admin: {}", adminUser);
+            return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED, "Admin registered successfully");
+        }
+
+        // For normal users (customers), create the Customer entity first
+        Customer customer = new Customer();
+        customer.setFullName(signUpRequest.getFullName());
+        customer.setEmail(signUpRequest.getEmail());
+        customer.setPhoneNo(signUpRequest.getContact());
+        customer.setGender(signUpRequest.getGender());
+
+        // Persist the Customer entity
+        customer = customerRepository.save(customer);
+
+        // Ensure Customer is saved successfully
+        if (customer.getCustomerId() == null) {
+            return responseDtoSetter.responseDtoSetter(HttpStatus.INTERNAL_SERVER_ERROR, "Customer could not be created.");
+        }
+
+        // Now create the User entity and associate it with the Customer
         User user = User.builder()
                 .email(signUpRequest.getEmail())
                 .password(passwordEncoder.encode(signUpRequest.getPassword()))
@@ -84,34 +128,22 @@ public class UserServiceImpl implements UserService {
                 .username(signUpRequest.getUsername())
                 .contact(signUpRequest.getContact())
                 .gender(signUpRequest.getGender())
+                .customer(customer) // Link the Customer to the User
                 .firstLogin(false)
                 .build();
 
-        // Determine role based on SignUpRequest's roleName or assign ROLE_CUSTOMER by default
+        // Assign ROLE_CUSTOMER by default or another role based on request
         String roleName = signUpRequest.getRoleName() != null ? signUpRequest.getRoleName() : "ROLE_CUSTOMER";
         Role role = roleRepository.findByName(RoleName.valueOf(roleName.toUpperCase()))
                 .orElseThrow(() -> new RuntimeException("Role not found!"));
 
-        // Assign the role to the user
         user.setRoles(Set.of(role));
 
-        // Additional logic if the role is CUSTOMER
-        if ("ROLE_CUSTOMER".equalsIgnoreCase(roleName)) {
-            Customer customer = new Customer();
-            customer.setCustomerId(user.getCustomerId());
-            customer.setFullName(user.getFullName());
-            customer.setEmail(user.getEmail());
-            customer.setPhoneNo(user.getContact());
-            customer.setGender(user.getGender());
-            customer.setOrders(new ArrayList<>());
-
-            customerRepository.save(customer);
-        }
-
-        // Save user to the repository
+        // Save the User entity
         userRepository.save(user);
 
-        log.info("Registered user: {}", user);
+        // Log both User and Customer
+        log.info("Registered user: {}, Associated customer: {}", user, customer);
 
         return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED, "User registered successfully");
     }

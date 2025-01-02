@@ -1,14 +1,14 @@
 package com.gigster.skymarket.service;
 
-import com.gigster.skymarket.dto.CartDto;
 import com.gigster.skymarket.dto.ResponseDto;
+import com.gigster.skymarket.security.UserPrincipal;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
 public interface CartService {
 
-    ResponseEntity<ResponseDto> addCart(Long customerId);
+    ResponseEntity<ResponseDto> addCart(UserPrincipal userPrincipal);
 
     ResponseEntity<ResponseDto> getAllCarts(Pageable pageable);
 

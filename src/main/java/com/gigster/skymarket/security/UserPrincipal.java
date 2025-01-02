@@ -31,7 +31,7 @@ public class UserPrincipal implements UserDetails {
 
     public static UserPrincipal create(User user) {
         return new UserPrincipal(
-                user.getId(),
+                user.getUserId(),
                 user.getFullName(),
                 user.getUsername(),
                 user.getEmail(),
