@@ -1,6 +1,7 @@
 package com.gigster.skymarket.controller;
 
 import com.gigster.skymarket.dto.ResponseDto;
+import com.gigster.skymarket.model.Customer;
 import com.gigster.skymarket.security.CurrentUserV2;
 import com.gigster.skymarket.security.UserPrincipal;
 import com.gigster.skymarket.service.CartService;
@@ -21,14 +22,14 @@ public class CartController {
 
     @PostMapping
     public ResponseEntity<ResponseDto> addCart() {
-        Long customerId = CurrentUserV2.getCurrentUser().getId();
+        ResponseDto response = cartService.addCart(CurrentUserV2.getCurrentUser()).getBody();
 
-        ResponseDto response = cartService.addCart(customerId).getBody();
+        log.info("Cart operation completed for customer ID: {}", CurrentUserV2.getCurrentUser().getId());
 
-        log.info("Cart operation completed for customer ID: {}", customerId);
         assert response != null;
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+
 
     @GetMapping
     public ResponseEntity<ResponseDto> getAllCarts(Pageable pageable) {
