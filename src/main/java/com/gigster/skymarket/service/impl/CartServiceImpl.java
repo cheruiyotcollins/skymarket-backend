@@ -5,11 +5,12 @@ import com.gigster.skymarket.mapper.CartMapper;
 import com.gigster.skymarket.model.Cart;
 import com.gigster.skymarket.model.CartItem;
 import com.gigster.skymarket.model.Customer;
-import com.gigster.skymarket.model.User;
 import com.gigster.skymarket.repository.CartItemRepository;
 import com.gigster.skymarket.repository.CartRepository;
 import com.gigster.skymarket.repository.CustomerRepository;
 import com.gigster.skymarket.repository.UserRepository;
+import com.gigster.skymarket.security.CurrentUserV2;
+import com.gigster.skymarket.security.UserPrincipal;
 import com.gigster.skymarket.service.CartService;
 import com.gigster.skymarket.mapper.CartItemsToCartItemsDtoMapper;
 import com.gigster.skymarket.mapper.ResponseDtoMapper;
@@ -51,22 +52,24 @@ public class CartServiceImpl implements CartService {
     CartItemsToCartItemsDtoMapper cartItemsToCartItemsDtoMapper;
 
     @Override
-    public ResponseEntity<ResponseDto> addCart(Long customerId) {
+    public ResponseEntity<ResponseDto> addCart(UserPrincipal userPrincipal) {
         try {
-            // Check if the customer exists in the database using the provided customerId
-            Customer customer = customerRepository.findById(customerId)
-                    .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
+            // Map the authenticated user to a customer
+            Customer customer = CurrentUserV2.mapToCustomer(userPrincipal);
 
-            // Check if the user record exists for the customer
-            if (!userRepository.existsByCustomerId(customerId)) {
-                // If the user doesn't exist, create a new user record associated with the customerId
-                User user = new User();
-                user.setCustomerId(customerId);  // Associate user with the customerId
-                userRepository.save(user);
+            // Debugging step: Ensure customerId is correctly set
+            if (customer.getCustomerId() == null) {
+                log.error("Customer ID is null for customer: {}", customer);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                        ResponseDto.builder()
+                                .status(HttpStatus.BAD_REQUEST)
+                                .description("Customer ID is null, cannot create cart.")
+                                .build()
+                );
             }
 
             // Check if the customer already has a cart
-            if (cartRepository.existsByCustomerId(customerId)) {
+            if (cartRepository.existsByCustomerId(customer.getCustomerId())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(
                         ResponseDto.builder()
                                 .status(HttpStatus.CONFLICT)
@@ -76,20 +79,22 @@ public class CartServiceImpl implements CartService {
             }
 
             // Proceed to create the cart
-            Cart cart = new Cart();
-            cart.setCustomer(customer);  // Associate the cart with the customer
-            cart.setTotalPrice(0.0);      // Initialize the cart with a total price of 0.0
+            Cart cart = Cart.builder()
+                    .customer(customer)  // Associate the cart with the current customer
+                    .totalPrice(0.0)      // Initialize with a default total price
+                    .build();
+
             cartRepository.save(cart);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(
                     ResponseDto.builder()
                             .status(HttpStatus.CREATED)
-                            .description("Cart added successfully.")
+                            .description("Cart created successfully.")
                             .payload(cart)
                             .build()
             );
-
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
+            log.error("Error creating cart: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                     ResponseDto.builder()
                             .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -97,7 +102,7 @@ public class CartServiceImpl implements CartService {
                             .build()
             );
         }
-    }
+}
 
     @Override
     public ResponseEntity<ResponseDto> getAllCarts(Pageable pageable) {
