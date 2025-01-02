@@ -16,7 +16,8 @@ import java.util.List;
 public class Customer implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generate the customer_id
+    @Column(name = "customer_id") // Maps to the customer_id column in the database
     private Long customerId;
 
     @Column(name = "full_name", nullable = false)
@@ -32,9 +33,11 @@ public class Customer implements Serializable {
     private String gender;
 
     @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private User user; // mappedBy is pointing to the 'customer' field in the User entity
+
+    @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private Cart cart;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders = new ArrayList<>();
-
 }
