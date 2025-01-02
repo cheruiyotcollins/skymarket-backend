@@ -1,6 +1,7 @@
 package com.gigster.skymarket.model;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -9,10 +10,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.NaturalId;
 
 import java.time.LocalDateTime;
 import java.util.Set;
-import org.hibernate.annotations.NaturalId;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
@@ -27,12 +28,20 @@ import org.hibernate.annotations.NaturalId;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "userId")
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generate the user_id
+    @Column(name = "user_id") // Maps to the user_id column in the database
+    private Long userId;
+
+    @ManyToOne(fetch = FetchType.LAZY) // Establish a relationship with the Customer entity
+    @JoinColumn(name = "customer_id") // Map customer_id in the User table to customer_id in the Customer table
+    private Customer customer;
+
+    @Column(name = "customer_id", insertable = false, updatable = false) // Prevent duplication
+    private Long customerId;
 
     @NotBlank
     @Size(max = 40)
@@ -58,8 +67,6 @@ public class User {
     @Size(max = 100)
     private String password;
 
-    private Long customerId;
-
     private String publicId;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -70,7 +77,9 @@ public class User {
     )
     private Set<Role> roles;
 
+    @Column(nullable = false)
     private Boolean firstLogin = true;
+
     private String resetCode;
     private LocalDateTime resetCodeExpiry;
 }
