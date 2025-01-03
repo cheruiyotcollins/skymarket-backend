@@ -3,6 +3,7 @@ package com.gigster.skymarket.service.impl;
 import com.gigster.skymarket.dto.CustomerResponseDto;
 import com.gigster.skymarket.dto.CustomerDto;
 import com.gigster.skymarket.dto.ResponseDto;
+import com.gigster.skymarket.mapper.CustomerMapper;
 import com.gigster.skymarket.model.Customer;
 import com.gigster.skymarket.repository.CustomerRepository;
 import com.gigster.skymarket.service.CustomerService;
@@ -28,6 +29,9 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     ResponseDtoMapper responseDtoSetter;
 
+    @Autowired
+    CustomerMapper customerMapper;
+
     @Override
     public ResponseEntity<ResponseDto> saveCustomer(CustomerDto newCustomer){
         try {
@@ -46,31 +50,24 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public ResponseEntity<ResponseDto> findAllCustomers(Pageable pageable) {
-        Page<Customer> customerPage = customerRepository.findAll(pageable);
+    public ResponseEntity<ResponseDto> getAllCustomers(Pageable pageable) {
+        Page<Customer> customersPage = customerRepository.findAll(pageable);
+        List<CustomerDto> customerDtos = customersPage.getContent()
+                .stream()
+                .map(customerMapper::toDto)
+                .collect(Collectors.toList());
 
-        if (customerPage.isEmpty()) {
-            return responseDtoSetter.responseDtoSetter(HttpStatus.NO_CONTENT, "No Customer Found!");
-        } else {
-            List<CustomerResponseDto> customerResponseDtos = customerPage.getContent()
-                    .stream()
-                    .map(this::mapCustomerResponseDto)
-                    .collect(Collectors.toList());
+        ResponseDto responseDto = ResponseDto.builder()
+                .status(HttpStatus.OK)
+                .description("List of All Customers.")
+                .payload(customerDtos)
+                .totalPages(customersPage.getTotalPages())
+                .totalElements(customersPage.getTotalElements())
+                .currentPage(customersPage.getNumber())
+                .pageSize(customersPage.getSize())
+                .build();
 
-            ResponseDto responseDto = responseDtoSetter.responseDtoSetter(
-                    HttpStatus.OK,
-                    "Customers Fetched Successfully.",
-                    customerResponseDtos
-            ).getBody();
-
-            assert responseDto != null;
-            responseDto.setTotalPages(customerPage.getTotalPages());
-            responseDto.setTotalElements(customerPage.getTotalElements());
-            responseDto.setCurrentPage(pageable.getPageNumber());
-            responseDto.setPageSize(pageable.getPageSize());
-
-            return ResponseEntity.ok(responseDto);
-        }
+        return ResponseEntity.ok(responseDto);
     }
 
     @Override

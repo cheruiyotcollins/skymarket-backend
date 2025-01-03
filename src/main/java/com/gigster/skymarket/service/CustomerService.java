@@ -11,7 +11,7 @@ public interface CustomerService{
 
     ResponseEntity<ResponseDto> saveCustomer(CustomerDto newCustomer);
 
-    ResponseEntity<ResponseDto> findAllCustomers(Pageable pageable);
+    ResponseEntity<ResponseDto> getAllCustomers(Pageable pageable);
 
     ResponseEntity<ResponseDto> findCustomerById(long id);
 

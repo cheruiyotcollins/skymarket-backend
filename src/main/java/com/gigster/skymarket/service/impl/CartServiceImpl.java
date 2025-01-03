@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -106,24 +107,23 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public ResponseEntity<ResponseDto> getAllCarts(Pageable pageable) {
-        Page<Cart> cartPage = cartRepository.findAll(pageable);
 
-        List<CartDto> cartDtos = cartPage.getContent()
+        Page<Cart> cartsPage = cartRepository.findAll(pageable);
+
+        List<CartDto> cartDtos = cartsPage.getContent()
                 .stream()
-                .map(cartMapper::toDto)
-                .toList();
+                .map(cartMapper::toDto) // Used mapper for consistency.
+                .collect(Collectors.toList());
 
-        ResponseDto responseDto = responseDtoSetter.responseDtoSetter(
-                HttpStatus.OK,
-                "Fetched List of All Carts.",
-                cartDtos
-        ).getBody();
-
-        assert responseDto != null;
-        responseDto.setTotalPages(cartPage.getTotalPages());
-        responseDto.setTotalElements(cartPage.getTotalElements());
-        responseDto.setCurrentPage(pageable.getPageNumber());
-        responseDto.setPageSize(pageable.getPageSize());
+        ResponseDto responseDto = ResponseDto.builder()
+                .status(HttpStatus.OK)
+                .description("List of All Carts.")
+                .payload(cartDtos)
+                .totalPages(cartsPage.getTotalPages())
+                .totalElements(cartsPage.getTotalElements())
+                .currentPage(cartsPage.getNumber())
+                .pageSize(cartsPage.getSize())
+                .build();
 
         return ResponseEntity.ok(responseDto);
     }

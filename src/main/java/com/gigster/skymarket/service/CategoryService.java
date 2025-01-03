@@ -9,7 +9,7 @@ public interface CategoryService {
 
     ResponseEntity<ResponseDto> getAllCategories(Pageable pageable);
 
-    ResponseEntity<ResponseDto> findById(Long categoryId);
+    ResponseEntity<ResponseDto> findCategoryById(Long categoryId);
 
     ResponseEntity<ResponseDto> updateCategory(Long categoryId, String newCategoryName);
 

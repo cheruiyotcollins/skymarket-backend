@@ -4,6 +4,7 @@ import com.gigster.skymarket.dto.NewProductDto;
 import com.gigster.skymarket.dto.ProductDto;
 import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.mapper.ProductMapper;
+import com.gigster.skymarket.model.Cart;
 import com.gigster.skymarket.model.Category;
 import com.gigster.skymarket.model.Product;
 import com.gigster.skymarket.repository.CategoryRepository;
@@ -65,15 +66,18 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ResponseEntity<ResponseDto> getAllProducts(Long productId, Pageable pageable) {
-        Page<Product> productsPage = productRepository.findByProductId(productId, pageable);
+    public ResponseEntity<ResponseDto> getAllProducts(Pageable pageable) {
+
+        Page<Product> productsPage = productRepository.findAll(pageable);
+
         List<ProductDto> ProductDtos = productsPage.getContent()
                 .stream()
-                .map(this::mapToDto)
+                .map(productMapper::toDto) // Use a mapper for consistency
                 .collect(Collectors.toList());
 
         ResponseDto responseDto = ResponseDto.builder()
                 .status(HttpStatus.OK)
+                .description("List of All Products.")
                 .payload(ProductDtos)
                 .totalPages(productsPage.getTotalPages())
                 .totalElements(productsPage.getTotalElements())
@@ -146,7 +150,7 @@ public class ProductServiceImpl implements ProductService {
         return ProductDto.builder()
                 .name(product.getProductName())
                 .productId(product.getProductId())
-                .categoryId(product.getCategory().getId())
+                .categoryId(product.getCategory().getCategoryId())
                 .description(product.getDescription())
                 .price(product.getPrice())
                 .imageUrl(product.getImageUrl())

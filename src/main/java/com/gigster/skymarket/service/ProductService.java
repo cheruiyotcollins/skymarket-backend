@@ -12,7 +12,7 @@ public interface ProductService {
 
     ResponseEntity<ResponseDto> getProductById(Long id);
 
-    ResponseEntity<ResponseDto> getAllProducts(Long productId, Pageable pageable);
+    ResponseEntity<ResponseDto> getAllProducts(Pageable pageable);
 
     ResponseEntity<ResponseDto> updateProduct(Long id, NewProductDto newProductDto);
 

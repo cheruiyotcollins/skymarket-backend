@@ -34,12 +34,11 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<ResponseDto> getAllProducts(
-            @PathVariable("productId") Long productId,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
-        return productService.getAllProducts(productId, pageable);
+        return productService.getAllProducts(pageable);
     }
 
     @PutMapping("/{id}")

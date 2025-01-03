@@ -1,13 +1,14 @@
 package com.gigster.skymarket.controller;
 
 import com.gigster.skymarket.dto.ResponseDto;
-import com.gigster.skymarket.model.Customer;
 import com.gigster.skymarket.security.CurrentUserV2;
 import com.gigster.skymarket.security.UserPrincipal;
 import com.gigster.skymarket.service.CartService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,11 @@ public class CartController {
 
 
     @GetMapping
-    public ResponseEntity<ResponseDto> getAllCarts(Pageable pageable) {
+    public ResponseEntity<ResponseDto> getAllCarts(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
         return cartService.getAllCarts(pageable);
     }
 

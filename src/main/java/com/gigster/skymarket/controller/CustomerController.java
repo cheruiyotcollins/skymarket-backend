@@ -6,7 +6,9 @@ import com.gigster.skymarket.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,8 +25,12 @@ public class CustomerController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponseDto> getAllCustomers(Pageable pageable) {
-        return customerService.findAllCustomers(pageable);
+    public ResponseEntity<ResponseDto> getAllCustomers(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
+        return customerService.getAllCustomers(pageable);
     }
 
     @GetMapping("/{id}")

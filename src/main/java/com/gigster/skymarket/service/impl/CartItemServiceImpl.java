@@ -111,7 +111,6 @@ public class CartItemServiceImpl implements CartItemService {
         }
     }
 
-    //TODO: To check later if this is the better pagination logic or the other one.
     @Override
     public ResponseEntity<ResponseDto> getAllCartItems(Long cartId, Pageable pageable) {
         Page<CartItem> cartItemsPage = cartItemRepository.findByCartId(cartId, pageable);
