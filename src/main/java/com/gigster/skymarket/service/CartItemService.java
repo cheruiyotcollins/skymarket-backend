@@ -13,7 +13,6 @@ public interface CartItemService {
 
     ResponseEntity<ResponseDto> getCartItem(Long cartId, Long itemId);
 
-    //TODO: To check later if this is the better pagination logic or the other one.
     ResponseEntity<ResponseDto> getAllCartItems(Long cartId, Pageable pageable);
 
     ResponseEntity<ResponseDto> updateCartItem(Long cartId, Long itemId, int quantity);
