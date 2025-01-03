@@ -48,35 +48,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public ResponseEntity<ResponseDto> getAllCategories(Pageable pageable) {
-        Page<Category> categoryPage = categoryRepository.findAll(pageable);
-
-        if (categoryPage.isEmpty()) {
-            return responseDtoSetter.responseDtoSetter(HttpStatus.NO_CONTENT, "No categories found");
-        } else {
-            List<CategoryDto> categoryDtos = categoryPage.getContent()
-                    .stream()
-                    .map(categoryMapper::toDto)
-                    .collect(Collectors.toList());
-
-            ResponseDto responseDto = responseDtoSetter.responseDtoSetter(
-                    HttpStatus.OK,
-                    "List of all categories",
-                    categoryDtos
-            ).getBody();
-
-            assert responseDto != null;
-            responseDto.setTotalPages(categoryPage.getTotalPages());
-            responseDto.setTotalElements(categoryPage.getTotalElements());
-            responseDto.setCurrentPage(pageable.getPageNumber());
-            responseDto.setPageSize(pageable.getPageSize());
-
-            return ResponseEntity.ok(responseDto);
-        }
-    }
-
-    @Override
-    public ResponseEntity<ResponseDto> findById(Long categoryId) {
+    public ResponseEntity<ResponseDto> findCategoryById(Long categoryId) {
         Optional<Category> categoryOpt = categoryRepository.findById(categoryId);
         if (categoryOpt.isPresent()) {
             return responseDtoSetter.responseDtoSetter(HttpStatus.FOUND, "Category retrieved successfully", categoryOpt.get());
@@ -85,6 +57,26 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
+    @Override
+    public ResponseEntity<ResponseDto> getAllCategories(Pageable pageable) {
+        Page<Category> categoriesPage = categoryRepository.findAll(pageable);
+        List<CategoryDto> categoryDtos = categoriesPage.getContent()
+                .stream()
+                .map(categoryMapper::toDto)
+                .collect(Collectors.toList());
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .status(HttpStatus.OK)
+                .description("List of All Categories.")
+                .payload(categoryDtos)
+                .totalPages(categoriesPage.getTotalPages())
+                .totalElements(categoriesPage.getTotalElements())
+                .currentPage(categoriesPage.getNumber())
+                .pageSize(categoriesPage.getSize())
+                .build();
+
+        return ResponseEntity.ok(responseDto);
+    }
 
     @Override
     public ResponseEntity<ResponseDto> updateCategory(Long categoryId, String newCategoryName) {
