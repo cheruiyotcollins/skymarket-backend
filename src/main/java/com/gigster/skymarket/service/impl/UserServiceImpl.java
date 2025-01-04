@@ -2,6 +2,7 @@ package com.gigster.skymarket.service.impl;
 
 import com.gigster.skymarket.dto.*;
 import com.gigster.skymarket.exception.ResourceNotFoundException;
+import com.gigster.skymarket.mapper.UserMapper;
 import com.gigster.skymarket.model.Customer;
 import com.gigster.skymarket.model.Role;
 import com.gigster.skymarket.model.User;
@@ -48,6 +49,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     ResponseDtoMapper responseDtoSetter;
+
+    @Autowired
+    UserMapper userMapper;
 
 
     public UserServiceImpl(AuthenticationManager authenticationManager,
@@ -195,24 +199,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<ResponseDto> getAllUsers(Pageable pageable) {
-        Page<User> userPage = userRepository.findAll(pageable);
-
-        List<UserResponseDto> userResponseDtos = userPage.getContent()
+        Page<User> usersPage = userRepository.findAll(pageable);
+        List<UserDto> userDtos = usersPage.getContent()
                 .stream()
-                .map(this::mapUserResponseDto)
+                .map(userMapper::toDto)
                 .collect(Collectors.toList());
 
-        ResponseDto responseDto = responseDtoSetter.responseDtoSetter(
-                HttpStatus.OK,
-                "Fetched List of All Users.",
-                userResponseDtos
-        ).getBody();
-
-        assert responseDto != null;
-        responseDto.setTotalPages(userPage.getTotalPages());
-        responseDto.setTotalElements(userPage.getTotalElements());
-        responseDto.setCurrentPage(pageable.getPageNumber());
-        responseDto.setPageSize(pageable.getPageSize());
+        ResponseDto responseDto = ResponseDto.builder()
+                .status(HttpStatus.OK)
+                .description("List of All Users.")
+                .payload(userDtos)
+                .totalPages(usersPage.getTotalPages())
+                .totalElements(usersPage.getTotalElements())
+                .currentPage(usersPage.getNumber())
+                .pageSize(usersPage.getSize())
+                .build();
 
         return ResponseEntity.ok(responseDto);
     }
