@@ -10,7 +10,7 @@ public interface CartService {
 
     ResponseEntity<ResponseDto> addCart(UserPrincipal userPrincipal);
 
-    ResponseEntity<ResponseDto> getAllCarts(Pageable pageable);
+    ResponseEntity<ResponseDto> getAllCarts(Pageable pageable, UserPrincipal userPrincipal);
 
     // Remove a specific item from the cart by product ID
     ResponseEntity<ResponseDto> removeItemFromCart(Long productId);

@@ -130,6 +130,37 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- Spring Security -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-core</artifactId>
+			<version>6.4.2</version>
+		</dependency>
+
+		<!-- Spring Security Test -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<version>6.4.2</version>
+			<scope>test</scope>
+		</dependency>
+
+
+		<dependency>
+				<groupId>org.junit.jupiter</groupId>
+				<artifactId>junit-jupiter-engine</artifactId>
+				<version>5.8.2</version>
+				<scope>test</scope>
+			</dependency>
+
+			<!-- Mockito -->
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>
+				<version>5.3.0</version>
+				<scope>test</scope>
+			</dependency>
+
 		<!-- MapStruct Dependency -->
 			<dependency>
 				<groupId>org.mapstruct</groupId>
@@ -161,12 +192,6 @@
 			<artifactId>spring-tx</artifactId>
 			<version>6.1.12</version>
 		</dependency>
-
-		<!--		<dependency>-->
-<!--			<groupId>org.redisson</groupId>-->
-<!--			<artifactId>redisson</artifactId>-->
-<!--			<version>3.24.0</version>-->
-<!--		</dependency>-->
 
 	</dependencies>
 
