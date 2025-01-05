@@ -59,8 +59,8 @@ public class CartServiceImpl implements CartService {
             Customer customer = CurrentUserV2.mapToCustomer(userPrincipal);
 
             // Debugging step: Ensure customerId is correctly set
-            if (customer.getCustomerId() == null) {
-                log.error("Customer ID is null for customer: {}", customer);
+            if (customer == null || customer.getCustomerId() == null) {
+                log.error("Customer is null or customer ID is null: {}", customer);
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
                         ResponseDto.builder()
                                 .status(HttpStatus.BAD_REQUEST)
@@ -87,6 +87,7 @@ public class CartServiceImpl implements CartService {
 
             cartRepository.save(cart);
 
+            // Ensure a valid response is returned with the cart payload
             return ResponseEntity.status(HttpStatus.CREATED).body(
                     ResponseDto.builder()
                             .status(HttpStatus.CREATED)
@@ -96,6 +97,7 @@ public class CartServiceImpl implements CartService {
             );
         } catch (Exception e) {
             log.error("Error creating cart: {}", e.getMessage(), e);
+            // Ensure the response contains the error message in the body
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                     ResponseDto.builder()
                             .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -103,16 +105,26 @@ public class CartServiceImpl implements CartService {
                             .build()
             );
         }
-}
+    }
+
 
     @Override
-    public ResponseEntity<ResponseDto> getAllCarts(Pageable pageable) {
+    public ResponseEntity<ResponseDto> getAllCarts(Pageable pageable, UserPrincipal userPrincipal) {
+        // If you require UserPrincipal, handle the logic here or inject it where necessary
+        if (userPrincipal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                    ResponseDto.builder()
+                            .status(HttpStatus.UNAUTHORIZED)
+                            .description("User is not authenticated")
+                            .build()
+            );
+        }
 
         Page<Cart> cartsPage = cartRepository.findAll(pageable);
 
         List<CartDto> cartDtos = cartsPage.getContent()
                 .stream()
-                .map(cartMapper::toDto) // Used mapper for consistency.
+                .map(cartMapper::toDto)
                 .collect(Collectors.toList());
 
         ResponseDto responseDto = ResponseDto.builder()
