@@ -21,6 +21,9 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
+    @Autowired
+    private UserPrincipal userPrincipal;
+
     @PostMapping
     public ResponseEntity<ResponseDto> addCart() {
         ResponseDto response = cartService.addCart(CurrentUserV2.getCurrentUser()).getBody();
@@ -38,7 +41,7 @@ public class CartController {
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
-        return cartService.getAllCarts(pageable);
+        return cartService.getAllCarts(pageable, userPrincipal);
     }
 
     @GetMapping("/customerId")
