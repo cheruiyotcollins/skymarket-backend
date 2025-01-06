@@ -1,7 +1,6 @@
 package com.gigster.skymarket.controller;
 
 import com.gigster.skymarket.dto.ResponseDto;
-import com.gigster.skymarket.security.CurrentUserV2;
 import com.gigster.skymarket.security.UserPrincipal;
 import com.gigster.skymarket.service.CartService;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,19 +21,19 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
-    @Autowired
-    private UserPrincipal userPrincipal;
+    private UserPrincipal getCurrentUser() {
+        return (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
 
     @PostMapping
     public ResponseEntity<ResponseDto> addCart() {
-        ResponseDto response = cartService.addCart(CurrentUserV2.getCurrentUser()).getBody();
+        ResponseDto response = cartService.addCart(getCurrentUser()).getBody();
 
-        log.info("Cart operation completed for customer ID: {}", CurrentUserV2.getCurrentUser().getId());
+        log.info("Cart operation completed for customer ID: {}", getCurrentUser().getId());
 
         assert response != null;
         return ResponseEntity.status(response.getStatus()).body(response);
     }
-
 
     @GetMapping
     public ResponseEntity<ResponseDto> getAllCarts(
@@ -41,7 +41,7 @@ public class CartController {
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
-        return cartService.getAllCarts(pageable, userPrincipal);
+        return cartService.getAllCarts(pageable, getCurrentUser());
     }
 
     @GetMapping("/customerId")
@@ -52,8 +52,8 @@ public class CartController {
     }
 
     @DeleteMapping("/remove/{productId}")
-    public ResponseEntity<ResponseDto> removeItemFromCart(@PathVariable Long productId, Authentication authentication) {
-        UserPrincipal userPrincipal = CurrentUserV2.getCurrentUser();
+    public ResponseEntity<ResponseDto> removeItemFromCart(@PathVariable Long productId) {
+        UserPrincipal userPrincipal = getCurrentUser();
         log.info("Authenticated UserPrincipal for removal: {}", userPrincipal);
         log.info("Removing product with ID: {}", productId);
 
