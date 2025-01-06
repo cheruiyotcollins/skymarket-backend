@@ -24,6 +24,11 @@ public class CustomerController {
         return customerService.saveCustomer(newCustomer);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseDto> getCustomerById(@PathVariable long id) {
+        return customerService.findCustomerById(id);
+    }
+
     @GetMapping
     public ResponseEntity<ResponseDto> getAllCustomers(
             @RequestParam(value = "page", defaultValue = "0") int page,
@@ -31,11 +36,6 @@ public class CustomerController {
             @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
         return customerService.getAllCustomers(pageable);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ResponseDto> getCustomerById(@PathVariable long id) {
-        return customerService.findCustomerById(id);
     }
 
     @PutMapping("/{id}")
