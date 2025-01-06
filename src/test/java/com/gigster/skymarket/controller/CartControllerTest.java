@@ -1,10 +1,6 @@
 package com.gigster.skymarket.controller;
 
 import com.gigster.skymarket.dto.ResponseDto;
-import com.gigster.skymarket.enums.RoleName;
-import com.gigster.skymarket.model.Role;
-import com.gigster.skymarket.model.User;
-import com.gigster.skymarket.security.CurrentUserV2;
 import com.gigster.skymarket.security.UserPrincipal;
 import com.gigster.skymarket.service.CartService;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,14 +14,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.test.context.support.WithMockUser;
 
-import java.util.Objects;
-import java.util.Set;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 class CartControllerTest {
@@ -34,170 +29,123 @@ class CartControllerTest {
     private CartService cartService;
 
     @Mock
-    private Authentication authentication;
+    private SecurityContext securityContext;
 
     @Mock
-    private UserPrincipal userPrincipal;
+    private Authentication authentication;
 
     @InjectMocks
     private CartController cartController;
 
+    private UserPrincipal mockUserPrincipal;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        // Setup mock user principal
+        mockUserPrincipal = new UserPrincipal(
+                1L,                      // id
+                "Kib Van Hag",              // name
+                "kibhag",               // username
+                "kib.hag@example.com",  // email
+                "1234567890",            // phoneNo
+                "password",              // password
+                List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER")) // authorities
+        );
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(mockUserPrincipal);
+
+        SecurityContextHolder.setContext(securityContext);
     }
 
     @Test
-    void testAddCart() {
-        // Mock User object
-        User mockUser = new User();
-        mockUser.setUserId(1L);
-        mockUser.setFullName("Test User");
-        mockUser.setUsername("testUser");
-        mockUser.setEmail("testuser@example.com");
-        mockUser.setContact("123456789");
-        mockUser.setPassword("password");
-        mockUser.setRoles(Set.of(new Role(1L, RoleName.ROLE_CUSTOMER)));
+    void addCart_ShouldReturnResponseEntity() {
+        // Arrange
+        ResponseDto responseDto = new ResponseDto(); // Set fields as necessary
+        responseDto.setStatus(HttpStatus.valueOf(HttpStatus.CREATED.value()));
+        ResponseEntity<ResponseDto> expectedResponse = ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
 
-        // Create UserPrincipal using UserPrincipal.create()
-        UserPrincipal mockUserPrincipal = UserPrincipal.create(mockUser);
+        when(cartService.addCart(mockUserPrincipal)).thenReturn(expectedResponse);
 
-        // Mock CurrentUserV2
-        when(CurrentUserV2.getCurrentUser()).thenReturn(mockUserPrincipal);
+        // Act
+        ResponseEntity<ResponseDto> actualResponse = cartController.addCart();
 
-        // Mock service response
-        ResponseDto responseDto = ResponseDto.builder()
-                .status(HttpStatus.OK)
-                .description("Cart added successfully")
-                .payload(null)
-                .build();
-        when(cartService.addCart(mockUserPrincipal)).thenReturn(ResponseEntity.ok(responseDto));
-
-        // Call the method
-        ResponseEntity<ResponseDto> response = cartController.addCart();
-
-        // Verify
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, Objects.requireNonNull(response.getBody()).getStatus());
-        assertEquals("Cart added successfully.", response.getBody().getDescription());
+        // Assert
+        assertEquals(expectedResponse, actualResponse);
         verify(cartService, times(1)).addCart(mockUserPrincipal);
     }
 
     @Test
-    void testGetAllCarts() {
-        // Mock service response
-        ResponseDto responseDto = ResponseDto.builder()
-                .status(HttpStatus.OK)
-                .description("Fetched all carts")
-                .payload(null)
-                .totalPages(1)
-                .totalElements(5L)
-                .currentPage(0)
-                .pageSize(10)
-                .build();
+    void getAllCarts_ShouldReturnResponseEntity() {
+        // Arrange
+        int page = 0;
+        int size = 10;
+        String sort = "id,asc";
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
+        ResponseDto responseDto = new ResponseDto(); // Set fields as necessary
+        ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.OK);
 
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("id").ascending());
+        when(cartService.getAllCarts(pageable, mockUserPrincipal)).thenReturn(expectedResponse);
 
-        // Mock the UserPrincipal and Authentication
-        User mockUser = new User();
-        mockUser.setUserId(1L);
-        mockUser.setFullName("Test User");
-        mockUser.setUsername("testUser");
-        UserPrincipal mockUserPrincipal = UserPrincipal.create(mockUser);
+        // Act
+        ResponseEntity<ResponseDto> actualResponse = cartController.getAllCarts(page, size, sort);
 
-        Authentication mockAuthentication = mock(Authentication.class);
-        when(mockAuthentication.getPrincipal()).thenReturn(mockUserPrincipal);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(mockAuthentication);
-        SecurityContextHolder.setContext(securityContext);
-
-        when(cartService.getAllCarts(pageable, mockUserPrincipal)).thenReturn(ResponseEntity.ok(responseDto));
-
-        // Call the method
-        ResponseEntity<ResponseDto> response = cartController.getAllCarts(0, 10, "id,asc");
-
-        // Verify
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, Objects.requireNonNull(response.getBody()).getStatus());
-        assertEquals("Fetched all carts", response.getBody().getDescription());
+        // Assert
+        assertEquals(expectedResponse, actualResponse);
         verify(cartService, times(1)).getAllCarts(pageable, mockUserPrincipal);
     }
 
-
     @Test
-    @WithMockUser(username = "testUser", roles = {"ROLE_CUSTOMER"})
-    void testFindCartByCustomerId() {
-        // Mock service response
-        ResponseDto responseDto = ResponseDto.builder()
-                .status(HttpStatus.OK)
-                .description("Cart found for customer.")
-                .payload(null)
-                .build();
-        when(cartService.findCartPerCustomer("testUser")).thenReturn(ResponseEntity.ok(responseDto));
+    void findCartByCustomerId_ShouldReturnResponseEntity() {
+        // Arrange
+        String username = "john.doe@example.com";
+        ResponseDto responseDto = new ResponseDto(); // Set fields as necessary
+        ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.OK);
 
-        // Call the method with the mock Authentication (from @WithMockUser)
-        ResponseEntity<ResponseDto> response = cartController.findCartByCustomerId(SecurityContextHolder.getContext().getAuthentication());
+        when(authentication.getName()).thenReturn(username);
+        when(cartService.findCartPerCustomer(username)).thenReturn(expectedResponse);
 
-        // Verify
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, Objects.requireNonNull(response.getBody()).getStatus());
-        assertEquals("Cart found for customer", response.getBody().getDescription());
-        verify(cartService, times(1)).findCartPerCustomer("testUser");
+        // Act
+        ResponseEntity<ResponseDto> actualResponse = cartController.findCartByCustomerId(authentication);
+
+        // Assert
+        assertEquals(expectedResponse, actualResponse);
+        verify(cartService, times(1)).findCartPerCustomer(username);
     }
 
     @Test
-    void testRemoveItemFromCart() {
-        // Mock User object
-        User mockUser = new User();
-        mockUser.setUserId(1L);
-        mockUser.setFullName("Test User");
-        mockUser.setUsername("testUser");
-        mockUser.setEmail("testuser@example.com");
-        mockUser.setContact("123456789");
-        mockUser.setPassword("password");
-        mockUser.setRoles(Set.of(new Role(1L, RoleName.ROLE_CUSTOMER)));
+    void removeItemFromCart_ShouldReturnResponseEntity() {
+        // Arrange
+        Long productId = 123L;
+        ResponseDto responseDto = new ResponseDto(); // Set fields as necessary
+        ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.OK);
 
-        // Create UserPrincipal using UserPrincipal.create()
-        UserPrincipal mockUserPrincipal = UserPrincipal.create(mockUser);
+        when(cartService.removeItemFromCart(productId)).thenReturn(expectedResponse);
 
-        // Mock CurrentUserV2
-        when(CurrentUserV2.getCurrentUser()).thenReturn(mockUserPrincipal);
+        // Act
+        ResponseEntity<ResponseDto> actualResponse = cartController.removeItemFromCart(productId);
 
-        // Mock service response
-        ResponseDto responseDto = ResponseDto.builder()
-                .status(HttpStatus.OK)
-                .description("Item removed from cart successfully")
-                .payload(null)
-                .build();
-        when(cartService.removeItemFromCart(1L)).thenReturn(ResponseEntity.ok(responseDto));
-
-        // Call the method
-        ResponseEntity<ResponseDto> response = cartController.removeItemFromCart(1L, authentication);
-
-        // Verify
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, Objects.requireNonNull(response.getBody()).getStatus());
-        assertEquals("Item removed from cart successfully", response.getBody().getDescription());
-        verify(cartService, times(1)).removeItemFromCart(1L);
+        // Assert
+        assertEquals(expectedResponse, actualResponse);
+        verify(cartService, times(1)).removeItemFromCart(productId);
     }
 
     @Test
-    void testClearCart() {
-        // Mock service response
-        ResponseDto responseDto = ResponseDto.builder()
-                .status(HttpStatus.OK)
-                .description("Cart cleared successfully")
-                .payload(null)
-                .build();
-        when(cartService.clearCart(1L)).thenReturn(ResponseEntity.ok(responseDto));
+    void clearCart_ShouldReturnResponseEntity() {
+        // Arrange
+        Long customerId = 1L;
+        ResponseDto responseDto = new ResponseDto(); // Set fields as necessary
+        ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.NO_CONTENT);
 
-        // Call the method
-        ResponseEntity<ResponseDto> response = cartController.clearCart(1L);
+        when(cartService.clearCart(customerId)).thenReturn(expectedResponse);
 
-        // Verify
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, Objects.requireNonNull(response.getBody()).getStatus());
-        assertEquals("Cart cleared successfully", response.getBody().getDescription());
-        verify(cartService, times(1)).clearCart(1L);
+        // Act
+        ResponseEntity<ResponseDto> actualResponse = cartController.clearCart(customerId);
+
+        // Assert
+        assertEquals(expectedResponse, actualResponse);
+        verify(cartService, times(1)).clearCart(customerId);
     }
 }
