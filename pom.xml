@@ -38,7 +38,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -69,7 +68,7 @@
 			<artifactId>validation-api</artifactId>
 			<version>2.0.1.Final</version>
 		</dependency>
-<!--		security-->
+		<!-- Spring Security -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-config</artifactId>
@@ -118,64 +117,35 @@
 			<artifactId>jakarta.persistence-api</artifactId>
 			<version>3.1.0</version>
 		</dependency>
-
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.assertj</groupId>
-			<artifactId>assertj-core</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<!-- Spring Security -->
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-core</artifactId>
-			<version>6.4.2</version>
-		</dependency>
-
-		<!-- Spring Security Test -->
+		<!-- Remove or update Spring Security Test if necessary -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
 			<version>6.4.2</version>
 			<scope>test</scope>
 		</dependency>
-
-
+		<!-- Remove JUnit 5 dependencies manually -->
+		<!-- Mocking Framework -->
 		<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-engine</artifactId>
-				<version>5.8.2</version>
-				<scope>test</scope>
-			</dependency>
-
-			<!-- Mockito -->
-			<dependency>
-				<groupId>org.mockito</groupId>
-				<artifactId>mockito-core</artifactId>
-				<version>5.3.0</version>
-				<scope>test</scope>
-			</dependency>
-
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>5.3.0</version>
+			<scope>test</scope>
+		</dependency>
 		<!-- MapStruct Dependency -->
-			<dependency>
-				<groupId>org.mapstruct</groupId>
-				<artifactId>mapstruct</artifactId>
-				<version>1.6.1</version>
-			</dependency>
-			<!-- Annotation Processor for MapStruct -->
-			<dependency>
-				<groupId>org.mapstruct</groupId>
-				<artifactId>mapstruct-processor</artifactId>
-				<version>1.6.1</version>
-				<scope>provided</scope>
-			</dependency>
-
 		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct</artifactId>
+			<version>1.6.1</version>
+		</dependency>
+		<!-- Annotation Processor for MapStruct -->
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct-processor</artifactId>
+			<version>1.6.1</version>
+			<scope>provided</scope>
+		</dependency>
+	<dependency>
 			<groupId>org.springframework.retry</groupId>
 			<artifactId>spring-retry</artifactId>
 			<version>2.0.3</version>
@@ -192,7 +162,6 @@
 			<artifactId>spring-tx</artifactId>
 			<version>6.1.12</version>
 		</dependency>
-
 	</dependencies>
 
 	<build>
