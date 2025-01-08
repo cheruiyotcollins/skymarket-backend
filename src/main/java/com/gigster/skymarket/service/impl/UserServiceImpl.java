@@ -313,7 +313,9 @@ public class UserServiceImpl implements UserService {
         return UserResponseDto.builder()
                 .email(user.getEmail())
                 .username(user.getUsername())
-//               TODO: build role.
+                .roles(user.getRoles().stream()
+                        .map(Role::getName)
+                        .collect(Collectors.toSet()))
                 .build();
     }
 
