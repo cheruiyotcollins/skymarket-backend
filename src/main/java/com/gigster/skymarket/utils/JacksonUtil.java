@@ -113,7 +113,6 @@ public class JacksonUtil {
                 .constructParametricType(collectionClass, elementClasses);
     }
 
-
     public <T> T readValue(String json,Class<?> collectionClass, Class<?>... elementClasses){
         try {
             return objectMapper.readValue(json,objectMapper.getTypeFactory()
