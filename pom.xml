@@ -124,7 +124,6 @@
 			<version>6.4.2</version>
 			<scope>test</scope>
 		</dependency>
-		<!-- Remove JUnit 5 dependencies manually -->
 		<!-- Mocking Framework -->
 		<dependency>
 			<groupId>org.mockito</groupId>

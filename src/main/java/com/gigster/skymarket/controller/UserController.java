@@ -54,7 +54,7 @@ public class UserController {
 
         if (loginResponse.isFirstLogin()) {
             // Return a 403 response indicating that a password change is required
-            //todo test first login response
+            //first login works
             loginResponse.setSuccess(0);
            loginResponse.setMessage("First login detected. Please change your password.");
             return new ResponseEntity<>(loginResponse, HttpStatus.FORBIDDEN);
