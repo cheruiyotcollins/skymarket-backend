@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 public class LoginResponse {
-    private String token;
+    private String accessToken;
     private boolean firstLogin;
     private int success;
     private String message;
@@ -19,11 +19,11 @@ public class LoginResponse {
 
     public LoginResponse(String token, boolean firstLogin) {
         this.firstLogin=firstLogin;
-        this.token=token;
+        this.accessToken=token;
     }
     public LoginResponse(String token, boolean firstLogin, int success,String message) {
         this.firstLogin=firstLogin;
-        this.token=token;
+        this.accessToken=token;
         this.message=message;
     }
 }
