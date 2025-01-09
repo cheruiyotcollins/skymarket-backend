@@ -61,7 +61,7 @@ public class SecurityConfig {
                                 .requestMatchers("/v3/**").permitAll()
                                 .requestMatchers("/api/v1/users/auth/signup").permitAll()
                                 .requestMatchers("/api/v1/users/auth/signin").permitAll()
-                                .requestMatchers("/api/v1products/{id}").permitAll()
+                                .requestMatchers("/api/v1/products/{id}").permitAll()
                                 .requestMatchers("/api/v1/products").permitAll()
 
                                 // Endpoints requiring specific roles.

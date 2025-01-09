@@ -167,7 +167,7 @@ public class UserServiceImpl implements UserService {
         boolean firstLogin = user.getFirstLogin();
 
         // If not the first login, generate a token
-        String token = firstLogin ? null : jwtTokenProvider.generateToken(authentication);
+        String token =jwtTokenProvider.generateToken(authentication);
 
         return new LoginResponse(token, firstLogin);
     }
