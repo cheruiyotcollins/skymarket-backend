@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -52,18 +53,18 @@ public class UserController {
     public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
         LoginResponse loginResponse = userService.login(loginDto);
 
-        if (loginResponse.isFirstLogin()) {
-            // Return a 403 response indicating that a password change is required
-            //first login works
-            loginResponse.setSuccess(0);
-           loginResponse.setMessage("First login detected. Please change your password.");
-            return new ResponseEntity<>(loginResponse, HttpStatus.FORBIDDEN);
-        }
+
 
         // If not the first login, return the JWT token in the response
         JWTAuthResponse jwtAuthResponse = new JWTAuthResponse();
-        jwtAuthResponse.setAccessToken(loginResponse.getToken());
-
+        String token=loginResponse.getAccessToken();
+        jwtAuthResponse.setAccessToken(token);
+        if (loginResponse.isFirstLogin()) {
+            loginResponse.setSuccess(0);
+            loginResponse.setMessage("First login detected. Please change your password.");
+            loginResponse.setAccessToken(token);
+            return new ResponseEntity<>(loginResponse, HttpStatus.OK);
+        }
         return ResponseEntity.ok(jwtAuthResponse);
     }
 
@@ -149,8 +150,8 @@ public class UserController {
     }
 
     @PutMapping("/change-password")
-    public ResponseEntity<?> changePassword(@RequestParam String newPassword, Principal principal) {
-        return userService.updatePassword(newPassword,principal);
+    public ResponseEntity<?> changePassword(@RequestBody @Valid ChangePasswordDto changePasswordDto, Principal principal) {
+        return userService.updatePassword(changePasswordDto.getNewPassword(),principal);
     }
 
     @PostMapping("/forgot-password")
