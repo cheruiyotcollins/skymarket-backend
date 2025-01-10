@@ -173,7 +173,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<?> addRole(AddRoleRequest addRoleRequest) {
+    public ResponseEntity<ResponseDto> addRole(AddRoleRequest addRoleRequest) {
         Role role=new Role();
         role.setName(RoleName.fromString(addRoleRequest.getName()));
         roleRepository.save(role);
@@ -219,7 +219,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<?> deleteById(long id){
+    public ResponseEntity<ResponseDto> deleteById(long id){
 
         try{
             userRepository.deleteById(id);
@@ -233,7 +233,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<?> getCurrentUser(String email) {
+    public ResponseEntity<ResponseDto> getCurrentUser(String email) {
 
         try {
             User user = userRepository.findByEmail(email)
@@ -250,7 +250,6 @@ public class UserServiceImpl implements UserService {
 
            return responseDtoSetter.responseDtoSetter(HttpStatus.FOUND,"Current User logged in", currentUserDto);
 
-
         } catch (ResourceNotFoundException ex) {
             return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND,ex.getMessage());
 
@@ -260,17 +259,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<?> updatePassword(String newPassword, Principal principal) {
+    public ResponseEntity<ResponseDto> updatePassword(String newPassword, Principal principal) {
         User user = userRepository.findByUsername(principal.getName()).orElseThrow();
         user.setPassword(passwordEncoder.encode(newPassword));
         // user first login is being set to false here
         user.setFirstLogin(false);
         userRepository.save(user);
-        return responseDtoSetter.responseDtoSetter(HttpStatus.OK,"Password updated successfully");
+        return responseDtoSetter.responseDtoSetter(HttpStatus.OK,"Password updated successfully.");
     }
 
     @Override
-    public ResponseEntity<?> forgotPassword(String email) {
+    public ResponseEntity<ResponseDto> forgotPassword(String email) {
         // Find the user by email
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
@@ -288,16 +287,16 @@ public class UserServiceImpl implements UserService {
         String message = "Your password reset code is " + verificationCode + ". This code expires in 15 minutes.";
         notificationService.sendMail(email, subject, message);
 
-        return ResponseEntity.ok("Password reset code sent to email.");
+        return responseDtoSetter.responseDtoSetter(HttpStatus.OK,"Password reset code sent to email.");
     }
 
     @Override
-    public ResponseEntity<?> resetPassword(String email, String resetCode, String newPassword) {
+    public ResponseEntity<ResponseDto> resetPassword(String email, String resetCode, String newPassword) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         if (!user.getResetCode().equals(resetCode) || LocalDateTime.now().isAfter(user.getResetCodeExpiry())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid or expired reset code.");
+            return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST,"Invalid or expired reset code.");
         }
 
         // Update the user's password
@@ -306,7 +305,7 @@ public class UserServiceImpl implements UserService {
         user.setResetCodeExpiry(null);
         userRepository.save(user);
 
-        return ResponseEntity.ok("Password has been successfully reset.");
+        return responseDtoSetter.responseDtoSetter(HttpStatus.OK,"Password has been successfully reset.");
     }
 
     private UserResponseDto mapUserResponseDto(User user){
