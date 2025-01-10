@@ -12,19 +12,19 @@ public interface UserService {
 
     LoginResponse login(LoginDto loginDto);
 
-    ResponseEntity<?> addRole(AddRoleRequest addRoleRequest);
+    ResponseEntity<ResponseDto> addRole(AddRoleRequest addRoleRequest);
 
-    ResponseEntity<?> findUserById(long id);
+    ResponseEntity<ResponseDto> findUserById(long id);
 
     ResponseEntity<ResponseDto> getAllUsers(Pageable pageable);
 
-    ResponseEntity<?> deleteById(long id);
+    ResponseEntity<ResponseDto> deleteById(long id);
 
-    ResponseEntity<?> getCurrentUser(String email);
+    ResponseEntity<ResponseDto> getCurrentUser(String email);
 
-    ResponseEntity<?> updatePassword(String newPassword, Principal principal);
+    ResponseEntity<ResponseDto> updatePassword(String newPassword, Principal principal);
 
-    ResponseEntity<?> forgotPassword(String email);
+    ResponseEntity<ResponseDto> forgotPassword(String email);
 
-    ResponseEntity<?> resetPassword(String email, String resetCode, String newPassword);
+    ResponseEntity<ResponseDto> resetPassword(String email, String resetCode, String newPassword);
 }
