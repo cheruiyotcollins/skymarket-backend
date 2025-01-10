@@ -53,11 +53,9 @@ public class UserController {
     public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
         LoginResponse loginResponse = userService.login(loginDto);
 
-
-
         // If not the first login, return the JWT token in the response
         JWTAuthResponse jwtAuthResponse = new JWTAuthResponse();
-        String token=loginResponse.getAccessToken();
+        String token = loginResponse.getAccessToken();
         jwtAuthResponse.setAccessToken(token);
         if (loginResponse.isFirstLogin()) {
             loginResponse.setSuccess(0);
@@ -149,8 +147,8 @@ public class UserController {
         return userService.getCurrentUser(authentication.getName());
     }
 
-    @PutMapping("/change-password")
-    public ResponseEntity<?> changePassword(@RequestBody @Valid ChangePasswordDto changePasswordDto, Principal principal) {
+    @PutMapping("/update-password")
+    public ResponseEntity<?> updatePassword(@RequestBody @Valid ChangePasswordDto changePasswordDto, Principal principal) {
         return userService.updatePassword(changePasswordDto.getNewPassword(),principal);
     }
 
