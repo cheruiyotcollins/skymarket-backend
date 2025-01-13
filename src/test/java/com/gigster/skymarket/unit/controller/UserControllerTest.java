@@ -1,5 +1,6 @@
-package com.gigster.skymarket.controller;
+package com.gigster.skymarket.unit.controller;
 
+import com.gigster.skymarket.controller.UserController;
 import com.gigster.skymarket.dto.*;
 import com.gigster.skymarket.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,54 +37,54 @@ class UserControllerTest {
     @Test
     void register_ShouldReturnResponseEntity() {
         // Arrange
-        SignUpRequest signUpRequest = new SignUpRequest();
+        SignUpRequestDto signUpRequestDto = new SignUpRequestDto();
         ResponseDto responseDto = new ResponseDto();
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.CREATED);
 
-        when(userService.register(signUpRequest)).thenReturn(expectedResponse);
+        when(userService.register(signUpRequestDto)).thenReturn(expectedResponse);
 
         // Act
-        ResponseEntity<ResponseDto> actualResponse = userController.register(signUpRequest);
+        ResponseEntity<ResponseDto> actualResponse = userController.register(signUpRequestDto);
 
         // Assert
         assertEquals(expectedResponse, actualResponse);
-        verify(userService, times(1)).register(signUpRequest);
+        verify(userService, times(1)).register(signUpRequestDto);
     }
 
     @Test
     void login_ShouldReturnResponseEntity() {
         // Arrange
         LoginDto loginDto = new LoginDto();
-        LoginResponse loginResponse = new LoginResponse();
-        loginResponse.setAccessToken("token");
-        JWTAuthResponse jwtAuthResponse = new JWTAuthResponse();
-        jwtAuthResponse.setAccessToken("token");
+        LoginResponseDto loginResponseDto = new LoginResponseDto();
+        loginResponseDto.setAccessToken("token");
+        JWTAuthResponseDto jwtAuthResponseDto = new JWTAuthResponseDto();
+        jwtAuthResponseDto.setAccessToken("token");
 
-        when(userService.login(loginDto)).thenReturn(loginResponse);
+        when(userService.login(loginDto)).thenReturn(loginResponseDto);
 
         // Act
         ResponseEntity<?> actualResponse = userController.login(loginDto);
 
         // Assert - Compare the access token values instead of whole ResponseEntity.
-        assertEquals(jwtAuthResponse.getAccessToken(), ((JWTAuthResponse) Objects.requireNonNull(actualResponse.getBody())).getAccessToken());
+        assertEquals(jwtAuthResponseDto.getAccessToken(), ((JWTAuthResponseDto) Objects.requireNonNull(actualResponse.getBody())).getAccessToken());
         verify(userService, times(1)).login(loginDto);
     }
 
     @Test
     void updateUser_ShouldReturnResponseEntity() {
         // Arrange
-        SignUpRequest signUpRequest = new SignUpRequest();
+        SignUpRequestDto signUpRequestDto = new SignUpRequestDto();
         ResponseDto responseDto = new ResponseDto();
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.CREATED);
 
-        when(userService.register(signUpRequest)).thenReturn(expectedResponse);
+        when(userService.register(signUpRequestDto)).thenReturn(expectedResponse);
 
         // Act
-        ResponseEntity<ResponseDto> actualResponse = (ResponseEntity<ResponseDto>) userController.updateUser(signUpRequest);
+        ResponseEntity<ResponseDto> actualResponse = (ResponseEntity<ResponseDto>) userController.updateUser(signUpRequestDto);
 
         // Assert
         assertEquals(expectedResponse, actualResponse);
-        verify(userService, times(1)).register(signUpRequest);
+        verify(userService, times(1)).register(signUpRequestDto);
     }
 
     @Test
@@ -143,18 +144,18 @@ class UserControllerTest {
     @Test
     void addRole_ShouldReturnResponseEntity() {
         // Arrange
-        AddRoleRequest addRoleRequest = new AddRoleRequest();
+        AddRoleRequestDto addRoleRequestDto = new AddRoleRequestDto();
         ResponseDto responseDto = new ResponseDto();
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.CREATED);
 
-        when(userService.addRole(addRoleRequest)).thenReturn(expectedResponse);
+        when(userService.addRole(addRoleRequestDto)).thenReturn(expectedResponse);
 
         // Act
-        ResponseEntity<ResponseDto> actualResponse = (ResponseEntity<ResponseDto>) userController.addRole(addRoleRequest);
+        ResponseEntity<ResponseDto> actualResponse = (ResponseEntity<ResponseDto>) userController.addRole(addRoleRequestDto);
 
         // Assert
         assertEquals(expectedResponse, actualResponse);
-        verify(userService, times(1)).addRole(addRoleRequest);
+        verify(userService, times(1)).addRole(addRoleRequestDto);
     }
 
     @Test

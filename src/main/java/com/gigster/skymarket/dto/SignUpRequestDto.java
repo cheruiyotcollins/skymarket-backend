@@ -10,7 +10,7 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class SignUpRequest {
+public class SignUpRequestDto {
     @NotBlank
     @Size(min = 4, max = 40)
     private String fullName;

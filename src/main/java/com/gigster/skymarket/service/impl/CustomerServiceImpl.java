@@ -50,6 +50,20 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public ResponseEntity<ResponseDto> findCustomerById(long id){
+        if(customerRepository.existsById(id)){
+            Customer customer=customerRepository.findById(id).get();
+            //calling mapCustomerResponseDto
+            CustomerResponseDto customerResponseDto=mapCustomerResponseDto(customer);
+            return responseDtoSetter.responseDtoSetter(HttpStatus.FOUND,"Customer Info Found",customerResponseDto);
+
+        }else {
+            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND,"No Customer with provided Id Found");
+
+        }
+    }
+
+    @Override
     public ResponseEntity<ResponseDto> getAllCustomers(Pageable pageable) {
         Page<Customer> customersPage = customerRepository.findAll(pageable);
         List<CustomerDto> customerDtos = customersPage.getContent()
@@ -68,20 +82,6 @@ public class CustomerServiceImpl implements CustomerService {
                 .build();
 
         return ResponseEntity.ok(responseDto);
-    }
-
-    @Override
-    public ResponseEntity<ResponseDto> findCustomerById(long id){
-        if(customerRepository.existsById(id)){
-            Customer customer=customerRepository.findById(id).get();
-            //calling mapCustomerResponseDto
-            CustomerResponseDto customerResponseDto=mapCustomerResponseDto(customer);
-            return responseDtoSetter.responseDtoSetter(HttpStatus.FOUND,"Customer Info Found",customerResponseDto);
-
-        }else {
-            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND,"No Customer with provided Id Found");
-
-        }
     }
 
     @Override

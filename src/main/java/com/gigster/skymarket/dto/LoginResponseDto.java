@@ -1,7 +1,6 @@
 package com.gigster.skymarket.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,18 +9,18 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
 @NoArgsConstructor
-public class LoginResponse {
+public class LoginResponseDto {
     private String accessToken;
     private boolean firstLogin;
     private int success;
     private String message;
 
 
-    public LoginResponse(String token, boolean firstLogin) {
+    public LoginResponseDto(String token, boolean firstLogin) {
         this.firstLogin=firstLogin;
         this.accessToken=token;
     }
-    public LoginResponse(String token, boolean firstLogin, int success,String message) {
+    public LoginResponseDto(String token, boolean firstLogin, int success, String message) {
         this.firstLogin=firstLogin;
         this.accessToken=token;
         this.message=message;

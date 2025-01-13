@@ -1,5 +1,6 @@
-package com.gigster.skymarket.controller;
+package com.gigster.skymarket.unit.controller;
 
+import com.gigster.skymarket.controller.CustomerController;
 import com.gigster.skymarket.dto.CustomerDto;
 import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.service.CustomerService;

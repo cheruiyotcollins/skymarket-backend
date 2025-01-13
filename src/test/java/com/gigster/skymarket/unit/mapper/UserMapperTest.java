@@ -1,7 +1,8 @@
-package com.gigster.skymarket.mapper;
+package com.gigster.skymarket.unit.mapper;
 
 import com.gigster.skymarket.dto.UserDto;
 import com.gigster.skymarket.enums.RoleName;
+import com.gigster.skymarket.mapper.UserMapper;
 import com.gigster.skymarket.model.Role;
 import com.gigster.skymarket.model.User;
 import org.junit.jupiter.api.BeforeEach;

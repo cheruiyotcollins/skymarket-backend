@@ -252,19 +252,19 @@ public class CartServiceImpl implements CartService {
         Cart cart = cartRepository.findByCustomerId(customer.getCustomerId()).orElseThrow(() -> new RuntimeException("Cart not found!"));
 
         // Map the cart items to a hashmap with total price and item list
-        HashMap<Double, List<CartItemDtoResponse>> cartItemsHashMap = cartItemsToCartItemsDtoMapper.mapCartItemsToCartItemsDto(cart.getCartItems());
+        HashMap<Double, List<CartItemResponseDto>> cartItemsHashMap = cartItemsToCartItemsDtoMapper.mapCartItemsToCartItemsDto(cart.getCartItems());
 
-        Map.Entry<Double, List<CartItemDtoResponse>> entry = cartItemsHashMap.entrySet().iterator().next();
+        Map.Entry<Double, List<CartItemResponseDto>> entry = cartItemsHashMap.entrySet().iterator().next();
         double totalPrice = entry.getKey();
-        List<CartItemDtoResponse> cartItemDtoList = entry.getValue();
+        List<CartItemResponseDto> cartItemDtoList = entry.getValue();
 
-        CartDtoResponse cartDtoResponse = CartDtoResponse.builder()
+        CartResponseDto cartResponseDto = CartResponseDto.builder()
                 .name(customer.getFullName())
                 .cartItemDtoList(cartItemDtoList)
                 .totalPrice(totalPrice)
                 .build();
 
-        return responseDtoSetter.responseDtoSetter(HttpStatus.OK, "Current Customer Cart", cartDtoResponse);
+        return responseDtoSetter.responseDtoSetter(HttpStatus.OK, "Current Customer Cart", cartResponseDto);
     }
 
 }

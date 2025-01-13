@@ -5,6 +5,6 @@ import lombok.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AddRoleRequest {
+public class AddRoleRequestDto {
     private String name;
 }

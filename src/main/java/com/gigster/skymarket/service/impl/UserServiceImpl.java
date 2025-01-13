@@ -73,27 +73,27 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public ResponseEntity<ResponseDto> register(SignUpRequest signUpRequest) {
+    public ResponseEntity<ResponseDto> register(SignUpRequestDto signUpRequestDto) {
         // Check if email or username already exists
-        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+        if (userRepository.existsByEmail(signUpRequestDto.getEmail())) {
             return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_ACCEPTABLE, "Email Address already in use!");
         }
-        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+        if (userRepository.existsByUsername(signUpRequestDto.getUsername())) {
             return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_ACCEPTABLE, "Username is already taken!");
         }
 
         // Determine if the user is an admin
-        boolean isAdmin = signUpRequest.getRoleName() != null && signUpRequest.getRoleName().equalsIgnoreCase("ROLE_ADMIN");
+        boolean isAdmin = signUpRequestDto.getRoleName() != null && signUpRequestDto.getRoleName().equalsIgnoreCase("ROLE_ADMIN");
 
         if (isAdmin) {
             // Create the User without a Customer entity for admin users
             User adminUser = User.builder()
-                    .email(signUpRequest.getEmail())
-                    .password(passwordEncoder.encode(signUpRequest.getPassword()))
-                    .fullName(signUpRequest.getFullName())
-                    .username(signUpRequest.getUsername())
-                    .contact(signUpRequest.getContact())
-                    .gender(signUpRequest.getGender())
+                    .email(signUpRequestDto.getEmail())
+                    .password(passwordEncoder.encode(signUpRequestDto.getPassword()))
+                    .fullName(signUpRequestDto.getFullName())
+                    .username(signUpRequestDto.getUsername())
+                    .contact(signUpRequestDto.getContact())
+                    .gender(signUpRequestDto.getGender())
                     .firstLogin(true)
                     .build();
 
@@ -111,10 +111,10 @@ public class UserServiceImpl implements UserService {
 
         // For normal users (customers), create the Customer entity first
         Customer customer = new Customer();
-        customer.setFullName(signUpRequest.getFullName());
-        customer.setEmail(signUpRequest.getEmail());
-        customer.setPhoneNo(signUpRequest.getContact());
-        customer.setGender(signUpRequest.getGender());
+        customer.setFullName(signUpRequestDto.getFullName());
+        customer.setEmail(signUpRequestDto.getEmail());
+        customer.setPhoneNo(signUpRequestDto.getContact());
+        customer.setGender(signUpRequestDto.getGender());
 
         // Persist the Customer entity
         customer = customerRepository.save(customer);
@@ -126,18 +126,18 @@ public class UserServiceImpl implements UserService {
 
         // Now create the User entity and associate it with the Customer
         User user = User.builder()
-                .email(signUpRequest.getEmail())
-                .password(passwordEncoder.encode(signUpRequest.getPassword()))
-                .fullName(signUpRequest.getFullName())
-                .username(signUpRequest.getUsername())
-                .contact(signUpRequest.getContact())
-                .gender(signUpRequest.getGender())
+                .email(signUpRequestDto.getEmail())
+                .password(passwordEncoder.encode(signUpRequestDto.getPassword()))
+                .fullName(signUpRequestDto.getFullName())
+                .username(signUpRequestDto.getUsername())
+                .contact(signUpRequestDto.getContact())
+                .gender(signUpRequestDto.getGender())
                 .customer(customer) // Link the Customer to the User
                 .firstLogin(false)
                 .build();
 
         // Assign ROLE_CUSTOMER by default or another role based on request
-        String roleName = signUpRequest.getRoleName() != null ? signUpRequest.getRoleName() : "ROLE_CUSTOMER";
+        String roleName = signUpRequestDto.getRoleName() != null ? signUpRequestDto.getRoleName() : "ROLE_CUSTOMER";
         Role role = roleRepository.findByName(RoleName.valueOf(roleName.toUpperCase()))
                 .orElseThrow(() -> new RuntimeException("Role not found!"));
 
@@ -153,7 +153,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public LoginResponse login(LoginDto loginDto) {
+    public LoginResponseDto login(LoginDto loginDto) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword())
         );
@@ -169,13 +169,13 @@ public class UserServiceImpl implements UserService {
         // If not the first login, generate a token
         String token =jwtTokenProvider.generateToken(authentication);
 
-        return new LoginResponse(token, firstLogin);
+        return new LoginResponseDto(token, firstLogin);
     }
 
     @Override
-    public ResponseEntity<ResponseDto> addRole(AddRoleRequest addRoleRequest) {
+    public ResponseEntity<ResponseDto> addRole(AddRoleRequestDto addRoleRequestDto) {
         Role role=new Role();
-        role.setName(RoleName.fromString(addRoleRequest.getName()));
+        role.setName(RoleName.fromString(addRoleRequestDto.getName()));
         roleRepository.save(role);
         return null;
     }
