@@ -1,5 +1,6 @@
-package com.gigster.skymarket.controller;
+package com.gigster.skymarket.unit.controller;
 
+import com.gigster.skymarket.controller.CartItemController;
 import com.gigster.skymarket.dto.CartItemRequestDto;
 import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.model.Cart;
