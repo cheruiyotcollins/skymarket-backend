@@ -1,6 +1,6 @@
 package com.gigster.skymarket.mapper;
 
-import com.gigster.skymarket.dto.CartItemDtoResponse;
+import com.gigster.skymarket.dto.CartItemResponseDto;
 import com.gigster.skymarket.model.CartItem;
 import org.springframework.stereotype.Service;
 
@@ -10,12 +10,12 @@ import java.util.List;
 
 @Service
 public class CartItemsToCartItemsDtoMapper {
-    public HashMap<Double, List<CartItemDtoResponse>> mapCartItemsToCartItemsDto(List<CartItem> cartItems) {
-        HashMap<Double, List<CartItemDtoResponse>> cartItemsHashmap = new HashMap<>();
-        List<CartItemDtoResponse> cartItemDtoList = new ArrayList<>();
+    public HashMap<Double, List<CartItemResponseDto>> mapCartItemsToCartItemsDto(List<CartItem> cartItems) {
+        HashMap<Double, List<CartItemResponseDto>> cartItemsHashmap = new HashMap<>();
+        List<CartItemResponseDto> cartItemDtoList = new ArrayList<>();
         double totalPrice = 0.0;
         for (CartItem item : cartItems) {
-            CartItemDtoResponse cartItemDto = CartItemDtoResponse.builder()
+            CartItemResponseDto cartItemDto = CartItemResponseDto.builder()
                     .productName(item.getProduct().getProductName())
                     .price(item.getProduct().getPrice())
                     .quantity(item.getQuantity())
