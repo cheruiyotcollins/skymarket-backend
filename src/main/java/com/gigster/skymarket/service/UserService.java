@@ -8,11 +8,11 @@ import java.security.Principal;
 
 public interface UserService {
 
-    ResponseEntity<ResponseDto> register(SignUpRequest signUpRequest);
+    ResponseEntity<ResponseDto> register(SignUpRequestDto signUpRequestDto);
 
-    LoginResponse login(LoginDto loginDto);
+    LoginResponseDto login(LoginDto loginDto);
 
-    ResponseEntity<ResponseDto> addRole(AddRoleRequest addRoleRequest);
+    ResponseEntity<ResponseDto> addRole(AddRoleRequestDto addRoleRequestDto);
 
     ResponseEntity<ResponseDto> findUserById(long id);
 

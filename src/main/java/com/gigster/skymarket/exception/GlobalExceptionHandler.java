@@ -1,7 +1,7 @@
 package com.gigster.skymarket.exception;
 
 
-import com.gigster.skymarket.dto.ErrorDetails;
+import com.gigster.skymarket.dto.ErrorDetailsDto;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -23,27 +23,27 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     // handle specific exceptions
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorDetails> handleResourceNotFoundException(ResourceNotFoundException exception,
-                                                                        WebRequest webRequest){
-        ErrorDetails errorDetails = new ErrorDetails(new Date(), exception.getMessage(),
+    public ResponseEntity<ErrorDetailsDto> handleResourceNotFoundException(ResourceNotFoundException exception,
+                                                                           WebRequest webRequest){
+        ErrorDetailsDto errorDetailsDto = new ErrorDetailsDto(new Date(), exception.getMessage(),
                 webRequest.getDescription(false));
-        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorDetailsDto, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(LendingAPIException.class)
-    public ResponseEntity<ErrorDetails> handleBlogAPIException(LendingAPIException exception,
-                                                               WebRequest webRequest){
-        ErrorDetails errorDetails = new ErrorDetails(new Date(), exception.getMessage(),
+    public ResponseEntity<ErrorDetailsDto> handleBlogAPIException(LendingAPIException exception,
+                                                                  WebRequest webRequest){
+        ErrorDetailsDto errorDetailsDto = new ErrorDetailsDto(new Date(), exception.getMessage(),
                 webRequest.getDescription(false));
-        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorDetailsDto, HttpStatus.BAD_REQUEST);
     }
     // global exceptions
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorDetails> handleGlobalException(Exception exception,
-                                                              WebRequest webRequest){
-        ErrorDetails errorDetails = new ErrorDetails(new Date(), exception.getMessage(),
+    public ResponseEntity<ErrorDetailsDto> handleGlobalException(Exception exception,
+                                                                 WebRequest webRequest){
+        ErrorDetailsDto errorDetailsDto = new ErrorDetailsDto(new Date(), exception.getMessage(),
                 webRequest.getDescription(false));
-        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(errorDetailsDto, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Override
@@ -74,10 +74,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 //    }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ErrorDetails> handleAccessDeniedException(AccessDeniedException exception,
-                                                                    WebRequest webRequest){
-        ErrorDetails errorDetails = new ErrorDetails(new Date(), exception.getMessage(),
+    public ResponseEntity<ErrorDetailsDto> handleAccessDeniedException(AccessDeniedException exception,
+                                                                       WebRequest webRequest){
+        ErrorDetailsDto errorDetailsDto = new ErrorDetailsDto(new Date(), exception.getMessage(),
                 webRequest.getDescription(false));
-        return new ResponseEntity<>(errorDetails, HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(errorDetailsDto, HttpStatus.UNAUTHORIZED);
     }
 }

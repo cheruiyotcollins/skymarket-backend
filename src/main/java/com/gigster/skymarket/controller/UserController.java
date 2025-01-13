@@ -37,8 +37,8 @@ public class UserController {
             @ApiResponse(responseCode = "404",description = "User not found",content = @Content),
             @ApiResponse(responseCode = "400",description = "Bad Request",content = @Content)})
     @PostMapping(value = "/signup")
-    public ResponseEntity<ResponseDto> register(@RequestBody SignUpRequest signUpRequest){
-        return userService.register(signUpRequest);
+    public ResponseEntity<ResponseDto> register(@RequestBody SignUpRequestDto signUpRequestDto){
+        return userService.register(signUpRequestDto);
     }
 
     @Operation(summary = "User sign in")
@@ -51,19 +51,19 @@ public class UserController {
     @PreAuthorize("permitAll()")
     @PostMapping(value = "/signin")
     public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
-        LoginResponse loginResponse = userService.login(loginDto);
+        LoginResponseDto loginResponseDto = userService.login(loginDto);
 
         // If not the first login, return the JWT token in the response
-        JWTAuthResponse jwtAuthResponse = new JWTAuthResponse();
-        String token = loginResponse.getAccessToken();
-        jwtAuthResponse.setAccessToken(token);
-        if (loginResponse.isFirstLogin()) {
-            loginResponse.setSuccess(0);
-            loginResponse.setMessage("First login detected. Please change your password.");
-            loginResponse.setAccessToken(token);
-            return new ResponseEntity<>(loginResponse, HttpStatus.OK);
+        JWTAuthResponseDto jwtAuthResponseDto = new JWTAuthResponseDto();
+        String token = loginResponseDto.getAccessToken();
+        jwtAuthResponseDto.setAccessToken(token);
+        if (loginResponseDto.isFirstLogin()) {
+            loginResponseDto.setSuccess(0);
+            loginResponseDto.setMessage("First login detected. Please change your password.");
+            loginResponseDto.setAccessToken(token);
+            return new ResponseEntity<>(loginResponseDto, HttpStatus.OK);
         }
-        return ResponseEntity.ok(jwtAuthResponse);
+        return ResponseEntity.ok(jwtAuthResponseDto);
     }
 
     @Operation(summary = "Update User Info")
@@ -75,8 +75,8 @@ public class UserController {
             @ApiResponse(responseCode = "400",description = "Bad Request",content = @Content)})
 
     @PutMapping
-    public ResponseEntity<?> updateUser(@RequestBody SignUpRequest signUpRequest){
-        return userService.register(signUpRequest);
+    public ResponseEntity<?> updateUser(@RequestBody SignUpRequestDto signUpRequestDto){
+        return userService.register(signUpRequestDto);
 
     }
 
@@ -130,8 +130,8 @@ public class UserController {
             @ApiResponse(responseCode = "404",description = "Role not found",content = @Content),
             @ApiResponse(responseCode = "400",description = "Bad Request",content = @Content)})
     @PostMapping("/new/role")
-    public ResponseEntity<?> addRole(@RequestBody AddRoleRequest addRoleRequest){
-        return userService.addRole(addRoleRequest);
+    public ResponseEntity<?> addRole(@RequestBody AddRoleRequestDto addRoleRequestDto){
+        return userService.addRole(addRoleRequestDto);
     }
 
     @Operation(summary = "Find Current User")
