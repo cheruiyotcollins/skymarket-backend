@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AdminDto {
     private Long adminId;
-    private  String adminName;
+    private  String fullName;
     private String email;
     private String contact;
     @Temporal(TemporalType.TIMESTAMP)
