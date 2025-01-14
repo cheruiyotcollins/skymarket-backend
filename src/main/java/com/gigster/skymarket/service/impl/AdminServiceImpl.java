@@ -38,7 +38,7 @@ public class AdminServiceImpl implements AdminService {
         try {
             Admin admin = Admin.builder()
                     .email(newAdmin.getEmail())
-                    .adminName(newAdmin.getAdminName())
+                    .fullName(newAdmin.getFullName())
                     .contact(newAdmin.getContact())
                     .build();
 
@@ -78,7 +78,7 @@ public class AdminServiceImpl implements AdminService {
         Admin existingAdmin = adminRepository.findById(adminDto.getAdminId()).get();
         log.info("admin id: {}", existingAdmin.getAdminId());
 
-        existingAdmin.setAdminName(adminDto.getAdminName());
+        existingAdmin.setFullName(adminDto.getFullName());
         existingAdmin.setContact(PhoneNumberEditor.resolveNumber(adminDto.getContact()));
         existingAdmin.setCreatedOn(DateUtils.dateNowString());
         existingAdmin.setEmail(adminDto.getEmail());
