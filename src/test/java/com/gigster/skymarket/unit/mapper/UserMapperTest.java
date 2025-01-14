@@ -29,9 +29,10 @@ class UserMapperTest {
         user.setEmail("test@example.com");
         user.setUsername("testuser");
 
-        Role role1 = new Role(1L, RoleName.ROLE_ADMIN);
-        Role role2 = new Role(2L, RoleName.ROLE_CUSTOMER);
-        user.setRoles(Set.of(role1, role2));
+        Role role1 = new Role(1L, RoleName.ROLE_SUPER_ADMIN);
+        Role role2 = new Role(2L, RoleName.ROLE_ADMIN);
+        Role role3 = new Role(3L, RoleName.ROLE_CUSTOMER);
+        user.setRoles(Set.of(role1, role2, role3));
 
         // Act
         UserDto userDto = userMapper.toDto(user);
@@ -40,7 +41,7 @@ class UserMapperTest {
         assertThat(userDto).isNotNull();
         assertThat(userDto.getEmail()).isEqualTo(user.getEmail());
         assertThat(userDto.getUsername()).isEqualTo(user.getUsername());
-        assertThat(userDto.getRoles()).containsExactlyInAnyOrder(RoleName.ROLE_ADMIN, RoleName.ROLE_CUSTOMER);
+        assertThat(userDto.getRoles()).containsExactlyInAnyOrder(RoleName.ROLE_SUPER_ADMIN, RoleName.ROLE_ADMIN, RoleName.ROLE_CUSTOMER);
     }
 
     @Test
@@ -48,8 +49,8 @@ class UserMapperTest {
         // Arrange
         UserDto userDto = new UserDto();
         userDto.setEmail("test@example.com");
-        userDto.setUsername("testuser");
-        userDto.setRoles(Set.of(RoleName.ROLE_ADMIN, RoleName.ROLE_CUSTOMER));
+        userDto.setUsername("tester");
+        userDto.setRoles(Set.of(RoleName.ROLE_SUPER_ADMIN, RoleName.ROLE_ADMIN, RoleName.ROLE_CUSTOMER));
 
         // Act
         User user = userMapper.toEntity(userDto);
@@ -60,6 +61,6 @@ class UserMapperTest {
         assertThat(user.getUsername()).isEqualTo(userDto.getUsername());
         assertThat(user.getRoles())
                 .extracting(Role::getName)
-                .containsExactlyInAnyOrder(RoleName.ROLE_CUSTOMER, RoleName.ROLE_ADMIN);
+                .containsExactlyInAnyOrder(RoleName.ROLE_SUPER_ADMIN, RoleName.ROLE_ADMIN, RoleName.ROLE_CUSTOMER);
     }
 }
