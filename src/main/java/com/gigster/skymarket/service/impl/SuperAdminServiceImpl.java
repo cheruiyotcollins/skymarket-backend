@@ -38,7 +38,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         try {
             SuperAdmin superAdmin = SuperAdmin.builder()
                     .email(newSuperAdmin.getEmail())
-                    .superAdminName(newSuperAdmin.getSuperAdminName())
+                    .fullName(newSuperAdmin.getFullName())
                     .contact(newSuperAdmin.getContact())
                     .build();
 
@@ -78,7 +78,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         SuperAdmin existingSuperAdmin = superAdminRepo.findById(superAdminDto.getSuperAdminId()).get();
         log.info("admin id: {}", existingSuperAdmin.getSuperAdminId());
 
-        existingSuperAdmin.setSuperAdminName(superAdminDto.getSuperAdminName());
+        existingSuperAdmin.setFullName(superAdminDto.getFullName());
         existingSuperAdmin.setContact(PhoneNumberEditor.resolveNumber(superAdminDto.getContact()));
         existingSuperAdmin.setCreatedOn(DateUtils.dateNowString());
         existingSuperAdmin.setEmail(superAdminDto.getEmail());

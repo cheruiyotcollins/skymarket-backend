@@ -18,7 +18,7 @@ public class SuperAdmin {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long superAdminId;
-    private String superAdminName;
+    private String fullName;
     private String email;
     private String createdOn;
     private String employeeNo;
