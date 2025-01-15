@@ -4,7 +4,7 @@ import com.gigster.skymarket.dto.*;
 import com.gigster.skymarket.exception.ResourceNotFoundException;
 import com.gigster.skymarket.mapper.UserMapper;
 import com.gigster.skymarket.model.Customer;
-import com.gigster.skymarket.model.MyUser;
+import com.gigster.skymarket.model.User;
 import com.gigster.skymarket.model.Role;
 import com.gigster.skymarket.repository.CustomerRepository;
 import com.gigster.skymarket.repository.RoleRepository;
@@ -12,7 +12,7 @@ import com.gigster.skymarket.repository.UserRepository;
 import com.gigster.skymarket.security.JwtTokenProvider;
 import com.gigster.skymarket.security.UserPrincipal;
 import com.gigster.skymarket.service.NotificationService;
-import com.gigster.skymarket.service.MyUserService;
+import com.gigster.skymarket.service.UserService;
 import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class MyMyUserServiceImpl implements MyUserService {
+public class UserServiceImpl implements UserService {
 
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
@@ -55,13 +55,13 @@ public class MyMyUserServiceImpl implements MyUserService {
     UserMapper userMapper;
 
 
-    public MyMyUserServiceImpl(AuthenticationManager authenticationManager,
-                               UserRepository userRepository,
-                               RoleRepository roleRepository,
-                               CustomerRepository customerRepository,
-                               PasswordEncoder passwordEncoder,
-                               JwtTokenProvider jwtTokenProvider,
-                               NotificationService notificationService) {
+    public UserServiceImpl(AuthenticationManager authenticationManager,
+                           UserRepository userRepository,
+                           RoleRepository roleRepository,
+                           CustomerRepository customerRepository,
+                           PasswordEncoder passwordEncoder,
+                           JwtTokenProvider jwtTokenProvider,
+                           NotificationService notificationService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -83,12 +83,12 @@ public class MyMyUserServiceImpl implements MyUserService {
             return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_ACCEPTABLE, "Username is already taken!");
         }
 
-        // Determine if the myUser is an admin
+        // Determine if the user is an admin
         boolean isAdmin = signUpRequestDto.getRoleName() != null && signUpRequestDto.getRoleName().equalsIgnoreCase("ROLE_ADMIN");
 
         if (isAdmin) {
-            // Create the MyUser without a Customer entity for admin users
-            MyUser adminMyUser = MyUser.builder()
+            // Create the User without a Customer entity for admin users
+            User adminUser = User.builder()
                     .email(signUpRequestDto.getEmail())
                     .password(passwordEncoder.encode(signUpRequestDto.getPassword()))
                     .fullName(signUpRequestDto.getFullName())
@@ -101,12 +101,12 @@ public class MyMyUserServiceImpl implements MyUserService {
             // Assign the admin role
             Role adminRole = roleRepository.findByName(RoleName.valueOf("ROLE_ADMIN"))
                     .orElseThrow(() -> new RuntimeException("Admin role not found!"));
-            adminMyUser.setRoles(Set.of(adminRole));
+            adminUser.setRoles(Set.of(adminRole));
 
-            // Save the Admin MyUser
-            userRepository.save(adminMyUser);
+            // Save the Admin User
+            userRepository.save(adminUser);
 
-            log.info("Registered admin: {}", adminMyUser);
+            log.info("Registered admin: {}", adminUser);
             return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED, "Admin registered successfully");
         }
 
@@ -125,15 +125,15 @@ public class MyMyUserServiceImpl implements MyUserService {
             return responseDtoSetter.responseDtoSetter(HttpStatus.INTERNAL_SERVER_ERROR, "Customer could not be created.");
         }
 
-        // Now create the MyUser entity and associate it with the Customer
-        MyUser myUser = MyUser.builder()
+        // Now create the User entity and associate it with the Customer
+        User user = User.builder()
                 .email(signUpRequestDto.getEmail())
                 .password(passwordEncoder.encode(signUpRequestDto.getPassword()))
                 .fullName(signUpRequestDto.getFullName())
                 .username(signUpRequestDto.getUsername())
                 .contact(signUpRequestDto.getContact())
                 .gender(signUpRequestDto.getGender())
-                .customer(customer) // Link the Customer to the MyUser
+                .customer(customer) // Link the Customer to the User
                 .firstLogin(false)
                 .build();
 
@@ -142,15 +142,15 @@ public class MyMyUserServiceImpl implements MyUserService {
         Role role = roleRepository.findByName(RoleName.valueOf(roleName.toUpperCase()))
                 .orElseThrow(() -> new RuntimeException("Role not found!"));
 
-        myUser.setRoles(Set.of(role));
+        user.setRoles(Set.of(role));
 
-        // Save the MyUser entity
-        userRepository.save(myUser);
+        // Save the User entity
+        userRepository.save(user);
 
-        // Log both MyUser and Customer
-        log.info("Registered myUser: {}, Associated customer: {}", myUser, customer);
+        // Log both User and Customer
+        log.info("Registered user: {}, Associated customer: {}", user, customer);
 
-        return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED, "MyUser registered successfully");
+        return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED, "User registered successfully");
     }
 
     @Override
@@ -162,10 +162,10 @@ public class MyMyUserServiceImpl implements MyUserService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
-        MyUser myUser = userRepository.findById(userPrincipal.getId()).orElseThrow();
+        User user = userRepository.findById(userPrincipal.getId()).orElseThrow();
 
-        // Check if this is the myUser's first login
-        boolean firstLogin = myUser.getFirstLogin();
+        // Check if this is the user's first login
+        boolean firstLogin = user.getFirstLogin();
 
         // If not the first login, generate a token
         String token =jwtTokenProvider.generateToken(authentication);
@@ -185,23 +185,23 @@ public class MyMyUserServiceImpl implements MyUserService {
     public ResponseEntity<ResponseDto> findUserById(long id) {
 
         try {
-            Optional<MyUser> userOptional = userRepository.findById(id);
+            Optional<User> userOptional = userRepository.findById(id);
 
             if (userOptional.isPresent()) {
-                return responseDtoSetter.responseDtoSetter(HttpStatus.OK, "MyUser info", userOptional.get());
+                return responseDtoSetter.responseDtoSetter(HttpStatus.OK, "User info", userOptional.get());
             } else {
-                return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND, "MyUser Not Found");
+                return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND, "User Not Found");
             }
 
         } catch (Exception e) {
-            return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST, "An error occurred while retrieving myUser info");
+            return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST, "An error occurred while retrieving user info");
         }
     }
 
     @Override
     public ResponseEntity<ResponseDto> getAllUsers(Pageable pageable) {
-        Page<MyUser> usersPage = userRepository.findAll(pageable);
-        List<MyUserDto> myUserDtos = usersPage.getContent()
+        Page<User> usersPage = userRepository.findAll(pageable);
+        List<UserDto> userDtos = usersPage.getContent()
                 .stream()
                 .map(userMapper::toDto)
                 .collect(Collectors.toList());
@@ -209,7 +209,7 @@ public class MyMyUserServiceImpl implements MyUserService {
         ResponseDto responseDto = ResponseDto.builder()
                 .status(HttpStatus.OK)
                 .description("List of All Users.")
-                .payload(myUserDtos)
+                .payload(userDtos)
                 .totalPages(usersPage.getTotalPages())
                 .totalElements(usersPage.getTotalElements())
                 .currentPage(usersPage.getNumber())
@@ -224,11 +224,11 @@ public class MyMyUserServiceImpl implements MyUserService {
 
         try{
             userRepository.deleteById(id);
-            return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED,"MyUser deleted successfully");
+            return responseDtoSetter.responseDtoSetter(HttpStatus.ACCEPTED,"User deleted successfully");
 
 
         }catch(Exception e){
-            return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST,"MyUser with that id not found");
+            return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST,"User with that id not found");
 
         }
     }
@@ -237,51 +237,51 @@ public class MyMyUserServiceImpl implements MyUserService {
     public ResponseEntity<ResponseDto> getCurrentUser(String email) {
 
         try {
-            MyUser myUser = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("MyUser with email " + email + "not found"));
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User with email " + email + "not found"));
 
             CurrentUserDto currentUserDto = CurrentUserDto.builder()
-                    .name(myUser.getUsername())
-                    .email(myUser.getEmail())
-                    .role(myUser.getRoles()
+                    .name(user.getUsername())
+                    .email(user.getEmail())
+                    .role(user.getRoles()
                             .stream()
                             .map(role -> role.getName().getRoleName())
                             .collect(Collectors.joining(", "))) // Join the roles into a single String
                     .build();
 
-           return responseDtoSetter.responseDtoSetter(HttpStatus.FOUND,"Current MyUser logged in", currentUserDto);
+           return responseDtoSetter.responseDtoSetter(HttpStatus.FOUND,"Current User logged in", currentUserDto);
 
         } catch (ResourceNotFoundException ex) {
             return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND,ex.getMessage());
 
         } catch (Exception ex) {
-            return responseDtoSetter.responseDtoSetter(HttpStatus.INTERNAL_SERVER_ERROR,"An error occurred while fetching the myUser details");
+            return responseDtoSetter.responseDtoSetter(HttpStatus.INTERNAL_SERVER_ERROR,"An error occurred while fetching the user details");
         }
     }
 
     @Override
     public ResponseEntity<ResponseDto> updatePassword(String newPassword, Principal principal) {
-        MyUser myUser = userRepository.findByUsername(principal.getName()).orElseThrow();
-        myUser.setPassword(passwordEncoder.encode(newPassword));
-        // myUser first login is being set to false here
-        myUser.setFirstLogin(false);
-        userRepository.save(myUser);
+        User user = userRepository.findByUsername(principal.getName()).orElseThrow();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        // user first login is being set to false here
+        user.setFirstLogin(false);
+        userRepository.save(user);
         return responseDtoSetter.responseDtoSetter(HttpStatus.OK,"Password updated successfully.");
     }
 
     @Override
     public ResponseEntity<ResponseDto> forgotPassword(String email) {
-        // Find the myUser by email
-        MyUser myUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("MyUser not found with email: " + email));
+        // Find the user by email
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         // Generate a verification code (e.g., a 6-digit code)
         String verificationCode = String.format("%06d", new Random().nextInt(999999));
 
-        // Save the verification code and expiration time to the myUser's account
-        myUser.setResetCode(verificationCode);
-        myUser.setResetCodeExpiry(LocalDateTime.now().plusMinutes(15)); // Code expires in 15 minutes
-        userRepository.save(myUser);
+        // Save the verification code and expiration time to the user's account
+        user.setResetCode(verificationCode);
+        user.setResetCodeExpiry(LocalDateTime.now().plusMinutes(15)); // Code expires in 15 minutes
+        userRepository.save(user);
 
         // Send email with the code
         String subject = "Password Reset Request";
@@ -293,24 +293,24 @@ public class MyMyUserServiceImpl implements MyUserService {
 
     @Override
     public ResponseEntity<ResponseDto> resetPassword(String email, String resetCode, String newPassword) {
-        MyUser myUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("MyUser not found with email: " + email));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        if (!myUser.getResetCode().equals(resetCode) || LocalDateTime.now().isAfter(myUser.getResetCodeExpiry())) {
+        if (!user.getResetCode().equals(resetCode) || LocalDateTime.now().isAfter(user.getResetCodeExpiry())) {
             return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST,"Invalid or expired reset code.");
         }
 
-        // Update the myUser's password
-        myUser.setPassword(passwordEncoder.encode(newPassword));
-        myUser.setResetCode(null);
-        myUser.setResetCodeExpiry(null);
-        userRepository.save(myUser);
+        // Update the user's password
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setResetCode(null);
+        user.setResetCodeExpiry(null);
+        userRepository.save(user);
 
         return responseDtoSetter.responseDtoSetter(HttpStatus.OK,"Password has been successfully reset.");
     }
 
     @Override
-    public MyUser getCurrentAuthenticatedUser() {
+    public User getCurrentAuthenticatedUser() {
         // Retrieve the current authentication from the SecurityContext
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -326,11 +326,11 @@ public class MyMyUserServiceImpl implements MyUserService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
     }
 
-    private MyUserResponseDto mapUserResponseDto(MyUser myUser){
+    private MyUserResponseDto mapUserResponseDto(User user){
         return MyUserResponseDto.builder()
-                .email(myUser.getEmail())
-                .username(myUser.getUsername())
-                .roles(myUser.getRoles().stream()
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .roles(user.getRoles().stream()
                         .map(Role::getName)
                         .collect(Collectors.toSet()))
                 .build();

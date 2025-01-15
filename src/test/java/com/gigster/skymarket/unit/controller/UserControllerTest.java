@@ -1,8 +1,8 @@
 package com.gigster.skymarket.unit.controller;
 
-import com.gigster.skymarket.controller.MyUserController;
+import com.gigster.skymarket.controller.UserController;
 import com.gigster.skymarket.dto.*;
-import com.gigster.skymarket.service.MyUserService;
+import com.gigster.skymarket.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -21,13 +21,13 @@ import java.util.Objects;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-class MyMyUserControllerTest {
+class UserControllerTest {
 
     @Mock
-    private MyUserService myUserService;
+    private UserService userService;
 
     @InjectMocks
-    private MyUserController myUserController;
+    private UserController userController;
 
     @BeforeEach
     void setUp() {
@@ -41,14 +41,14 @@ class MyMyUserControllerTest {
         ResponseDto responseDto = new ResponseDto();
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.CREATED);
 
-        when(myUserService.register(signUpRequestDto)).thenReturn(expectedResponse);
+        when(userService.register(signUpRequestDto)).thenReturn(expectedResponse);
 
         // Act
-        ResponseEntity<ResponseDto> actualResponse = myUserController.register(signUpRequestDto);
+        ResponseEntity<ResponseDto> actualResponse = userController.register(signUpRequestDto);
 
         // Assert
         assertEquals(expectedResponse, actualResponse);
-        verify(myUserService, times(1)).register(signUpRequestDto);
+        verify(userService, times(1)).register(signUpRequestDto);
     }
 
     @Test
@@ -60,14 +60,14 @@ class MyMyUserControllerTest {
         JWTAuthResponseDto jwtAuthResponseDto = new JWTAuthResponseDto();
         jwtAuthResponseDto.setAccessToken("token");
 
-        when(myUserService.login(loginDto)).thenReturn(loginResponseDto);
+        when(userService.login(loginDto)).thenReturn(loginResponseDto);
 
         // Act
-        ResponseEntity<?> actualResponse = myUserController.login(loginDto);
+        ResponseEntity<?> actualResponse = userController.login(loginDto);
 
         // Assert - Compare the access token values instead of whole ResponseEntity.
         assertEquals(jwtAuthResponseDto.getAccessToken(), ((JWTAuthResponseDto) Objects.requireNonNull(actualResponse.getBody())).getAccessToken());
-        verify(myUserService, times(1)).login(loginDto);
+        verify(userService, times(1)).login(loginDto);
     }
 
     @Test
@@ -77,14 +77,14 @@ class MyMyUserControllerTest {
         ResponseDto responseDto = new ResponseDto();
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.CREATED);
 
-        when(myUserService.register(signUpRequestDto)).thenReturn(expectedResponse);
+        when(userService.register(signUpRequestDto)).thenReturn(expectedResponse);
 
         // Act
-        ResponseEntity<ResponseDto> actualResponse = (ResponseEntity<ResponseDto>) myUserController.updateUser(signUpRequestDto);
+        ResponseEntity<ResponseDto> actualResponse = (ResponseEntity<ResponseDto>) userController.updateUser(signUpRequestDto);
 
         // Assert
         assertEquals(expectedResponse, actualResponse);
-        verify(myUserService, times(1)).register(signUpRequestDto);
+        verify(userService, times(1)).register(signUpRequestDto);
     }
 
     @Test
@@ -94,14 +94,14 @@ class MyMyUserControllerTest {
         ResponseDto responseDto = new ResponseDto();
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.FOUND);
 
-        when(myUserService.findUserById(userId)).thenReturn(expectedResponse);
+        when(userService.findUserById(userId)).thenReturn(expectedResponse);
 
         // Act
-        ResponseEntity<ResponseDto> actualResponse = (ResponseEntity<ResponseDto>) myUserController.findUserById(userId);
+        ResponseEntity<ResponseDto> actualResponse = (ResponseEntity<ResponseDto>) userController.findUserById(userId);
 
         // Assert
         assertEquals(expectedResponse, actualResponse);
-        verify(myUserService, times(1)).findUserById(userId);
+        verify(userService, times(1)).findUserById(userId);
     }
 
     @Test
@@ -114,14 +114,14 @@ class MyMyUserControllerTest {
         ResponseDto responseDto = new ResponseDto();
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.FOUND);
 
-        when(myUserService.getAllUsers(pageable)).thenReturn(expectedResponse);
+        when(userService.getAllUsers(pageable)).thenReturn(expectedResponse);
 
         // Act
-        ResponseEntity<ResponseDto> actualResponse = myUserController.getAllUsers(page, size, sort);
+        ResponseEntity<ResponseDto> actualResponse = userController.getAllUsers(page, size, sort);
 
         // Assert
         assertEquals(expectedResponse, actualResponse);
-        verify(myUserService, times(1)).getAllUsers(pageable);
+        verify(userService, times(1)).getAllUsers(pageable);
     }
 
     @Test
@@ -131,14 +131,14 @@ class MyMyUserControllerTest {
         ResponseDto responseDto = new ResponseDto();
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.OK);
 
-        when(myUserService.deleteById(userId)).thenReturn(expectedResponse);
+        when(userService.deleteById(userId)).thenReturn(expectedResponse);
 
         // Act
-        ResponseEntity<ResponseDto> actualResponse = (ResponseEntity<ResponseDto>) myUserController.deleteById(userId);
+        ResponseEntity<ResponseDto> actualResponse = (ResponseEntity<ResponseDto>) userController.deleteById(userId);
 
         // Assert
         assertEquals(expectedResponse, actualResponse);
-        verify(myUserService, times(1)).deleteById(userId);
+        verify(userService, times(1)).deleteById(userId);
     }
 
     @Test
@@ -148,14 +148,14 @@ class MyMyUserControllerTest {
         ResponseDto responseDto = new ResponseDto();
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.CREATED);
 
-        when(myUserService.addRole(addRoleRequestDto)).thenReturn(expectedResponse);
+        when(userService.addRole(addRoleRequestDto)).thenReturn(expectedResponse);
 
         // Act
-        ResponseEntity<ResponseDto> actualResponse = (ResponseEntity<ResponseDto>) myUserController.addRole(addRoleRequestDto);
+        ResponseEntity<ResponseDto> actualResponse = (ResponseEntity<ResponseDto>) userController.addRole(addRoleRequestDto);
 
         // Assert
         assertEquals(expectedResponse, actualResponse);
-        verify(myUserService, times(1)).addRole(addRoleRequestDto);
+        verify(userService, times(1)).addRole(addRoleRequestDto);
     }
 
     @Test
@@ -167,14 +167,14 @@ class MyMyUserControllerTest {
         ResponseDto responseDto = new ResponseDto();
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.CREATED);
 
-        when(myUserService.getCurrentUser(username)).thenReturn(expectedResponse);
+        when(userService.getCurrentUser(username)).thenReturn(expectedResponse);
 
         // Act
-        ResponseEntity<ResponseDto> actualResponse = (ResponseEntity<ResponseDto>) myUserController.getCurrentUser(authentication);
+        ResponseEntity<ResponseDto> actualResponse = (ResponseEntity<ResponseDto>) userController.getCurrentUser(authentication);
 
         // Assert
         assertEquals(expectedResponse, actualResponse);
-        verify(myUserService, times(1)).getCurrentUser(username);
+        verify(userService, times(1)).getCurrentUser(username);
     }
 
     @Test
@@ -186,13 +186,13 @@ class MyMyUserControllerTest {
         ResponseDto responseDto = new ResponseDto();
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.OK);
 
-        when(myUserService.updatePassword(changePasswordDto.getNewPassword(), principal)).thenReturn(expectedResponse);
+        when(userService.updatePassword(changePasswordDto.getNewPassword(), principal)).thenReturn(expectedResponse);
 
         // Act
-        ResponseEntity<ResponseDto> actualResponse = (ResponseEntity<ResponseDto>) myUserController.updatePassword(changePasswordDto, principal);
+        ResponseEntity<ResponseDto> actualResponse = (ResponseEntity<ResponseDto>) userController.updatePassword(changePasswordDto, principal);
 
         // Assert
         assertEquals(expectedResponse, actualResponse);
-        verify(myUserService, times(1)).updatePassword(changePasswordDto.getNewPassword(), principal);
+        verify(userService, times(1)).updatePassword(changePasswordDto.getNewPassword(), principal);
     }
 }
