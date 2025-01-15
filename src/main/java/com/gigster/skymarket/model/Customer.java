@@ -2,7 +2,6 @@ package com.gigster.skymarket.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,11 +32,20 @@ public class Customer implements Serializable {
     private String gender;
 
     @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private User user; // mappedBy is pointing to the 'customer' field in the User entity
+    private MyUser myUser; // mappedBy is pointing to the 'customer' field in the MyUser entity
 
     @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private Cart cart;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "customer_likes_product",
+            joinColumns = @JoinColumn(name = "customer_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id")
+    )
+    private List<Product> likedProducts = new ArrayList<>();
+
 }
