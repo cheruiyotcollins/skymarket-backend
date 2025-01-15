@@ -13,6 +13,17 @@ public class DateUtils {
         TimeZone.setDefault(TimeZone.getTimeZone(zoneId));
         return new Date(System.currentTimeMillis());
     }
+
+    public static String formatDateTime(String date) {
+        // Assuming date is in the default format "Wed Jan 15 20:53:30 EAT 2025"
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz yyyy");
+        LocalDateTime localDateTime = LocalDateTime.parse(date, inputFormatter);
+
+        // Define the desired output format
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return localDateTime.format(outputFormatter);
+    }
+
     public static String dateNowString(){
         ZoneId zoneId = ZoneId.of("Africa/Nairobi");
         TimeZone.setDefault(TimeZone.getTimeZone(zoneId));
