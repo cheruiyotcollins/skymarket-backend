@@ -14,7 +14,7 @@ public class Admin {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long adminId;
-    private  String adminName;
+    private  String fullName;
     private String email;
     private String contact;
     @Builder.Default

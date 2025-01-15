@@ -82,4 +82,9 @@ public class User {
 
     private String resetCode;
     private LocalDateTime resetCodeExpiry;
+
+    public boolean hasRole(String roleName) {
+        roles.stream().anyMatch(role -> false);
+        return true;
+    }
 }

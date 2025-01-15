@@ -33,7 +33,7 @@ public class ProcRepository {
             return Admin.builder()
                     .email(rs.getString("email"))
                     .adminId(rs.getLong("admin_id"))
-                    .adminName(rs.getString("admin_name"))
+                    .fullName(rs.getString("full_name"))
                     .createdOn(rs.getString("created_on"))
                     .contact(rs.getString("contact"))
                     .build();
@@ -46,7 +46,7 @@ public class ProcRepository {
             return SuperAdmin.builder()
                     .email(rs.getString("email"))
                     .superAdminId(rs.getLong("superAdmin_id"))
-                    .superAdminName(rs.getString("superAdmin_name"))
+                    .fullName(rs.getString("full_name"))
                     .createdOn(rs.getString("created_on"))
                     .contact(rs.getString("contact"))
                     .employeeNo(rs.getString("employee_no"))

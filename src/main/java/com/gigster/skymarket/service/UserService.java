@@ -1,6 +1,7 @@
 package com.gigster.skymarket.service;
 
 import com.gigster.skymarket.dto.*;
+import com.gigster.skymarket.model.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
@@ -27,4 +28,6 @@ public interface UserService {
     ResponseEntity<ResponseDto> forgotPassword(String email);
 
     ResponseEntity<ResponseDto> resetPassword(String email, String resetCode, String newPassword);
+
+    User getCurrentAuthenticatedUser();
 }

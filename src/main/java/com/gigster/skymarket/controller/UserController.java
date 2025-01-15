@@ -1,8 +1,8 @@
 package com.gigster.skymarket.controller;
 
 import com.gigster.skymarket.dto.*;
-import com.gigster.skymarket.model.Role;
 import com.gigster.skymarket.model.User;
+import com.gigster.skymarket.model.Role;
 import com.gigster.skymarket.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

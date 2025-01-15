@@ -66,29 +66,37 @@ public class SecurityConfig {
 
                                 // Endpoints requiring specific roles.
                                 //  User endpoints.
-                                .requestMatchers("/api/v1/users/auth/current").hasAnyAuthority("ADMIN", "CUSTOMER")
-                                .requestMatchers("/api/v1/users/auth/update").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.GET, "/api/v1/users/auth").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.GET, "/api/v1/users/auth/id/*").hasAuthority("ADMIN")
-                                .requestMatchers("/api/v1/users/auth/new/role").hasAuthority("ADMIN")
+                                .requestMatchers("/api/v1/users/auth/current").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN", "ROLE_CUSTOMER")
+                                .requestMatchers("/api/v1/users/auth/update").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/users/auth").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/users/auth/id/*").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN")
+                                .requestMatchers("/api/v1/users/auth/new/role").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN")
+
                                 //  Product endpoints.
-                                .requestMatchers(HttpMethod.PUT, "/api/v1/products/{id}").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.DELETE, "/api/v1/products/{id}").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/api/v1/products/{id}").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/products/{id}").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/products/{id}").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/api/v1/products/{id}").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN")
+
                                 //  Customer endpoints.
-                                .requestMatchers(HttpMethod.POST, "/api/v1/customers").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.GET, "/api/v1/customers").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.GET, "/api/v1/customers/{id}").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.DELETE, "/api/v1/customers/{id}").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/api/v1/customers").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/customers").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/customers/{id}").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/customers/{id}").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN")
+
+                                //  Cart endpoints.
+                                .requestMatchers(HttpMethod.GET, "/api/v1/carts").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/carts/customerId").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN")
+
                                 //  Cart items endpoints.
-                                .requestMatchers(HttpMethod.POST, "/api/v1/carts/items").hasAnyAuthority("ADMIN", "CUSTOMER")
+                                .requestMatchers(HttpMethod.POST, "/api/v1/carts/items").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ADMIN", "ROLE_CUSTOMER")
+
                                 //  Order endpoints.
-                                .requestMatchers(HttpMethod.POST, "/api/v1/orders").hasAnyAuthority("ADMIN", "CUSTOMER")
-                                .requestMatchers(HttpMethod.GET, "/api/v1/orders/{id}").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.GET, "/api/v1/orders").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.PUT, "/api/v1/orders/{id}").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.PATCH, "/api/v1/orders/{id}").hasAnyAuthority("ADMIN", "CUSTOMER")
-                                .requestMatchers(HttpMethod.DELETE, "/api/v1/orders/{id}").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/api/v1/orders").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ADMIN", "ROLE_CUSTOMER")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/orders/{id}").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/v1/orders").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/api/v1/orders/{id}").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN")
+                                .requestMatchers(HttpMethod.PATCH, "/api/v1/orders/{id}").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ADMIN", "ROLE_CUSTOMER")
+                                .requestMatchers(HttpMethod.DELETE, "/api/v1/orders/{id}").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN")
 
                                 .anyRequest().authenticated()
                 )

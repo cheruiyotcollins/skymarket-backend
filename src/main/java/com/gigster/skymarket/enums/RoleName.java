@@ -1,9 +1,9 @@
 package com.gigster.skymarket.enums;
 
 public enum RoleName {
+    ROLE_SUPER_ADMIN,
     ROLE_ADMIN,
-    ROLE_CUSTOMER,
-    ROLE_SUPERADMIN;
+    ROLE_CUSTOMER;
 
     // Example getter for the enum name as a string
     public String getRoleName() {

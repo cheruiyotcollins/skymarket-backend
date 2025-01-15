@@ -4,8 +4,8 @@ import com.gigster.skymarket.dto.*;
 import com.gigster.skymarket.exception.ResourceNotFoundException;
 import com.gigster.skymarket.mapper.UserMapper;
 import com.gigster.skymarket.model.Customer;
-import com.gigster.skymarket.model.Role;
 import com.gigster.skymarket.model.User;
+import com.gigster.skymarket.model.Role;
 import com.gigster.skymarket.repository.CustomerRepository;
 import com.gigster.skymarket.repository.RoleRepository;
 import com.gigster.skymarket.repository.UserRepository;
@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -308,8 +309,25 @@ public class UserServiceImpl implements UserService {
         return responseDtoSetter.responseDtoSetter(HttpStatus.OK,"Password has been successfully reset.");
     }
 
-    private UserResponseDto mapUserResponseDto(User user){
-        return UserResponseDto.builder()
+    @Override
+    public User getCurrentAuthenticatedUser() {
+        // Retrieve the current authentication from the SecurityContext
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated() || authentication instanceof AnonymousAuthenticationToken) {
+            throw new IllegalStateException("No authenticated user found");
+        }
+
+        // Get the username (or principal) from the authentication
+        String username = authentication.getName();
+
+        // Retrieve the user from the repository
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+    }
+
+    private MyUserResponseDto mapUserResponseDto(User user){
+        return MyUserResponseDto.builder()
                 .email(user.getEmail())
                 .username(user.getUsername())
                 .roles(user.getRoles().stream()
