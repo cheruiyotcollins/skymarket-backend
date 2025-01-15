@@ -32,7 +32,7 @@ public class Customer implements Serializable {
     private String gender;
 
     @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private MyUser myUser; // mappedBy is pointing to the 'customer' field in the MyUser entity
+    private User user; // mappedBy is pointing to the 'customer' field in the User entity
 
     @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private Cart cart;
