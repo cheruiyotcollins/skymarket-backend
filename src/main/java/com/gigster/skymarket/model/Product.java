@@ -20,8 +20,8 @@ public class Product implements Serializable {
 
     @Column(nullable = false, unique = true)
     private String productName;
-
-    @Column(nullable = false, unique = true)
+//todo agree on using either id or product id
+    @Column(nullable = true, unique = true)
     private Long productId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
