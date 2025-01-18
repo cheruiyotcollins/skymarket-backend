@@ -4,7 +4,6 @@ import com.gigster.skymarket.dto.NewProductDto;
 import com.gigster.skymarket.dto.ProductDto;
 import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.mapper.ProductMapper;
-import com.gigster.skymarket.model.Cart;
 import com.gigster.skymarket.model.Category;
 import com.gigster.skymarket.model.Product;
 import com.gigster.skymarket.repository.CategoryRepository;
@@ -148,12 +147,12 @@ public class ProductServiceImpl implements ProductService {
     // Method to map Product to ProductDto.
     private ProductDto mapToDto(Product product) {
         return ProductDto.builder()
-                .name(product.getProductName())
+                .title(product.getProductName())
                 .productId(product.getProductId())
-                .categoryId(product.getCategory().getCategoryId())
+                .category(product.getCategory().getCategoryName().name())
                 .description(product.getDescription())
                 .price(product.getPrice())
-                .imageUrl(product.getImageUrl())
+                .image(product.getImageUrl())
                 .build();
     }
 
