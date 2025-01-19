@@ -29,14 +29,17 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ResponseDto> getProductById(@PathVariable Long id) {
-        return productService.getProductById(id);
+        //todo the first index of a product from frontend is starting from 0 we temporarily add 1 to id as
+        //we find another better way to handle this
+        return productService.getProductById(id+1);
     }
 
     @GetMapping
     public ResponseEntity<ResponseDto> getAllProducts(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
+            //todo confirm if removing asc affects the response
+            @RequestParam(value = "sort", defaultValue = "id") String sort) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
         return productService.getAllProducts(pageable);
     }

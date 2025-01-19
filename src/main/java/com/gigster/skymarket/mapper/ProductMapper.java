@@ -1,6 +1,7 @@
 package com.gigster.skymarket.mapper;
 
 import com.gigster.skymarket.dto.ProductDto;
+import com.gigster.skymarket.dto.Rating;
 import com.gigster.skymarket.enums.CategoryName;
 import com.gigster.skymarket.model.Category;
 import com.gigster.skymarket.model.Product;
@@ -19,11 +20,12 @@ public class ProductMapper {
         }
 
         return ProductDto.builder()
-                .name(product.getProductName())
+                .title(product.getProductName())
                 .description(product.getDescription())
                 .price(product.getPrice())
-                .categoryId(product.getCategory() != null ? Long.valueOf(product.getCategory().getCategoryName().name()) : null)
-                .imageUrl(product.getImageUrl())
+                .category(product.getCategory() != null ? product.getCategory().getCategoryName().name() : null)
+                .image(product.getImageUrl())
+                .rating(Rating.builder().rate(product.getRating()).count(product.getCount()).build())
                 .build();
     }
 
@@ -34,20 +36,20 @@ public class ProductMapper {
         }
 
         Product product = new Product();
-        product.setProductName(productDto.getName());
+        product.setProductName(productDto.getTitle());
         product.setDescription(productDto.getDescription());
         product.setPrice(productDto.getPrice());
 
         // Create a Category object using CategoryName from the DTO
-        if (productDto.getCategoryId() != null) {
+        if (productDto.getCategory() != null) {
             Category category = new Category();
-            category.setCategoryName(CategoryName.fromString(String.valueOf(productDto.getCategoryId())));
+            category.setCategoryName(CategoryName.fromString(String.valueOf(productDto.getCategory())));
             product.setCategory(category);
         } else {
             product.setCategory(null);
         }
 
-        product.setImageUrl(productDto.getImageUrl());
+        product.setImageUrl(productDto.getImage());
         return product;
     }
 

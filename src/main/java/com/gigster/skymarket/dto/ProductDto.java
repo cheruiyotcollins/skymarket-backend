@@ -6,11 +6,13 @@ import lombok.Data;
 @Data
 @Builder
 public class ProductDto {
-    private String name;
+    private long id;
+    private String title;
     private String description;
     private Double price;
-    private Long categoryId;
-    private String imageUrl;
+    private String category;
+    private String image;
     private Long productId;
+    private Rating  rating;
 
 }

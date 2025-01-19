@@ -20,8 +20,8 @@ public class Product implements Serializable {
 
     @Column(nullable = false, unique = true)
     private String productName;
-
-    @Column(nullable = false, unique = true)
+//todo agree on using either id or product id
+    @Column(nullable = true, unique = true)
     private Long productId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
@@ -41,4 +41,8 @@ public class Product implements Serializable {
 
     @Column(nullable = false)
     private int stock;
+    //todo set rating and count to 0 when a product is added
+    private double rating;
+    private int count;
+
 }
