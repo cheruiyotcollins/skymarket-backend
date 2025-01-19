@@ -60,7 +60,7 @@ public class ProductServiceImpl implements ProductService {
         if (optionalProduct.isPresent()) {
             Product product=optionalProduct.get();
             ProductDto productDto=productMapper.toDto(product);
-            return responseDtoSetter.responseDtoSetter(HttpStatus.FOUND, "Product Fetched Successfully", productDto);
+            return responseDtoSetter.responseDtoSetter(HttpStatus.OK, "Product Fetched Successfully", productDto);
         } else {
             return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND, "Product not found with ID: " + id);
         }
@@ -135,10 +135,14 @@ public class ProductServiceImpl implements ProductService {
 
     private Product setProduct(NewProductDto newProductDto) {
         Product product = Product.builder()
-                .productName(newProductDto.getProductName())
-                .stock(newProductDto.getStock())
+                .productName(newProductDto.getTitle())
+                .imageUrl(newProductDto.getImage())
+                .description(newProductDto.getDescription())
                 .price(newProductDto.getPrice())
                 .manufacturer(newProductDto.getManufacturer())
+                .stock(0)
+                .count(0)
+                .rating(0)
                 .build();
         // If mandatory is present then set it
         Optional<Category> category = categoryRepository.findById(newProductDto.getCategory_id());
