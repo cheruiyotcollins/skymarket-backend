@@ -4,9 +4,10 @@ import lombok.Data;
 
 @Data
 public class NewProductDto {
-    private String productName;
+    private String title;
     private long category_id;
     private String manufacturer;
+    private String description;
+    private String image;
     private double price;
-    private int stock;
 }

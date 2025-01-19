@@ -29,9 +29,7 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ResponseDto> getProductById(@PathVariable Long id) {
-        //todo the first index of a product from frontend is starting from 0 we temporarily add 1 to id as
-        //we find another better way to handle this
-        return productService.getProductById(id+1);
+        return productService.getProductById(id);
     }
 
     @GetMapping
