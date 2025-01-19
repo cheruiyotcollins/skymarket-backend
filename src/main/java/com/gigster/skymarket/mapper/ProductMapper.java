@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+//todo to use mapstruct
 public class ProductMapper {
 
     // Map Product entity to ProductDto
@@ -20,6 +21,7 @@ public class ProductMapper {
         }
 
         return ProductDto.builder()
+                .id(product.getId())
                 .title(product.getProductName())
                 .description(product.getDescription())
                 .price(product.getPrice())
