@@ -58,7 +58,9 @@ public class ProductServiceImpl implements ProductService {
     public ResponseEntity<ResponseDto> getProductById(Long id) {
         Optional<Product> optionalProduct = productRepository.findById(id);
         if (optionalProduct.isPresent()) {
-            return responseDtoSetter.responseDtoSetter(HttpStatus.FOUND, "Product Fetched Successfully", optionalProduct.get());
+            Product product=optionalProduct.get();
+            ProductDto productDto=productMapper.toDto(product);
+            return responseDtoSetter.responseDtoSetter(HttpStatus.FOUND, "Product Fetched Successfully", productDto);
         } else {
             return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND, "Product not found with ID: " + id);
         }
@@ -148,7 +150,6 @@ public class ProductServiceImpl implements ProductService {
     private ProductDto mapToDto(Product product) {
         return ProductDto.builder()
                 .title(product.getProductName())
-                .productId(product.getProductId())
                 .category(product.getCategory().getCategoryName().name())
                 .description(product.getDescription())
                 .price(product.getPrice())
