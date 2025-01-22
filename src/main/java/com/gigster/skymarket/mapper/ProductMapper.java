@@ -1,7 +1,7 @@
 package com.gigster.skymarket.mapper;
 
 import com.gigster.skymarket.dto.ProductDto;
-import com.gigster.skymarket.dto.Rating;
+import com.gigster.skymarket.dto.RatingDto;
 import com.gigster.skymarket.enums.CategoryName;
 import com.gigster.skymarket.model.Category;
 import com.gigster.skymarket.model.Product;
@@ -27,7 +27,7 @@ public class ProductMapper {
                 .price(product.getPrice())
                 .category(product.getCategory() != null ? product.getCategory().getCategoryName().name() : null)
                 .image(product.getImageUrl())
-                .rating(Rating.builder().rate(product.getRating()).count(product.getCount()).build())
+                .ratingDto(RatingDto.builder().rate(product.getRating()).count(product.getCount()).build())
                 .build();
     }
 
