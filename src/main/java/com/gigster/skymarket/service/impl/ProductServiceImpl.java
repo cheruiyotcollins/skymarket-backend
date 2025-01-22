@@ -142,7 +142,7 @@ public class ProductServiceImpl implements ProductService {
                 .manufacturer(newProductDto.getManufacturer())
                 .stock(0)
                 .count(0)
-                .rating(0)
+                .rating(0.0)
                 .build();
         // If mandatory is present then set it
         Optional<Category> category = categoryRepository.findById(newProductDto.getCategory_id());
