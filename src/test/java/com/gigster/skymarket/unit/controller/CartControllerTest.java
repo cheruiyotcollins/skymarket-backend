@@ -46,12 +46,13 @@ class CartControllerTest {
 
         // Setup mock user principal
         mockUserPrincipal = new UserPrincipal(
-                1L,                      // id
-                "Kib Van Hag",              // name
+                1L,                     // id
+                1L,                     // customerId
+                "Kib Van Hag",          // name
                 "kibhag",               // username
                 "kib.hag@example.com",  // email
-                "1234567890",            // phoneNo
-                "password",              // password
+                "1234567890",           // phoneNo
+                "password",             // password
                 List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER")) // authorities
         );
 
@@ -68,14 +69,14 @@ class CartControllerTest {
         responseDto.setStatus(HttpStatus.valueOf(HttpStatus.CREATED.value()));
         ResponseEntity<ResponseDto> expectedResponse = ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
 
-        when(cartService.addCart(mockUserPrincipal)).thenReturn(expectedResponse);
+        when(cartService.createCart(mockUserPrincipal)).thenReturn(expectedResponse);
 
         // Act
-        ResponseEntity<ResponseDto> actualResponse = cartController.addCart();
+        ResponseEntity<ResponseDto> actualResponse = cartController.createCart();
 
         // Assert
         assertEquals(expectedResponse, actualResponse);
-        verify(cartService, times(1)).addCart(mockUserPrincipal);
+        verify(cartService, times(1)).createCart(mockUserPrincipal);
     }
 
     @Test
