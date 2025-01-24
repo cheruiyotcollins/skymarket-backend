@@ -20,6 +20,8 @@ public class UserPrincipal implements UserDetails {
     @EqualsAndHashCode.Include
     private final Long id;
 
+    private final Long customerId;
+
     private final String name;
     private final String username;
     private final String email;
@@ -32,6 +34,7 @@ public class UserPrincipal implements UserDetails {
     public static UserPrincipal create(User user) {
         return new UserPrincipal(
                 user.getUserId(),
+                user.getCustomerId(),
                 user.getFullName(),
                 user.getUsername(),
                 user.getEmail(),
