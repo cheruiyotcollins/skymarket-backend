@@ -8,7 +8,6 @@ import com.gigster.skymarket.model.Customer;
 import com.gigster.skymarket.repository.CartItemRepository;
 import com.gigster.skymarket.repository.CartRepository;
 import com.gigster.skymarket.repository.CustomerRepository;
-import com.gigster.skymarket.repository.UserRepository;
 import com.gigster.skymarket.security.CurrentUserV2;
 import com.gigster.skymarket.security.UserPrincipal;
 import com.gigster.skymarket.service.CartService;
@@ -26,6 +25,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,9 +33,6 @@ import java.util.stream.Collectors;
 public class CartServiceImpl implements CartService {
     @Autowired
     CartRepository cartRepository;
-
-    @Autowired
-    UserRepository userRepository;
 
     @Autowired
     CartItemRepository cartItemRepository;
@@ -53,24 +50,27 @@ public class CartServiceImpl implements CartService {
     CartItemsToCartItemsDtoMapper cartItemsToCartItemsDtoMapper;
 
     @Override
-    public ResponseEntity<ResponseDto> addCart(UserPrincipal userPrincipal) {
+    public ResponseEntity<ResponseDto>createCart(UserPrincipal userPrincipal) {
         try {
             // Map the authenticated user to a customer
             Customer customer = CurrentUserV2.mapToCustomer(userPrincipal);
+            log.debug("Mapped customer: {}", customer);
 
-            // Debugging step: Ensure customerId is correctly set
-            if (customer == null || customer.getCustomerId() == null) {
-                log.error("Customer is null or customer ID is null: {}", customer);
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            // Validate customer existence
+            Optional<Customer> existingCustomer = customerRepository.findById(customer.getCustomerId());
+            if (existingCustomer.isEmpty()) {
+                log.error("Customer with ID {} does not exist.", customer.getCustomerId());
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                         ResponseDto.builder()
-                                .status(HttpStatus.BAD_REQUEST)
-                                .description("Customer ID is null, cannot create cart.")
+                                .status(HttpStatus.NOT_FOUND)
+                                .description("Customer not found.")
                                 .build()
                 );
             }
 
             // Check if the customer already has a cart
             if (cartRepository.existsByCustomerId(customer.getCustomerId())) {
+                log.error("Customer already has a cart: {}", customer.getCustomerId());
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(
                         ResponseDto.builder()
                                 .status(HttpStatus.CONFLICT)
@@ -79,25 +79,23 @@ public class CartServiceImpl implements CartService {
                 );
             }
 
-            // Proceed to create the cart
+            // Create and save the cart
             Cart cart = Cart.builder()
-                    .customer(customer)  // Associate the cart with the current customer
-                    .totalPrice(0.0)      // Initialize with a default total price
+                    .customer(existingCustomer.get()) // Use the persisted customer entity
+                    .totalPrice(0.0) // Initialize total price
                     .build();
+            Cart savedCart = cartRepository.save(cart);
+            log.info("Cart created successfully: {}", savedCart);
 
-            cartRepository.save(cart);
-
-            // Ensure a valid response is returned with the cart payload
             return ResponseEntity.status(HttpStatus.CREATED).body(
                     ResponseDto.builder()
                             .status(HttpStatus.CREATED)
                             .description("Cart created successfully.")
-                            .payload(cart)
+                            .payload(savedCart)
                             .build()
             );
         } catch (Exception e) {
             log.error("Error creating cart: {}", e.getMessage(), e);
-            // Ensure the response contains the error message in the body
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                     ResponseDto.builder()
                             .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -106,8 +104,7 @@ public class CartServiceImpl implements CartService {
             );
         }
     }
-
-
+    
     @Override
     public ResponseEntity<ResponseDto> getAllCarts(Pageable pageable, UserPrincipal userPrincipal) {
         // If you require UserPrincipal, handle the logic here or inject it where necessary
@@ -164,7 +161,7 @@ public class CartServiceImpl implements CartService {
             // Save the updated cart if not empty, else delete the cart
             if (cart.getCartItems().isEmpty()) {
                 cartRepository.delete(cart);
-                log.info("Cart is empty. Cart with ID {} has been deleted.", cart.getId());
+                log.info("Cart is empty. Cart with ID {} has been deleted.", cart.getCartId());
             } else {
                 cartRepository.save(cart);
             }
