@@ -13,6 +13,8 @@ import java.util.List;
 @AllArgsConstructor
 public class CartResponseDto {
     private String name;
+    private Long cartId;
+    private CustomerDto customerDto;
     private List<CartItemResponseDto> cartItemDtoList;
     private double totalPrice;
 }
