@@ -20,9 +20,6 @@ public class Product implements Serializable {
 
     @Column(nullable = false, unique = true)
     private String productName;
-//todo agree on using either id or product id
-    @Column(nullable = true, unique = true)
-    private Long productId;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "category_id")
@@ -30,7 +27,7 @@ public class Product implements Serializable {
 
     private String manufacturer;
 
-    @Column(length = 1000) // Set a limit on description length
+    @Column(length = 1000)
     private String description;
 
     private String imageUrl;
@@ -41,6 +38,7 @@ public class Product implements Serializable {
 
     @Column(nullable = false)
     private int stock;
+  
     //todo set rating and count to 0 when a product is added
     private double rating;
     private int count;

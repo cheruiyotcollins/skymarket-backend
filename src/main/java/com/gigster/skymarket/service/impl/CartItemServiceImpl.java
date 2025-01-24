@@ -39,10 +39,10 @@ public class CartItemServiceImpl implements CartItemService {
     public ResponseEntity<ResponseDto> addOrUpdateCartItem(Optional<Cart> cart, Optional<Product> product, int quantity) {
         // Check if both cart and product are present
         if (cart.isPresent() && product.isPresent()) {
-            Long cartId = cart.get().getId();
+            Long cartId = cart.get().getCartId();
             Long productId = product.get().getId();
 
-            Optional<CartItem> existingCartItem = cartItemRepository.findByCartIdAndProductId(cartId, productId);
+            Optional<CartItem> existingCartItem = cartItemRepository.findByCart_CartIdAndProductId(cartId, productId);
 
             if (existingCartItem.isPresent()) {
                 // Update the quantity of the existing cart item.
@@ -88,7 +88,7 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public ResponseEntity<ResponseDto> getCartItem(Long cartId, Long itemId) {
-        Optional<CartItem> cartItemOptional = cartItemRepository.findByCartIdAndProductId(cartId, itemId);
+        Optional<CartItem> cartItemOptional = cartItemRepository.findByCart_CartIdAndProductId(cartId, itemId);
 
         if (cartItemOptional.isPresent()) {
             CartItemDto cartItemDto = mapToDto(cartItemOptional.get());
@@ -113,7 +113,7 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public ResponseEntity<ResponseDto> getAllCartItems(Long cartId, Pageable pageable) {
-        Page<CartItem> cartItemsPage = cartItemRepository.findByCartId(cartId, pageable);
+        Page<CartItem> cartItemsPage = cartItemRepository.findByCart_CartId(cartId, pageable);
         List<CartItemDto> cartItemDtos = cartItemsPage.getContent()
                 .stream()
                 .map(this::mapToDto)
@@ -134,7 +134,7 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public ResponseEntity<ResponseDto> updateCartItem(Long cartId, Long itemId, int quantity) {
-        Optional<CartItem> cartItemOptional = cartItemRepository.findByCartIdAndProductId(cartId, itemId);
+        Optional<CartItem> cartItemOptional = cartItemRepository.findByCart_CartIdAndProductId(cartId, itemId);
 
         if (cartItemOptional.isPresent()) {
             CartItem cartItem = cartItemOptional.get();
@@ -164,7 +164,7 @@ public class CartItemServiceImpl implements CartItemService {
     private CartItemDto mapToDto(CartItem cartItem) {
         return CartItemDto.builder()
                 .productId(cartItem.getProduct().getId())
-                .cartId(cartItem.getCart().getId())
+                .cartId(cartItem.getCart().getCartId())
                 .quantity(cartItem.getQuantity())
                 .subtotal(cartItem.getSubtotal())
                 .build();

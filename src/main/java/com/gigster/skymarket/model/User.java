@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.NaturalId;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -81,7 +82,12 @@ public class User {
     private Boolean firstLogin = true;
 
     private String resetCode;
+
     private LocalDateTime resetCodeExpiry;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews;
+
 
     public boolean hasRole(String roleName) {
         roles.stream().anyMatch(role -> false);

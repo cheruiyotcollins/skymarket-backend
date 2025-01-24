@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 
 public interface CartService {
 
-    ResponseEntity<ResponseDto> addCart(UserPrincipal userPrincipal);
+    ResponseEntity<ResponseDto> createCart(UserPrincipal userPrincipal);
 
     ResponseEntity<ResponseDto> getAllCarts(Pageable pageable, UserPrincipal userPrincipal);
 
