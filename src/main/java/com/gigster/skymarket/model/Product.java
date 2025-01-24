@@ -20,6 +20,7 @@ public class Product implements Serializable {
 
     @Column(nullable = false, unique = true)
     private String productName;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "category_id")
     private Category category;
@@ -37,6 +38,8 @@ public class Product implements Serializable {
 
     @Column(nullable = false)
     private int stock;
+  
+    //todo set rating and count to 0 when a product is added
     private double rating;
     private int count;
 

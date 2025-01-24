@@ -13,5 +13,6 @@ public class ProductDto {
     private String category;
     private String image;
     private RatingDto ratingDto;
+    private Long productId;
 
 }
