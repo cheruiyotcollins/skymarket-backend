@@ -26,10 +26,10 @@ public class CartController {
     }
 
     @PostMapping
-    public ResponseEntity<ResponseDto> addCart() {
-        ResponseDto response = cartService.addCart(getCurrentUser()).getBody();
+    public ResponseEntity<ResponseDto> createCart() {
+        ResponseDto response = cartService.createCart(getCurrentUser()).getBody();
 
-        log.info("Cart operation completed for customer ID: {}", getCurrentUser().getId());
+        log.info("Cart operation completed for customer ID: {}", getCurrentUser().getCustomerId());
 
         assert response != null;
         return ResponseEntity.status(response.getStatus()).body(response);
