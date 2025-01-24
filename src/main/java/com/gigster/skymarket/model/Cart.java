@@ -16,8 +16,6 @@ public class Cart {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     private Long cartId;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
