@@ -112,7 +112,7 @@ public class OrderServiceImpl implements OrderService {
             }
 
             // Create order and persist it
-            Order order = mapToOrder(orderDto, customer, products);
+            Order order = mapToOrder(orderDto, customer);
             order.setStatus(OrderStatus.PENDING_PAYMENT);
             order = orderRepository.save(order);
 
@@ -302,7 +302,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     // Mapping OrderDto to Order
-    private Order mapToOrder(OrderDto orderDto, Customer customer, List<Product> products) {
+    private Order mapToOrder(OrderDto orderDto, Customer customer) {
         Order order = new Order();
         order.setId(orderDto.getOrderId());
         order.setOrderNumber(orderDto.getOrderNumber());
