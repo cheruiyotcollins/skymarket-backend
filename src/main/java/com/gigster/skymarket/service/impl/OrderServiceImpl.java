@@ -7,6 +7,7 @@ import com.gigster.skymarket.enums.OrderStatus;
 import com.gigster.skymarket.exception.OrderNotFoundException;
 import com.gigster.skymarket.model.*;
 import com.gigster.skymarket.repository.*;
+import com.gigster.skymarket.service.NotificationService;
 import com.gigster.skymarket.service.OrderService;
 import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import jakarta.persistence.EntityNotFoundException;
@@ -47,7 +48,7 @@ public class OrderServiceImpl implements OrderService {
     private ProductRepository productRepository;
 
     @Autowired
-    private NotificationServiceImpl notificationService;
+    private NotificationService notificationService;
 
     @Autowired
     ResponseDtoMapper responseDtoSetter;
@@ -268,7 +269,7 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
-    // Cancelling orders (Customers, admins)
+    // 6. Cancelling orders (Customers, admins)
     @Override
     public ResponseEntity<ResponseDto> cancelOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
@@ -290,6 +291,17 @@ public class OrderServiceImpl implements OrderService {
                 HttpStatus.NOT_ACCEPTABLE,
                 "Orders currently being shipped or already delivered cannot be cancelled."
         );
+    }
+
+    // 7.
+    @Override
+    public void saveOrder(Order order) {
+        Order savedOrder = orderRepository.save(order);
+        ResponseEntity.ok(ResponseDto.builder()
+                .status(HttpStatus.OK)
+                .description("Order saved successfully")
+                .payload(savedOrder)
+                .build());
     }
 
     // Method to determine if an order can be cancelled.
