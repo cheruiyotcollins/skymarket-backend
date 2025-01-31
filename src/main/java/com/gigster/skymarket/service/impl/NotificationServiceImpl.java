@@ -2,6 +2,7 @@ package com.gigster.skymarket.service.impl;
 
 import com.gigster.skymarket.model.Customer;
 import com.gigster.skymarket.model.Order;
+import com.gigster.skymarket.model.Payment;
 import com.gigster.skymarket.service.NotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +79,44 @@ public class NotificationServiceImpl implements NotificationService {
 
         // Asynchronous email sending
         sendOrderConfirmationEmailAsync(sendTo, subject, emailBody);
+    }
+
+    /**
+     * Sends a payment failure notification to the customer.
+     */
+    public void sendPaymentFailureNotification(Customer customer, Payment payment) {
+        String to = customer.getEmail();
+        String subject = "Payment Failure Notification";
+        String message = String.format(
+                "Dear %s,\n\nWe regret to inform you that your payment with reference %s has failed.\nReason: %s\n\n" +
+                        "Please try again or contact support for assistance.\n\nBest regards,\nSkyMarket Team",
+                customer.getFullName(),
+                payment.getPaymentReference(),
+                payment.getFailureReason()
+        );
+
+        sendMail(to, subject, message);
+    }
+
+    /**
+     * Sends a payment confirmation notification to the customer.
+     */
+    public void sendPaymentConfirmationNotification(Customer customer, Payment payment) {
+        // Extract details from the customer and payment objects
+        String to = customer.getEmail();
+        String subject = "Payment Confirmation";
+        String message = String.format(
+                "Dear %s,\n\nYour payment with reference %s has been successfully confirmed.\n\n" +
+                        "Thank you for your business.\n\nBest regards,\nSkyMarket Team",
+                customer.getFullName(),
+                payment.getPaymentReference()
+        );
+
+        // Log the email details synchronously
+        logEmailDetails(to, subject, message);
+
+        // Asynchronous email sending
+        sendMail(to, subject, message);
     }
 
     @Async("asyncExecutor")

@@ -7,6 +7,7 @@ import com.gigster.skymarket.enums.OrderStatus;
 import com.gigster.skymarket.exception.OrderNotFoundException;
 import com.gigster.skymarket.model.*;
 import com.gigster.skymarket.repository.*;
+import com.gigster.skymarket.service.NotificationService;
 import com.gigster.skymarket.service.OrderService;
 import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import jakarta.persistence.EntityNotFoundException;
@@ -47,7 +48,7 @@ public class OrderServiceImpl implements OrderService {
     private ProductRepository productRepository;
 
     @Autowired
-    private NotificationServiceImpl notificationService;
+    private NotificationService notificationService;
 
     @Autowired
     ResponseDtoMapper responseDtoSetter;
@@ -112,7 +113,7 @@ public class OrderServiceImpl implements OrderService {
             }
 
             // Create order and persist it
-            Order order = mapToOrder(orderDto, customer, products);
+            Order order = mapToOrder(orderDto, customer);
             order.setStatus(OrderStatus.PENDING_PAYMENT);
             order = orderRepository.save(order);
 
@@ -268,7 +269,7 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
-    // Cancelling orders (Customers, admins)
+    // 6. Cancelling orders (Customers, admins)
     @Override
     public ResponseEntity<ResponseDto> cancelOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
@@ -292,6 +293,17 @@ public class OrderServiceImpl implements OrderService {
         );
     }
 
+    // 7.
+    @Override
+    public void saveOrder(Order order) {
+        Order savedOrder = orderRepository.save(order);
+        ResponseEntity.ok(ResponseDto.builder()
+                .status(HttpStatus.OK)
+                .description("Order saved successfully")
+                .payload(savedOrder)
+                .build());
+    }
+
     // Method to determine if an order can be cancelled.
     private boolean isCancellable(OrderStatus status) {
         return EnumSet.of(
@@ -302,7 +314,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     // Mapping OrderDto to Order
-    private Order mapToOrder(OrderDto orderDto, Customer customer, List<Product> products) {
+    private Order mapToOrder(OrderDto orderDto, Customer customer) {
         Order order = new Order();
         order.setId(orderDto.getOrderId());
         order.setOrderNumber(orderDto.getOrderNumber());

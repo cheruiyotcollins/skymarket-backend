@@ -19,4 +19,12 @@ public class ResponseDto {
     private Long totalElements;
     private Integer currentPage;
     private Integer pageSize;
+
+    // Generic method to retrieve payload as a specific type
+    public <T> T getPayloadAs(Class<T> type) {
+        if (payload != null && type.isInstance(payload)) {
+            return type.cast(payload);
+        }
+        return null;
+    }
 }

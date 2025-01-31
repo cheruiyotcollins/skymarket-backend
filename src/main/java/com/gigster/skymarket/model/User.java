@@ -88,7 +88,6 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews;
 
-
     public boolean hasRole(String roleName) {
         roles.stream().anyMatch(role -> false);
         return true;
