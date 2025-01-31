@@ -48,7 +48,13 @@ public class Payment {
 
     @Column(nullable = false)
     private String orderId;
-    private String customerId;
+
+    @Column(name = "customer_id", insertable = false, updatable = false)
+    private Long customerId;
+
+    @ManyToOne
+    @JoinColumn(name = "customer_id", referencedColumnName = "customer_id", nullable = false)
+    private Customer customer;
 
     private String gatewayTransactionId;
 
