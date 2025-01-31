@@ -2,6 +2,7 @@ package com.gigster.skymarket.enums;
 
 public enum PaymentStatus {
     PENDING,        // Payment has been initiated but not yet processed.
+    CONFIRMED,
     COMPLETED,      // Payment was successful.
     FAILED,         // Payment failed due to an error.
     CANCELLED,      // Payment was cancelled by the user or system.
