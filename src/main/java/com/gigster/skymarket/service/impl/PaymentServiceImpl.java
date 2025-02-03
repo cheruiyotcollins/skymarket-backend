@@ -145,7 +145,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private void sendPaymentFailureNotification(Payment payment) {
-        Customer customer = customerRepository.findById(Long.valueOf(payment.getCustomerId()))
+        Customer customer = customerRepository.findById(payment.getCustomerId())
                 .orElseThrow(() -> new ResourceNotFoundException("Customer", "id", payment.getCustomerId()));
 
         String customerEmail = customer.getEmail();
