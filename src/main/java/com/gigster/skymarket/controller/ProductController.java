@@ -56,4 +56,16 @@ public class ProductController {
     public ResponseEntity<ResponseDto> restockProduct(@PathVariable Long id, @RequestParam int stock) {
         return productService.restockProduct(id, stock);
     }
+
+    // New Endpoint for liking a product
+    @PatchMapping("/{productId}/like")
+    public ResponseEntity<ResponseDto> likeProduct(@PathVariable Long productId, @RequestParam Long userId) {
+        return productService.likeProduct(productId, userId);
+    }
+
+    // New Endpoint for disliking a product
+    @PatchMapping("/{productId}/dislike")
+    public ResponseEntity<ResponseDto> dislikeProduct(@PathVariable Long productId, @RequestParam Long userId) {
+        return productService.dislikeProduct(productId, userId);
+    }
 }
