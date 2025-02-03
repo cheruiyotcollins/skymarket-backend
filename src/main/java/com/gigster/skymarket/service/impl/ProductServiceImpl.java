@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -132,6 +133,45 @@ public class ProductServiceImpl implements ProductService {
             return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND, "Product not found with ID: " + id);
         }
     }
+
+    @Override
+    public ResponseEntity<ResponseDto> likeProduct(Long productId, Long userId) {
+        Optional<Product> optionalProduct = productRepository.findById(productId);
+        if (optionalProduct.isPresent()) {
+            Product product = optionalProduct.get();
+            if (product.getLikedByUsers() == null) {
+                product.setLikedByUsers(new HashSet<>());
+            }
+            if (product.getLikedByUsers().contains(userId)) {
+                return responseDtoSetter.responseDtoSetter(HttpStatus.BAD_REQUEST, "You have already liked this product.");
+            }
+            product.getLikedByUsers().add(userId);
+            productRepository.save(product);
+            return responseDtoSetter.responseDtoSetter(HttpStatus.OK, "Product liked successfully", product);
+        } else {
+            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND, "Product not found with ID: " + productId);
+        }
+    }
+
+    @Override
+    public ResponseEntity<ResponseDto> dislikeProduct(Long productId, Long userId) {
+        Optional<Product> optionalProduct = productRepository.findById(productId);
+        if (optionalProduct.isPresent()) {
+            Product product = optionalProduct.get();
+
+            if (product.getLikedByUsers() == null) {
+                product.setLikedByUsers(new HashSet<>());
+            }
+
+            product.getLikedByUsers().remove(userId);
+
+            productRepository.save(product);
+
+            return responseDtoSetter.responseDtoSetter(HttpStatus.OK, "Product disliked successfully", product);
+        } else {
+            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_FOUND, "Product not found with ID: " + productId);
+        }
+}
 
     private Product setProduct(NewProductDto newProductDto) {
         Product product = Product.builder()
