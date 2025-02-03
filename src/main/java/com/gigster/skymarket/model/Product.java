@@ -5,6 +5,8 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "products")
@@ -42,5 +44,8 @@ public class Product implements Serializable {
     //todo set rating and count to 0 when a product is added
     private double rating;
     private int count;
+
+    @ElementCollection
+    private Set<Long> likedByUsers = new HashSet<>(); // Stores user IDs of customers who liked the product
 
 }

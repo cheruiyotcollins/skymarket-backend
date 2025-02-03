@@ -20,4 +20,7 @@ public interface ProductService {
 
     ResponseEntity<ResponseDto> restockProduct(Long id, int stock);
 
+    ResponseEntity<ResponseDto> likeProduct(Long productId, Long userId);
+
+    ResponseEntity<ResponseDto> dislikeProduct(Long productId, Long userId);
 }

@@ -13,7 +13,9 @@ import com.gigster.skymarket.service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import com.gigster.skymarket.utils.DateUtils;
+import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,20 +35,21 @@ public class ReviewServiceImpl implements ReviewService {
     private UserRepository userRepository;
 
     @Override
-    // Check if a user has purchased a product
     public boolean isVerifiedPurchase(Long userId, Long productId) {
         return orderRepository.existsByUserIdAndProductId(userId, productId);
     }
 
     @Override
-    // Add a new review
     public void addReview(Long userId, Long productId, int rating, String comment) {
-        // Restrict reviews to verified purchasers
         if (!isVerifiedPurchase(userId, productId)) {
             throw new UnauthorizedException("You must purchase the product to leave a review.");
         }
 
-        // Create and save the review
+        boolean alreadyReviewed = reviewRepository.existsByUser_UserIdAndProductId(userId, productId);
+        if (alreadyReviewed) {
+            throw new UnauthorizedException("You have already reviewed this product.");
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
@@ -56,48 +59,100 @@ public class ReviewServiceImpl implements ReviewService {
         review.setComment(comment);
         review.setVerifiedPurchase(true);
         review.setUser(user);
-        review.setCreatedAt(LocalDateTime.now());
+        review.setCreatedAt(Instant.now());
 
-        // Save the review to the database
         reviewRepository.save(review);
 
-        // Update the product's average rating
         updateProductRating(productId);
     }
 
-    // Update the average rating for a product
+    @Override
+    public void addComment(Long userId, Long productId, String comment) {
+        boolean alreadyReviewed = reviewRepository.existsByUser_UserIdAndProductId(userId, productId);
+        if (alreadyReviewed) {
+            throw new UnauthorizedException("You have already reviewed this product.");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+
+        Review review = new Review();
+        review.setProductId(productId);
+        review.setComment(comment);
+        review.setUser(user);
+        review.setCreatedAt(Instant.now());
+
+        reviewRepository.save(review);
+    }
+
+    @Override
+    public void likeReview(Long userId, Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Review", "id", reviewId));
+
+        // Check if the user has already liked the review
+        if (review.getLikes().contains(userId)) {
+            throw new UnauthorizedException("You have already liked this review.");
+        }
+
+        review.getLikes().add(userId); // Add the user ID to the likes set
+        reviewRepository.save(review); // Save only once
+    }
+
+    @Override
+    public void dislikeReview(Long userId, Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Review", "id", reviewId));
+
+        // Check if the user has already disliked the review
+        if (review.getDislikes().contains(userId)) {
+            throw new UnauthorizedException("You have already disliked this review.");
+        }
+
+        // Check if the user has liked the review, if so, remove the like
+        review.getLikes().remove(userId);
+
+        // Add the user ID to the dislikes set
+        if (review.getDislikes() == null) {
+            review.setDislikes(new HashSet<>());  // Initialize dislikes if it’s null
+        }
+        review.getDislikes().add(userId);  // Add the user ID to the dislikes set
+
+        reviewRepository.save(review);
+    }
+
     private void updateProductRating(Long productId) {
-        List<Review> reviews = reviewRepository.findByProductId(productId);
+        List<Review> reviews = reviewRepository.findByProductId(productId)
+                .stream()
+                .filter(review -> review.getRating() > 0)
+                .toList();
+
         double averageRating = reviews.stream()
                 .mapToInt(Review::getRating)
                 .average()
                 .orElse(0.0);
 
         int totalReviews = reviews.size();
-
-        // Update the product entity
         productRepository.updateProductRating(productId, averageRating, totalReviews);
     }
 
     @Override
-    // Get all reviews for a product
     public List<ReviewDto> getReviewsForProduct(Long productId) {
-        List<Review> reviews = reviewRepository.findByProductId(productId);
-
-        return reviews.stream()
+        return reviewRepository.findByProductId(productId).stream()
                 .map(review -> new ReviewDto(
                         review.getId(),
                         review.getUser().getUsername(),
                         review.getRating(),
+                        review.getLikes(),
                         review.getComment(),
                         review.isVerifiedPurchase(),
-                        review.getCreatedAt()
+                        DateUtils.formatInstant(review.getCreatedAt())
+
                 ))
                 .collect(Collectors.toList());
     }
 
     @Override
-    // Admin override: Mark a review as verified
     public void markAsVerified(Long reviewId) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Review", "id", reviewId));

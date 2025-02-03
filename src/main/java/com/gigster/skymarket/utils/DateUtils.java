@@ -1,5 +1,6 @@
 package com.gigster.skymarket.utils;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -28,6 +29,13 @@ public class DateUtils {
         ZoneId zoneId = ZoneId.of("Africa/Nairobi");
         TimeZone.setDefault(TimeZone.getTimeZone(zoneId));
         return ""+ new Date(System.currentTimeMillis());
+    }
+
+    // Utility method for formatting Instant
+    public static String  formatInstant(Instant instant) {
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                .withZone(ZoneId.systemDefault())
+                .format(instant);
     }
 
     private static String[] dayTodayInArray(){
