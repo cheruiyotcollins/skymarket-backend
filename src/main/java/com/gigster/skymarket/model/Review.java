@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Data
@@ -13,19 +15,22 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Table(name = "reviews")
 public class Review {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
-    private long productId;
+    private Long productId;
     private int rating;
     private String comment;
     private boolean verifiedPurchase;
+    private Instant createdAt;
 
-    private LocalDateTime createdAt;
+    @ElementCollection // Hibernate will create a separate table for storing likes
+    private Set<Long> likes = new HashSet<>(); // Store user IDs who liked the review
+    private Set<Long> dislikes = new HashSet<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 }
+
