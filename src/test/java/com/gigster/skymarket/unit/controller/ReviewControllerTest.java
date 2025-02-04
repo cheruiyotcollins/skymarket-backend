@@ -29,6 +29,12 @@ class ReviewControllerTest {
     @InjectMocks
     private ReviewController reviewController;
 
+    private static final String SUCCESS_REVIEW_ADDED = "Review added successfully";
+    private static final String SUCCESS_COMMENT_ADDED = "Comment added successfully";
+    private static final String SUCCESS_REVIEW_LIKED = "Review liked successfully";
+    private static final String SUCCESS_REVIEW_DISLIKED = "Review disliked successfully";
+    private static final String SUCCESS_REVIEW_VERIFIED = "Review marked as verified";
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -48,7 +54,7 @@ class ReviewControllerTest {
                         .param("comment", comment)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Review added successfully"));
+                .andExpect(content().string(SUCCESS_REVIEW_ADDED));
 
         verify(reviewService, times(1)).addReview(userId, productId, rating, comment);
     }
@@ -64,7 +70,7 @@ class ReviewControllerTest {
                         .param("comment", comment)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Comment added successfully"));
+                .andExpect(content().string(SUCCESS_COMMENT_ADDED));
 
         verify(reviewService, times(1)).addComment(userId, productId, comment);
     }
@@ -78,7 +84,7 @@ class ReviewControllerTest {
                         .param("userId", userId.toString())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Review liked successfully"));
+                .andExpect(content().string(SUCCESS_REVIEW_LIKED));
 
         verify(reviewService, times(1)).likeReview(userId, reviewId);
     }
@@ -92,7 +98,7 @@ class ReviewControllerTest {
                         .param("userId", userId.toString())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Review disliked successfully"));
+                .andExpect(content().string(SUCCESS_REVIEW_DISLIKED));
 
         verify(reviewService, times(1)).dislikeReview(userId, reviewId);
     }
@@ -106,7 +112,9 @@ class ReviewControllerTest {
 
         when(reviewService.getReviewsForProduct(productId)).thenReturn(reviews);
 
-        mockMvc.perform(get("/api/v1/reviews/{productId}", productId))
+        mockMvc.perform(get("/api/v1/reviews/{productId}/reviews", productId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(1))
                 .andExpect(jsonPath("$[0].rating").value(5))
@@ -115,7 +123,6 @@ class ReviewControllerTest {
         verify(reviewService, times(1)).getReviewsForProduct(productId);
     }
 
-
     @Test
     void markAsVerified_ShouldReturnOk() throws Exception {
         Long reviewId = 5L;
@@ -123,7 +130,7 @@ class ReviewControllerTest {
         mockMvc.perform(patch("/api/v1/reviews/{reviewId}/verify", reviewId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Review marked as verified"));
+                .andExpect(content().string(SUCCESS_REVIEW_VERIFIED));
 
         verify(reviewService, times(1)).markAsVerified(reviewId);
     }
@@ -136,7 +143,9 @@ class ReviewControllerTest {
         when(reviewService.isVerifiedPurchase(userId, productId)).thenReturn(true);
 
         mockMvc.perform(get("/api/v1/reviews/verify/{productId}", productId)
-                        .param("userId", userId.toString()))
+                        .param("userId", userId.toString())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string("true"));
 
