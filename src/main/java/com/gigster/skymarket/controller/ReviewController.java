@@ -45,7 +45,7 @@ public class ReviewController {
         return ResponseEntity.ok("Review disliked successfully");
     }
 
-    @GetMapping("/{productId}")
+    @GetMapping("/{productId}/reviews")
     public ResponseEntity<List<ReviewDto>> getReviewsForProduct(@PathVariable Long productId) {
         List<ReviewDto> reviews = reviewService.getReviewsForProduct(productId);
         return ResponseEntity.ok(reviews);
