@@ -40,12 +40,11 @@ public class Product implements Serializable {
 
     @Column(nullable = false)
     private int stock;
-  
-    //todo set rating and count to 0 when a product is added
+
     private double rating;
     private int count;
 
     @ElementCollection
-    private Set<Long> likedByUsers = new HashSet<>(); // Stores user IDs of customers who liked the product
+    private Set<Long> likedByUsers = new HashSet<>();
 
 }

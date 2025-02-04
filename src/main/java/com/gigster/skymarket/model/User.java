@@ -33,15 +33,15 @@ import java.util.Set;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-generate the user_id
-    @Column(name = "user_id") // Maps to the user_id column in the database
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long userId;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Establish a relationship with the Customer entity
-    @JoinColumn(name = "customer_id") // Map customer_id in the User table to customer_id in the Customer table
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id")
     private Customer customer;
 
-    @Column(name = "customer_id", insertable = false, updatable = false) // Prevent duplication
+    @Column(name = "customer_id", insertable = false, updatable = false)
     private Long customerId;
 
     @NotBlank

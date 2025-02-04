@@ -30,11 +30,4 @@ public class Category {
     @Column(nullable = false)
     private String updatedDate = DateUtils.dateNowString();
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "parent_id")
-//    private Category parent;
-
-//    @ManyToOne
-//    @JoinColumn(name = "catalogue_id") // Foreign key in the "Category" table
-//    private Catalogue catalogue;
 }
