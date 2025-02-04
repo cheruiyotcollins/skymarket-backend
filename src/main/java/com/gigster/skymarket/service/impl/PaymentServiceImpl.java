@@ -41,7 +41,7 @@ public class PaymentServiceImpl implements PaymentService {
         // Simulate payment processing (replace with your actual integration)
         boolean paymentSuccess = simulatePayment(amount, currency, paymentMethod);
         if (paymentSuccess) {
-            Payment payment = createPayment(paymentReference, amount, currency, PaymentStatus.PENDING, Instant.now(), paymentMethod, orderId, customerId, provider);
+            Payment payment = createPayment(paymentReference, amount, currency, Instant.now(), paymentMethod, orderId, customerId, provider);
             paymentRepository.save(payment);
             // Send payment confirmation notification to customer (e.g., email)
             sendPaymentConfirmationNotification(payment);
@@ -59,12 +59,12 @@ public class PaymentServiceImpl implements PaymentService {
         return Math.random() > 0.5; // Simulate random success/failure (50% chance)
     }
 
-    private Payment createPayment(String paymentReference, BigDecimal amount, String currency, PaymentStatus status, Instant paymentDate, String paymentMethod, String orderId, String customerId, PaymentProvider provider) {
+    private Payment createPayment(String paymentReference, BigDecimal amount, String currency, Instant paymentDate, String paymentMethod, String orderId, String customerId, PaymentProvider provider) {
         return Payment.builder()
                 .paymentReference(paymentReference)
                 .amount(amount)
                 .currency(currency)
-                .status(status)
+                .status(PaymentStatus.PENDING)
                 .paymentDate(paymentDate)
                 .paymentMethod(paymentMethod)
                 .orderId(orderId)
@@ -123,7 +123,6 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private void sendPaymentConfirmationNotification(Payment payment) {
-        // Retrieve customer email
         String customerEmail = payment.getCustomerEmail();
 
         if (customerEmail == null || customerEmail.isEmpty()) {
@@ -135,7 +134,6 @@ public class PaymentServiceImpl implements PaymentService {
         String message = String.format("Dear Customer,\n\nYour payment with reference %s has been successfully confirmed.\n\nThank you for your business.\n\nBest regards,\nYour Company Name",
                 payment.getPaymentReference());
 
-        // Send email using a hypothetical EmailService
         try {
             notificationService.sendMail(customerEmail, subject, message);
             log.info("Payment confirmation notification sent to {}", customerEmail);

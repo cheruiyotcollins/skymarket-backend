@@ -81,8 +81,8 @@ public class CartServiceImpl implements CartService {
 
             // Create and save the cart
             Cart cart = Cart.builder()
-                    .customer(existingCustomer.get()) // Use the persisted customer entity
-                    .totalPrice(0.0) // Initialize total price
+                    .customer(existingCustomer.get())
+                    .totalPrice(0.0)
                     .build();
             Cart savedCart = cartRepository.save(cart);
             log.info("Cart created successfully: {}", savedCart);
