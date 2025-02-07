@@ -67,7 +67,7 @@ public class OrderServiceImpl implements OrderService {
             Customer customer = customerRepository.findById(orderDto.getCustomerId())
                     .orElseThrow(() -> new RuntimeException("We could not find your account. Please check your details or try again later."));
 
-            //   Validate the cart after validating the customer.
+            // Validate the cart after validating the customer.
             Cart cart = cartRepository.findById(orderDto.getCartId())
                     .orElseThrow(() -> new RuntimeException("We could not find the cart you are trying to make order with."));
 
