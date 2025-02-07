@@ -123,19 +123,18 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     private void sendPaymentConfirmationNotification(Payment payment) {
-        String customerEmail = payment.getCustomerEmail();
+        Customer customer = customerRepository.findById(payment.getCustomerId())
+                .orElseThrow(() -> new ResourceNotFoundException("Customer", "id", payment.getCustomerId()));
+
+        String customerEmail = customer.getEmail();
 
         if (customerEmail == null || customerEmail.isEmpty()) {
+            log.warn("Customer email is missing for payment with reference {}", payment.getPaymentReference());
             return;
         }
 
-        // Construct the notification message
-        String subject = "Payment Confirmation";
-        String message = String.format("Dear Customer,\n\nYour payment with reference %s has been successfully confirmed.\n\nThank you for your business.\n\nBest regards,\nYour Company Name",
-                payment.getPaymentReference());
-
         try {
-            notificationService.sendMail(customerEmail, subject, message);
+            notificationService.sendPaymentConfirmationNotification(customer, payment);
             log.info("Payment confirmation notification sent to {}", customerEmail);
         } catch (Exception e) {
             log.error("Failed to send payment confirmation notification to {}", customerEmail, e);
