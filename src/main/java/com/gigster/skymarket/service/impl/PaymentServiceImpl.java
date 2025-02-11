@@ -148,7 +148,6 @@ public class PaymentServiceImpl implements PaymentService {
         String customerEmail = customer.getEmail();
 
         if (customerEmail == null || customerEmail.isEmpty()) {
-            log.warn("Customer email is missing for payment with reference {}", payment.getPaymentReference());
             return;
         }
 
