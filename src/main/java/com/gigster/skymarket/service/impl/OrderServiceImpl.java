@@ -13,7 +13,7 @@ import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DeadlockLoserDataAccessException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +57,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     @Retryable(
-            value = DeadlockLoserDataAccessException.class,
+            retryFor = PessimisticLockingFailureException.class,
             backoff = @Backoff(delay = 100)
     )
 
