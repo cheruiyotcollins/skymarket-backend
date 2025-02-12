@@ -96,7 +96,7 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
         review.getLikes().add(userId); // Add the user ID to the likes set
-        reviewRepository.save(review); // Save only once
+        reviewRepository.save(review);
     }
 
     @Override
