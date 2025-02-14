@@ -50,7 +50,7 @@ public class CartServiceImpl implements CartService {
     CartItemsToCartItemsDtoMapper cartItemsToCartItemsDtoMapper;
 
     @Override
-    public ResponseEntity<ResponseDto>createCart(UserPrincipal userPrincipal) {
+    public ResponseEntity<ResponseDto> createCart(UserPrincipal userPrincipal) {
         try {
             // Map the authenticated user to a customer
             Customer customer = CurrentUserV2.mapToCustomer(userPrincipal);
@@ -64,8 +64,7 @@ public class CartServiceImpl implements CartService {
                         ResponseDto.builder()
                                 .status(HttpStatus.NOT_FOUND)
                                 .description("Customer not found.")
-                                .build()
-                );
+                                .build());
             }
 
             // Check if the customer already has a cart
@@ -75,8 +74,7 @@ public class CartServiceImpl implements CartService {
                         ResponseDto.builder()
                                 .status(HttpStatus.CONFLICT)
                                 .description("Customer already has a cart.")
-                                .build()
-                );
+                                .build());
             }
 
             // Create and save the cart
@@ -91,29 +89,27 @@ public class CartServiceImpl implements CartService {
                     ResponseDto.builder()
                             .status(HttpStatus.CREATED)
                             .description("Cart created successfully.")
-                            .build()
-            );
+                            .build());
         } catch (Exception e) {
             log.error("Error creating cart: {}", e.getMessage(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                     ResponseDto.builder()
                             .status(HttpStatus.INTERNAL_SERVER_ERROR)
                             .description("Failed to create cart: " + e.getMessage())
-                            .build()
-            );
+                            .build());
         }
     }
-    
+
     @Override
     public ResponseEntity<ResponseDto> getAllCarts(Pageable pageable, UserPrincipal userPrincipal) {
-        // If you require UserPrincipal, handle the logic here or inject it where necessary
+        // If you require UserPrincipal, handle the logic here or inject it where
+        // necessary
         if (userPrincipal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     ResponseDto.builder()
                             .status(HttpStatus.UNAUTHORIZED)
                             .description("User is not authenticated")
-                            .build()
-            );
+                            .build());
         }
 
         Page<Cart> cartsPage = cartRepository.findAll(pageable);
@@ -166,7 +162,8 @@ public class CartServiceImpl implements CartService {
             }
 
             // Log and build success response
-            log.info("Cart item with product ID {} removed successfully. New total price: {}", productId, newTotalPrice);
+            log.info("Cart item with product ID {} removed successfully. New total price: {}", productId,
+                    newTotalPrice);
             ResponseDto response = ResponseDto.builder()
                     .status(HttpStatus.OK)
                     .description("Product removed from cart successfully.")
@@ -201,8 +198,7 @@ public class CartServiceImpl implements CartService {
                                 .status(HttpStatus.OK)
                                 .description("Cart is already empty.")
                                 .payload(null)
-                                .build()
-                );
+                                .build());
             }
 
             // Clear all items from the cart
@@ -219,8 +215,7 @@ public class CartServiceImpl implements CartService {
                             .status(HttpStatus.OK)
                             .description("All items removed from cart successfully.")
                             .payload(null)
-                            .build()
-            );
+                            .build());
 
         } catch (RuntimeException e) {
             // Handle errors (e.g., cart not found)
@@ -229,8 +224,7 @@ public class CartServiceImpl implements CartService {
                             .status(HttpStatus.NOT_FOUND)
                             .description("Failed to clear cart: " + e.getMessage())
                             .payload(null)
-                            .build()
-            );
+                            .build());
         }
     }
 
@@ -242,13 +236,16 @@ public class CartServiceImpl implements CartService {
     @Override
     public ResponseEntity<ResponseDto> findCartPerCustomer(String email) {
         // Fetch the customer using the email
-        Customer customer = customerRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Customer not found!"));
+        Customer customer = customerRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Customer not found!"));
 
         // Fetch the cart associated with the customer
-        Cart cart = cartRepository.findByCustomerId(customer.getCustomerId()).orElseThrow(() -> new RuntimeException("Cart not found!"));
+        Cart cart = cartRepository.findByCustomerId(customer.getCustomerId())
+                .orElseThrow(() -> new RuntimeException("Cart not found!"));
 
         // Map the cart items to a hashmap with total price and item list
-        HashMap<Double, List<CartItemResponseDto>> cartItemsHashMap = cartItemsToCartItemsDtoMapper.mapCartItemsToCartItemsDto(cart.getCartItems());
+        HashMap<Double, List<CartItemResponseDto>> cartItemsHashMap = cartItemsToCartItemsDtoMapper
+                .mapCartItemsToCartItemsDto(cart.getCartItems());
 
         Map.Entry<Double, List<CartItemResponseDto>> entry = cartItemsHashMap.entrySet().iterator().next();
         double totalPrice = entry.getKey();
@@ -256,6 +253,7 @@ public class CartServiceImpl implements CartService {
 
         CartResponseDto cartResponseDto = CartResponseDto.builder()
                 .name(customer.getFullName())
+                .cartId(customer.getCart().getCartId())
                 .cartItemDtoList(cartItemDtoList)
                 .totalPrice(totalPrice)
                 .build();
