@@ -66,6 +66,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/v1/users/auth/signin").permitAll()
                                 .requestMatchers("/api/v1/products/{id}").permitAll()
                                 .requestMatchers("/api/v1/products").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/carts**").permitAll()
 
                                 // Endpoints requiring specific roles.
                                 //  User endpoints.
@@ -87,11 +88,12 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.DELETE, "/api/v1/customers/{id}").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN")
 
                                 //  Cart endpoints.
-                                .requestMatchers(HttpMethod.GET, "/api/v1/carts").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN")
-                                .requestMatchers(HttpMethod.GET, "/api/v1/carts/customerId").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN")
+//                                .requestMatchers(HttpMethod.GET, "/api/v1/carts").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN")
+//                                .requestMatchers(HttpMethod.GET, "/api/v1/carts/customer").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN","ROLE_CUSTOMER")
+
 
                                 //  Cart items endpoints.
-                                .requestMatchers(HttpMethod.POST, "/api/v1/carts/items").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ADMIN", "ROLE_CUSTOMER")
+//                                .requestMatchers(HttpMethod.POST, "/api/v1/carts/items").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ADMIN", "ROLE_CUSTOMER")
 
                                 //  Order endpoints.
                                 .requestMatchers(HttpMethod.POST, "/api/v1/orders").hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ADMIN", "ROLE_CUSTOMER")
