@@ -66,6 +66,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/v1/users/auth/signin").permitAll()
                                 .requestMatchers("/api/v1/products/{id}").permitAll()
                                 .requestMatchers("/api/v1/products").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/v1/carts/customer").permitAll()
 
                                 // Endpoints requiring specific roles.
                                 //  User endpoints.
@@ -88,7 +89,7 @@ public class SecurityConfig {
 
                                 //  Cart endpoints.
                                 .requestMatchers(HttpMethod.GET, "/api/v1/carts").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN")
-                                .requestMatchers(HttpMethod.GET, "/api/v1/carts/customer").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN","ROLE_CUSTOMER")
+//                                .requestMatchers(HttpMethod.GET, "/api/v1/carts/customer").hasAnyAuthority("ROLE_SUPER_ADMIN","ROLE_ADMIN","ROLE_CUSTOMER")
 
 
                                 //  Cart items endpoints.
