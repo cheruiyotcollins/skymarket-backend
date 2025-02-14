@@ -36,7 +36,9 @@ public class CartItemServiceImpl implements CartItemService {
     CartRepository cartRepository;
 
     @Override
-    public ResponseEntity<ResponseDto> addOrUpdateCartItem(Optional<Cart> cart, Optional<Product> product, int quantity) {
+    public ResponseEntity<ResponseDto> addOrUpdateCartItem(Optional<Cart> cart, Optional<Product> product,
+            int quantity) {
+        //todo check if cart exist if yes proceed to add item if not create new cart then add item
         // Check if both cart and product are present
         if (cart.isPresent() && product.isPresent()) {
             Long cartId = cart.get().getCartId();
@@ -53,7 +55,6 @@ public class CartItemServiceImpl implements CartItemService {
                 ResponseDto response = ResponseDto.builder()
                         .status(HttpStatus.OK)
                         .description("Cart item updated successfully")
-                        .payload(mapToDto(cartItem))
                         .build();
 
                 return ResponseEntity.ok(response);
@@ -68,7 +69,6 @@ public class CartItemServiceImpl implements CartItemService {
                 ResponseDto response = ResponseDto.builder()
                         .status(HttpStatus.CREATED)
                         .description("Cart item added successfully")
-                        .payload(mapToDto(newCartItem))
                         .build();
 
                 return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -130,7 +130,7 @@ public class CartItemServiceImpl implements CartItemService {
                 .build();
 
         return ResponseEntity.ok(responseDto);
-}
+    }
 
     @Override
     public ResponseEntity<ResponseDto> updateCartItem(Long cartId, Long itemId, int quantity) {
