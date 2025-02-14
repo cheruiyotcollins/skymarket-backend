@@ -44,7 +44,7 @@ public class CartController {
         return cartService.getAllCarts(pageable, getCurrentUser());
     }
 
-    @GetMapping("/customerId")
+    @GetMapping("/customer")
     public ResponseEntity<ResponseDto> findCartByCustomerId(Authentication authentication) {
         String username = authentication.getName();
         log.info("Fetching cart for customer with username: {}", username);
