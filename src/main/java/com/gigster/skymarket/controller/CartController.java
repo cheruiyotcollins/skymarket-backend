@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -46,9 +47,10 @@ public class CartController {
 
     @GetMapping("/customer")
     public ResponseEntity<ResponseDto> findCartByCustomerId(Authentication authentication) {
-        String username = authentication.getName();
-        log.info("Fetching cart for customer with username: {}", username);
-        return cartService.findCartPerCustomer(username);
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        String email = userPrincipal.getEmail();
+        log.info("Fetching cart for customer with email: {}", email);
+        return cartService.findCartPerCustomer(email);
     }
 
     @DeleteMapping("/remove/{productId}")
