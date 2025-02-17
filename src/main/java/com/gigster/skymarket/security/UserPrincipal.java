@@ -46,7 +46,7 @@ public class UserPrincipal implements UserDetails {
 
     private static List<GrantedAuthority> mapRolesToAuthorities(User user) {
         return user.getRoles().stream()  // Assuming `user.getRoles()` returns a collection of roles
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))  // Add ROLE_ prefix
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
                 .collect(Collectors.toList());
     }
 

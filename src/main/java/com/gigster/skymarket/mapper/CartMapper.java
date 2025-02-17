@@ -17,3 +17,4 @@ public interface CartMapper {
 
     List<Cart> toEntityList(List<CartDto> cartDtos);
 }
+
