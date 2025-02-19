@@ -4,13 +4,20 @@ import com.gigster.skymarket.dto.CartItemDto;
 import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.model.Cart;
 import com.gigster.skymarket.model.CartItem;
+import com.gigster.skymarket.model.Customer;
 import com.gigster.skymarket.model.Product;
 import com.gigster.skymarket.repository.CartItemRepository;
 import com.gigster.skymarket.repository.CartRepository;
+import com.gigster.skymarket.repository.CustomerRepository;
 import com.gigster.skymarket.repository.ProductRepository;
+import com.gigster.skymarket.security.CurrentUserV2;
+import com.gigster.skymarket.security.UserPrincipal;
 import com.gigster.skymarket.service.CartItemService;
 import com.gigster.skymarket.mapper.ResponseDtoMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.gigster.skymarket.service.CartService;
+import lombok.RequiredArgsConstructor;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -22,69 +29,100 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class CartItemServiceImpl implements CartItemService {
-    @Autowired
-    CartItemRepository cartItemRepository;
 
-    @Autowired
-    ProductRepository productRepository;
+        private final CartService cartService;
+        private final CustomerRepository customerRepository;
+        private final CartRepository cartRepository;
+        private final CartItemRepository cartItemRepository;
+        private final ProductRepository productRepository;
+        private final ResponseDtoMapper responseDtoSetter;
 
-    @Autowired
-    ResponseDtoMapper responseDtoSetter;
+     @Override
+     public ResponseEntity<ResponseDto> addOrUpdateCartItem(Optional<Cart> cart, Optional<Product> product, int quantity, UserPrincipal userPrincipal) {
+            try {
+                // Map the authenticated user to a customer
+                Customer customer = CurrentUserV2.mapToCustomer(userPrincipal);
+                log.debug("Mapped customer: {}", customer);
 
-    @Autowired
-    CartRepository cartRepository;
+                // Validate customer existence
+                Optional<Customer> existingCustomer = customerRepository.findById(customer.getCustomerId());
+                if (existingCustomer.isEmpty()) {
+                    log.error("Customer with ID {} does not exist.", customer.getCustomerId());
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                            ResponseDto.builder()
+                                    .status(HttpStatus.NOT_FOUND)
+                                    .description("Customer not found.")
+                                    .build());
+                }
 
-    @Override
-    public ResponseEntity<ResponseDto> addOrUpdateCartItem(Optional<Cart> cart, Optional<Product> product,
-            int quantity) {
-        //todo check if cart exist if yes proceed to add item if not create new cart then add item
-        // Check if both cart and product are present
-        if (cart.isPresent() && product.isPresent()) {
-            Long cartId = cart.get().getCartId();
-            Long productId = product.get().getId();
+                // If cart does not exist, create one using the existing method
+                Cart customerCart = cart.orElseGet(() -> {
+                    if (!cartRepository.existsByCustomerId(customer.getCustomerId())) {
+                        ResponseEntity<ResponseDto> response = cartService.createCart(userPrincipal);
+                        if (response.getStatusCode().is2xxSuccessful()) {
+                            return cartRepository.findByCustomerId(customer.getCustomerId()).orElseThrow();
+                        } else {
+                            throw new RuntimeException("Failed to create cart.");
+                        }
+                    } else {
+                        return cartRepository.findByCustomerId(customer.getCustomerId()).orElseThrow();
+                    }
+                });
 
-            Optional<CartItem> existingCartItem = cartItemRepository.findByCart_CartIdAndProductId(cartId, productId);
+                // Ensure product exists
+                if (product.isEmpty()) {
+                    log.error("Product not found.");
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                            ResponseDto.builder()
+                                    .status(HttpStatus.NOT_FOUND)
+                                    .description("Product not found.")
+                                    .build());
+                }
 
-            if (existingCartItem.isPresent()) {
-                // Update the quantity of the existing cart item.
-                CartItem cartItem = existingCartItem.get();
-                cartItem.setQuantity(cartItem.getQuantity() + quantity);
-                cartItemRepository.save(cartItem);
+                Long cartId = customerCart.getCartId();
+                Long productId = product.get().getId();
 
-                ResponseDto response = ResponseDto.builder()
-                        .status(HttpStatus.OK)
-                        .description("Cart item updated successfully")
-                        .build();
+                Optional<CartItem> existingCartItem = cartItemRepository.findByCart_CartIdAndProductId(cartId, productId);
 
-                return ResponseEntity.ok(response);
-            } else {
-                CartItem newCartItem = new CartItem();
-                newCartItem.setCart(cart.get());
-                newCartItem.setProduct(product.get());
-                newCartItem.setQuantity(quantity);
+                if (existingCartItem.isPresent()) {
+                    // Update the quantity of the existing cart item.
+                    CartItem cartItem = existingCartItem.get();
+                    cartItem.setQuantity(cartItem.getQuantity() + quantity);
+                    cartItemRepository.save(cartItem);
 
-                cartItemRepository.save(newCartItem);
+                    log.info("Cart item updated successfully for cart ID {}", cartId);
+                    return ResponseEntity.ok(
+                            ResponseDto.builder()
+                                    .status(HttpStatus.OK)
+                                    .description("Cart item updated successfully.")
+                                    .build());
+                } else {
+                    // Add a new item to the cart.
+                    CartItem newCartItem = new CartItem();
+                    newCartItem.setCart(customerCart);
+                    newCartItem.setProduct(product.get());
+                    newCartItem.setQuantity(quantity);
+                    cartItemRepository.save(newCartItem);
 
-                ResponseDto response = ResponseDto.builder()
-                        .status(HttpStatus.CREATED)
-                        .description("Cart item added successfully")
-                        .build();
-
-                return ResponseEntity.status(HttpStatus.CREATED).body(response);
+                    log.info("Cart item added successfully for cart ID {}", cartId);
+                    return ResponseEntity.status(HttpStatus.CREATED).body(
+                            ResponseDto.builder()
+                                    .status(HttpStatus.CREATED)
+                                    .description("Cart item added successfully.")
+                                    .build());
+                }
+            } catch (Exception e) {
+                log.error("Error processing cart item: {}", e.getMessage(), e);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                        ResponseDto.builder()
+                                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .description("Failed to process cart item: " + e.getMessage())
+                                .build());
             }
-        } else {
-            String missingResource = cart.isEmpty() ? "Cart" : "Product";
-
-            ResponseDto response = ResponseDto.builder()
-                    .status(HttpStatus.NOT_FOUND)
-                    .description(missingResource + " not found")
-                    .payload(null)
-                    .build();
-
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
-    }
 
     @Override
     public ResponseEntity<ResponseDto> getCartItem(Long cartId, Long itemId) {

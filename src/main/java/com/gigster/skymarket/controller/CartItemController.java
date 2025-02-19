@@ -6,6 +6,7 @@ import com.gigster.skymarket.model.Cart;
 import com.gigster.skymarket.model.Product;
 import com.gigster.skymarket.repository.CartRepository;
 import com.gigster.skymarket.repository.ProductRepository;
+import com.gigster.skymarket.security.UserPrincipal;
 import com.gigster.skymarket.service.CartItemService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -36,7 +38,9 @@ public class CartItemController {
         Optional<Cart> cart = cartRepository.findById(request.getCartId());
         Optional<Product> product = productRepository.findById(request.getProductId());
 
-        return cartItemService.addOrUpdateCartItem(cart, product, request.getQuantity());
+        UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        return cartItemService.addOrUpdateCartItem(cart, product, request.getQuantity(), userPrincipal);
     }
 
     @GetMapping("/{cartId}/{itemId}")

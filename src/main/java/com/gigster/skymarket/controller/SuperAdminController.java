@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/super")
+@RequestMapping("/api/v1/super")
 @CrossOrigin("*")
 @AllArgsConstructor
 public class SuperAdminController {
