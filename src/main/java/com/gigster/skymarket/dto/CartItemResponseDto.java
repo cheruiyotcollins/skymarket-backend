@@ -7,9 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class CartItemResponseDto {
     private String productName;
     private double price;

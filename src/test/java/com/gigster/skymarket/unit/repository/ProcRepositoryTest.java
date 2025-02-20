@@ -5,12 +5,14 @@ import com.gigster.skymarket.model.SuperAdmin;
 import com.gigster.skymarket.repository.ProcRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -40,19 +42,20 @@ class ProcRepositoryTest {
                         .email("admin1@example.com")
                         .adminId(1L)
                         .fullName("Admin One")
-                        .createdOn("2025-01-01")
+                        .createdOn(Instant.parse("2025-01-01T00:00:00Z"))
                         .contact("123456789")
                         .build(),
                 Admin.builder()
                         .email("admin2@example.com")
                         .adminId(2L)
                         .fullName("Admin Two")
-                        .createdOn("2025-01-02")
+                        .createdOn(Instant.parse("2025-01-02T00:00:00Z"))
                         .contact("987654321")
                         .build()
         );
 
-        when(jdbcTemplate.query(anyString(), any(RowMapper.class))).thenReturn(expectedAdmins);
+        ArgumentCaptor<RowMapper<Admin>> captor = ArgumentCaptor.forClass(RowMapper.class);
+        when(jdbcTemplate.query(anyString(), captor.capture())).thenReturn(expectedAdmins);
 
         // Act
         List<Admin> admins = procRepository.getAdmins();
@@ -70,13 +73,14 @@ class ProcRepositoryTest {
                         .email("superadmin1@example.com")
                         .superAdminId(1L)
                         .fullName("SuperAdmin One")
-                        .createdOn("2025-01-01")
+                        .createdOn(Instant.parse("2025-01-01T00:00:00Z"))
                         .contact("123456789")
                         .employeeNo("EMP001")
                         .build()
         );
 
-        when(jdbcTemplate.query(anyString(), any(RowMapper.class))).thenReturn(expectedSuperAdmins);
+        ArgumentCaptor<RowMapper<SuperAdmin>> captor = ArgumentCaptor.forClass(RowMapper.class);
+        when(jdbcTemplate.query(anyString(), captor.capture())).thenReturn(expectedSuperAdmins);
 
         // Act
         List<SuperAdmin> superAdmins = procRepository.getSuperAdmins();

@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 
 @Slf4j
@@ -80,7 +81,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
         existingSuperAdmin.setFullName(superAdminDto.getFullName());
         existingSuperAdmin.setContact(PhoneNumberEditor.resolveNumber(superAdminDto.getContact()));
-        existingSuperAdmin.setCreatedOn(DateUtils.dateNowString());
+        existingSuperAdmin.setCreatedOn(Instant.now());
         existingSuperAdmin.setEmail(superAdminDto.getEmail());
         existingSuperAdmin.setEmployeeNo(superAdminDto.getEmployeeNo());
 

@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Builder
 @NoArgsConstructor
+@Builder
 public class LoginResponseDto {
     private String accessToken;
     private boolean firstLogin;

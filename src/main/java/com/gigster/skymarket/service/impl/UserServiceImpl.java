@@ -175,10 +175,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<ResponseDto> addRole(AddRoleRequestDto addRoleRequestDto) {
-        Role role=new Role();
-        role.setName(RoleName.fromString(addRoleRequestDto.getName()));
+        Role role = new Role();
+        role.setName(RoleName.fromString(addRoleRequestDto.name()));
+
         roleRepository.save(role);
-        return null;
+
+        ResponseDto response = ResponseDto.builder()
+                .status(HttpStatus.OK)
+                .description("Role added successfully")
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
     @Override

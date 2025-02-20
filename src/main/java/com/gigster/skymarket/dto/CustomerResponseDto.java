@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class CustomerResponseDto {
     private Long customerId;
     private String fullName;

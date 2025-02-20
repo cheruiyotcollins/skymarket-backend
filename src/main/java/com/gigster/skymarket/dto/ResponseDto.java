@@ -22,7 +22,7 @@ public class ResponseDto {
 
     // Generic method to retrieve payload as a specific type
     public <T> T getPayloadAs(Class<T> type) {
-        if (payload != null && type.isInstance(payload)) {
+        if (type.isInstance(payload)) {
             return type.cast(payload);
         }
         return null;

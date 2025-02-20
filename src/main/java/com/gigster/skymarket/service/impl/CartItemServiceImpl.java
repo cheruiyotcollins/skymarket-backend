@@ -58,7 +58,7 @@ public class CartItemServiceImpl implements CartItemService {
                                     .build());
                 }
 
-                // If cart does not exist, create one using the existing method
+                // If cart does not exist, create one using the existing method.
                 Cart customerCart = cart.orElseGet(() -> {
                     if (!cartRepository.existsByCustomerId(customer.getCustomerId())) {
                         ResponseEntity<ResponseDto> response = cartService.createCart(userPrincipal);

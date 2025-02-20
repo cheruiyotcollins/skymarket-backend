@@ -7,11 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "payments_service_providers")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "payments_service_providers")
 public class PaymentServiceProvider {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
