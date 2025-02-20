@@ -1,7 +1,6 @@
 package com.gigster.skymarket.dto;
 
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,9 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AdminDto {
     private Long adminId;
-    private  String fullName;
+    private String fullName;
     private String email;
     private String contact;
-    @Temporal(TemporalType.TIMESTAMP)
-    private String CreatedOn;
+    private Instant createdOn = Instant.now();
 }
