@@ -11,6 +11,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -40,14 +41,14 @@ class ProcRepositoryTest {
                         .email("admin1@example.com")
                         .adminId(1L)
                         .fullName("Admin One")
-                        .createdOn("2025-01-01")
+                        .createdOn(Instant.parse("2025-01-01T00:00:00Z"))
                         .contact("123456789")
                         .build(),
                 Admin.builder()
                         .email("admin2@example.com")
                         .adminId(2L)
                         .fullName("Admin Two")
-                        .createdOn("2025-01-02")
+                        .createdOn(Instant.parse("2025-01-02T00:00:00Z"))
                         .contact("987654321")
                         .build()
         );
