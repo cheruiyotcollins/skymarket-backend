@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -80,7 +81,7 @@ public class AdminServiceImpl implements AdminService {
 
         existingAdmin.setFullName(adminDto.getFullName());
         existingAdmin.setContact(PhoneNumberEditor.resolveNumber(adminDto.getContact()));
-        existingAdmin.setCreatedOn(DateUtils.dateNowString());
+        existingAdmin.setCreatedOn(Instant.now());
         existingAdmin.setEmail(adminDto.getEmail());
 
         Admin newAdmin = adminRepository.save(existingAdmin);
