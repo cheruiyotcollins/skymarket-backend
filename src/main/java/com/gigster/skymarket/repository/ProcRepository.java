@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.List;
 
 @Repository
@@ -34,7 +35,7 @@ public class ProcRepository {
                     .email(rs.getString("email"))
                     .adminId(rs.getLong("admin_id"))
                     .fullName(rs.getString("full_name"))
-                    .createdOn(rs.getString("created_on"))
+                    .createdOn(rs.getTimestamp("created_on") != null ? rs.getTimestamp("created_on").toInstant() : null)
                     .contact(rs.getString("contact"))
                     .build();
         }
@@ -47,7 +48,7 @@ public class ProcRepository {
                     .email(rs.getString("email"))
                     .superAdminId(rs.getLong("superAdmin_id"))
                     .fullName(rs.getString("full_name"))
-                    .createdOn(rs.getString("created_on"))
+                    .createdOn(rs.getTimestamp("created_on") != null ? rs.getTimestamp("created_on").toInstant() : null)
                     .contact(rs.getString("contact"))
                     .employeeNo(rs.getString("employee_no"))
                     .build();
