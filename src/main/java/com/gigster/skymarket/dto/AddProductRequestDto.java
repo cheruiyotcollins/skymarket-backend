@@ -1,14 +1,3 @@
 package com.gigster.skymarket.dto;
 
-import lombok.*;
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class AddProductRequestDto {
-    private String productName;
-    private String category;
-    private String manufacturer;
-    private double price;
-    private int stock;
-}
+public record AddProductRequestDto(String productName, String category, String manufacturer, double price, int stock) {}
