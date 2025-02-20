@@ -1,14 +1,14 @@
 
 package com.gigster.skymarket.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.Instant;
+
 @Entity
 @Data
 @Builder
@@ -20,7 +20,16 @@ public class SuperAdmin {
     private Long superAdminId;
     private String fullName;
     private String email;
-    private String createdOn;
     private String employeeNo;
     private String contact;
+
+    @Column(nullable = false, updatable = false)
+    private Instant createdOn;
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdOn == null) {
+            createdOn = Instant.now();
+        }
+    }
 }
