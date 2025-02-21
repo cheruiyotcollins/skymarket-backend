@@ -5,7 +5,6 @@ import com.gigster.skymarket.dto.SuperAdminDto;
 import com.gigster.skymarket.mapper.MyDtoMapper;
 import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import com.gigster.skymarket.service.SuperAdminService;
-import com.gigster.skymarket.utils.DateUtils;
 
 import com.gigster.skymarket.exception.ResourceNotFoundException;
 import com.gigster.skymarket.repository.*;
