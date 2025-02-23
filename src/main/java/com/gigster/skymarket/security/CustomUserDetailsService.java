@@ -1,6 +1,5 @@
 package com.gigster.skymarket.security;
 
-
 import com.gigster.skymarket.exception.ResourceNotFoundException;
 import com.gigster.skymarket.model.User;
 import com.gigster.skymarket.repository.UserRepository;

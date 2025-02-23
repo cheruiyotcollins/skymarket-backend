@@ -59,18 +59,17 @@ public class CartItemServiceImpl implements CartItemService {
                 }
 
                 // If cart does not exist, create one using the existing method.
-                Cart customerCart = cart.orElseGet(() -> {
-                    if (!cartRepository.existsByCustomerId(customer.getCustomerId())) {
-                        ResponseEntity<ResponseDto> response = cartService.createCart(userPrincipal);
-                        if (response.getStatusCode().is2xxSuccessful()) {
-                            return cartRepository.findByCustomerId(customer.getCustomerId()).orElseThrow();
-                        } else {
-                            throw new RuntimeException("Failed to create cart.");
-                        }
-                    } else {
-                        return cartRepository.findByCustomerId(customer.getCustomerId()).orElseThrow();
-                    }
-                });
+                Cart customerCart = cart.orElseGet(() ->
+                        cartRepository.findByCustomerId(customer.getCustomerId())
+                                .orElseGet(() -> {
+                                    ResponseEntity<ResponseDto> response = cartService.createCart(userPrincipal);
+                                    if (response.getStatusCode().is2xxSuccessful()) {
+                                        return cartRepository.findByCustomerId(customer.getCustomerId()).orElseThrow();
+                                    } else {
+                                        throw new RuntimeException("Failed to create cart.");
+                                    }
+                                })
+                );
 
                 // Ensure product exists
                 if (product.isEmpty()) {
