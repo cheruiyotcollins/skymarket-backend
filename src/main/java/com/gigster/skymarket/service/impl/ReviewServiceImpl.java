@@ -1,5 +1,6 @@
 package com.gigster.skymarket.service.impl;
 
+import com.gigster.skymarket.config.ReviewConfig;
 import com.gigster.skymarket.dto.ReviewDto;
 import com.gigster.skymarket.model.Review;
 import com.gigster.skymarket.exception.ResourceNotFoundException;
@@ -33,6 +34,9 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ReviewConfig reviewConfig;
 
     @Override
     public boolean isVerifiedPurchase(Long userId, Long productId) {
@@ -68,9 +72,14 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public void addComment(Long userId, Long productId, String comment) {
-        boolean alreadyReviewed = reviewRepository.existsByUser_UserIdAndProductId(userId, productId);
-        if (alreadyReviewed) {
-            throw new UnauthorizedException("You have already reviewed this product.");
+        // Fetch the configurable comment limit
+        int maxComments = reviewConfig.getCommentLimit();
+
+        // Count existing comments by the user for this product
+        long commentCount = reviewRepository.countByUser_UserIdAndProductId(userId, productId);
+
+        if (commentCount >= maxComments) {
+            throw new UnauthorizedException("You can only leave up to " + maxComments + " comments per product.");
         }
 
         User user = userRepository.findById(userId)
@@ -104,19 +113,19 @@ public class ReviewServiceImpl implements ReviewService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Review", "id", reviewId));
 
-        // Check if the user has already disliked the review
+        // Check if the user has already disliked the review.
         if (review.getDislikes().contains(userId)) {
             throw new UnauthorizedException("You have already disliked this review.");
         }
 
-        // Check if the user has liked the review, if so, remove the like
+        // Check if the user has liked the review, if so, remove the like.
         review.getLikes().remove(userId);
 
-        // Add the user ID to the dislikes set
+        // Add the user ID to the dislikes set.
         if (review.getDislikes() == null) {
-            review.setDislikes(new HashSet<>());  // Initialize dislikes if it’s null
+            review.setDislikes(new HashSet<>());
         }
-        review.getDislikes().add(userId);  // Add the user ID to the dislikes set
+        review.getDislikes().add(userId);
 
         reviewRepository.save(review);
     }
