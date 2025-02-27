@@ -327,18 +327,17 @@ public class OrderServiceImpl implements OrderService {
         List<OrderProduct> orderProducts = new ArrayList<>();
         for (OrderProductDto orderProductDto : orderDto.getOrderProducts()) {
             OrderProduct orderProduct = new OrderProduct();
-            orderProduct.setOrder(order);  // Set the current order
+            orderProduct.setOrder(order);
 
-            // Fetch the product from the database
             Product product = productRepository.findById(orderProductDto.getProductId())
                     .orElseThrow(() -> new EntityNotFoundException("Product not found"));
-            orderProduct.setProduct(product);  // Set the fetched product
-            orderProduct.setQuantity(orderProductDto.getQuantity());  // Set quantity
+            orderProduct.setProduct(product);
+            orderProduct.setQuantity(orderProductDto.getQuantity());
 
             orderProducts.add(orderProduct);
         }
 
-        order.setOrderProducts(orderProducts);  // Set the list of OrderProducts
+        order.setOrderProducts(orderProducts);
         return order;
     }
 
