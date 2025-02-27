@@ -54,9 +54,19 @@ public class CartItemController {
     public ResponseEntity<ResponseDto> getAllCartItems(
             @PathVariable("cartId") Long cartId,
             @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "size", defaultValue = "20") int size,
             @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
+
+        String[] sortParams = sort.split(",");
+
+        Sort.Direction direction = Sort.Direction.ASC; // Default sorting order.
+
+        if (sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")) {
+            direction = Sort.Direction.DESC;
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
+
         return cartItemService.getAllCartItems(cartId, pageable);
     }
 
