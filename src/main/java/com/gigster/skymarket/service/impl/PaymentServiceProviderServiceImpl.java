@@ -16,18 +16,19 @@ import java.util.stream.Collectors;
 public class PaymentServiceProviderServiceImpl implements PaymentServiceProviderService {
 
     private final PaymentServiceProviderRepository repository;
+    private final PaymentServiceProviderMapper mapper;
 
     @Autowired
-    public PaymentServiceProviderServiceImpl(PaymentServiceProviderRepository repository) {
+    public PaymentServiceProviderServiceImpl(PaymentServiceProviderRepository repository, PaymentServiceProviderMapper mapper) {
         this.repository = repository;
+        this.mapper = mapper;
     }
 
     @Override
     public PaymentServiceProviderDto create(PaymentServiceProviderDto paymentServiceProviderDto) {
-        // Convert DTO to Entity
-        PaymentServiceProvider entity = PaymentServiceProviderMapper.toEntity(paymentServiceProviderDto);
 
-        // Validate unique fields
+        PaymentServiceProvider entity = mapper.toEntity(paymentServiceProviderDto);
+
         if (repository.findByServiceProviderName(entity.getServiceProviderName()).isPresent()) {
             throw new IllegalArgumentException("Service Provider Name already exists");
         }
@@ -35,42 +36,36 @@ public class PaymentServiceProviderServiceImpl implements PaymentServiceProvider
             throw new IllegalArgumentException("Short Code already exists");
         }
 
-        // Save entity to the database
         PaymentServiceProvider savedEntity = repository.save(entity);
 
-        // Convert saved entity back to DTO
-        return PaymentServiceProviderMapper.toDTO(savedEntity);
+        return mapper.toDto(savedEntity);
     }
 
     @Override
     public PaymentServiceProviderDto update(long id, PaymentServiceProviderDto paymentServiceProviderDto) {
-        // Find the existing entity
         PaymentServiceProvider existingEntity = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("PaymentServiceProvider not found with id: " + id));
-
 
         existingEntity.setServiceProviderName(paymentServiceProviderDto.getServiceProviderName());
         existingEntity.setShortCode(paymentServiceProviderDto.getShortCode());
 
         PaymentServiceProvider updatedEntity = repository.save(existingEntity);
 
-        // Convert updated entity to DTO
-        return PaymentServiceProviderMapper.toDTO(updatedEntity);
+        return mapper.toDto(updatedEntity);
     }
 
     @Override
     public PaymentServiceProviderDto getById(long id) {
-
         PaymentServiceProvider entity = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("PaymentServiceProvider not found with id: " + id));
-        return PaymentServiceProviderMapper.toDTO(entity);
+        return mapper.toDto(entity);
     }
 
     @Override
     public List<PaymentServiceProviderDto> getAll() {
         return repository.findAll()
                 .stream()
-                .map(PaymentServiceProviderMapper::toDTO)
+                .map(mapper::toDto)
                 .collect(Collectors.toList());
     }
 
