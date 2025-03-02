@@ -1,12 +1,19 @@
 package com.gigster.skymarket.service.impl;
 
 import com.gigster.skymarket.dto.PaymentServiceProviderDto;
+import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.mapper.PaymentServiceProviderMapper;
 import com.gigster.skymarket.model.PaymentServiceProvider;
 import com.gigster.skymarket.repository.PaymentServiceProviderRepository;
 import com.gigster.skymarket.service.PaymentServiceProviderService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -62,12 +69,28 @@ public class PaymentServiceProviderServiceImpl implements PaymentServiceProvider
     }
 
     @Override
-    public List<PaymentServiceProviderDto> getAll() {
-        return repository.findAll()
+    public ResponseEntity<ResponseDto> getAllPSP(int page, int size, String sort) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
+        Page<PaymentServiceProvider> pspPage = repository.findAll(pageable);
+
+        List<PaymentServiceProviderDto> dtos = pspPage.getContent()
                 .stream()
                 .map(mapper::toDto)
                 .collect(Collectors.toList());
+
+        ResponseDto responseDto = ResponseDto.builder()
+                .status(HttpStatus.OK)
+                .description("List of All Payment Service Providers.")
+                .payload(dtos)
+                .totalPages(pspPage.getTotalPages())
+                .totalElements(pspPage.getTotalElements())
+                .currentPage(pspPage.getNumber())
+                .pageSize(pspPage.getSize())
+                .build();
+
+        return ResponseEntity.ok(responseDto);
     }
+
 
     @Override
     public void deleteById(long id) {
