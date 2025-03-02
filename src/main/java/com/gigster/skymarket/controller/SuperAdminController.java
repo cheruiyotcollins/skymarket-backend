@@ -25,8 +25,12 @@ public class SuperAdminController {
     }
 
     @GetMapping
-    public ExtendedResDto getAllSuperAdmins() {
-        return superAdminService.getAllSuperAdmins();
+    public ResponseEntity<ExtendedResDto> getAllSuperAdmins(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size,
+            @RequestParam(value = "sort", defaultValue = "superAdmin_id,asc") String sort) {
+
+        return ResponseEntity.ok(superAdminService.getAllSuperAdmins(page, size, sort));
     }
 
     @PutMapping("/{id}")
