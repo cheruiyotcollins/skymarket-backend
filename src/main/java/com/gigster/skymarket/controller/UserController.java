@@ -95,7 +95,7 @@ public class UserController {
 
     @Operation(summary = "List All Users")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "302", description = "returned list of users",
+            @ApiResponse(responseCode = "302", description = "Returned list of users",
                     content = {@Content(mediaType = "application/json",schema = @Schema(implementation = User.class))}),
             @ApiResponse(responseCode = "401",description = "Unauthorized user",content = @Content),
             @ApiResponse(responseCode = "404",description = "no user found",content = @Content),
@@ -105,8 +105,8 @@ public class UserController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
-        return userService.getAllUsers(pageable);
+
+        return userService.getAllUsers(page, size, sort);
     }
 
     @Operation(summary = "Delete User By Id")
@@ -117,8 +117,8 @@ public class UserController {
             @ApiResponse(responseCode = "404",description = "User not found",content = @Content),
             @ApiResponse(responseCode = "400",description = "Bad Request",content = @Content)})
     @DeleteMapping("/id/{id}")
-    public ResponseEntity<?> deleteById(@PathVariable long id){
-        return userService.deleteById(id);
+    public ResponseEntity<?> deleteUserById(@PathVariable long id){
+        return userService.deleteUserById(id);
 
     }
 
