@@ -17,9 +17,9 @@ public interface UserService {
 
     ResponseEntity<ResponseDto> findUserById(long id);
 
-    ResponseEntity<ResponseDto> getAllUsers(Pageable pageable);
+    ResponseEntity<ResponseDto> getAllUsers(int page, int size, String sort);
 
-    ResponseEntity<ResponseDto> deleteById(long id);
+    ResponseEntity<ResponseDto> deleteUserById(long id);
 
     ResponseEntity<ResponseDto> getCurrentUser(String email);
 
