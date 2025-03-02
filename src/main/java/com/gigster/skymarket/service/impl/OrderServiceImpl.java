@@ -14,6 +14,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.PessimisticLockingFailureException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -173,7 +175,15 @@ public class OrderServiceImpl implements OrderService {
 
     // 3. Retrieve all orders, ADMIN.
     @Override
-    public ResponseEntity<ResponseDto> getAllOrders(Pageable pageable) {
+    public ResponseEntity<ResponseDto> getAllOrders(int page, int size, String sort) {
+        String[] sortParams = sort.split(",");
+        Sort.Direction direction = Sort.Direction.ASC;
+
+        if (sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")) {
+            direction = Sort.Direction.DESC;
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
         Page<Order> orderPage = orderRepository.findAll(pageable);
 
         List<OrderDto> orderDtos = orderPage.getContent()
@@ -190,8 +200,8 @@ public class OrderServiceImpl implements OrderService {
         assert responseDto != null;
         responseDto.setTotalPages(orderPage.getTotalPages());
         responseDto.setTotalElements(orderPage.getTotalElements());
-        responseDto.setCurrentPage(pageable.getPageNumber());
-        responseDto.setPageSize(pageable.getPageSize());
+        responseDto.setCurrentPage(orderPage.getNumber());
+        responseDto.setPageSize(orderPage.getSize());
 
         return ResponseEntity.ok(responseDto);
     }
