@@ -11,7 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class CartItemResponseDto {
-    private String productName;
+    private long id;
+    private String title;
     private double price;
     private int quantity;
     private double subTotal;
