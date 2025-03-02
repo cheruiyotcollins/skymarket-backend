@@ -16,7 +16,8 @@ public class CartItemsToCartItemsDtoMapper {
         double totalPrice = 0.0;
         for (CartItem item : cartItems) {
             CartItemResponseDto cartItemDto = CartItemResponseDto.builder()
-                    .productName(item.getProduct().getProductName())
+                    .id(item.getId())
+                    .title(item.getProduct().getProductName())
                     .price(item.getProduct().getPrice())
                     .quantity(item.getQuantity())
                     .subTotal(item.getSubtotal())
