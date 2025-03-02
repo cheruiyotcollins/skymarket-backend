@@ -14,7 +14,7 @@ public interface CatalogueService {
 
     Catalogue getCatalogueById(Long id);
 
-    ResponseEntity<ResponseDto> getAllCatalogues(Pageable pageable);
+    ResponseEntity<ResponseDto> getAllCatalogues(int page, int size, String sort);
 
     Catalogue updateCatalogue(Long id, Catalogue updatedCatalogue);
 
