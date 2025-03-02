@@ -32,8 +32,8 @@ public class CategoryController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
-        return categoryService.getAllCategories(pageable);
+
+        return categoryService.getAllCategories(page, size, sort);
     }
 
     @PutMapping("/{id}")
