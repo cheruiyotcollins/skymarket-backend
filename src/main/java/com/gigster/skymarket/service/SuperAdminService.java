@@ -11,7 +11,7 @@ public interface SuperAdminService {
 
     ExtendedResDto getSuperAdminById(Long id);
 
-    ExtendedResDto getAllSuperAdmins();
+    ExtendedResDto getAllSuperAdmins(int page, int size, String sort);
 
     ExtendedResDto updateSuperAdminById(SuperAdminDto superAdminDto);
 
