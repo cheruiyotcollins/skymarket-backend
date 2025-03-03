@@ -17,7 +17,9 @@ import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -121,7 +123,7 @@ public class UserServiceImpl implements UserService {
 
         // Ensure Customer is saved successfully
         if (customer.getCustomerId() == null) {
-            return responseDtoSetter.responseDtoSetter(HttpStatus.INTERNAL_SERVER_ERROR, "Customer could not be created.");
+            return responseDtoSetter.responseDtoSetter(HttpStatus.INTERNAL_SERVER_ERROR, "Customer could not be added.");
         }
 
         // Now create the User entity and associate it with the Customer
@@ -205,28 +207,39 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<ResponseDto> getAllUsers(Pageable pageable) {
+    public ResponseEntity<ResponseDto> getAllUsers(int page, int size, String sort) {
+        String[] sortParams = sort.split(",");
+        Sort.Direction direction = Sort.Direction.ASC;
+
+        if (sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")) {
+            direction = Sort.Direction.DESC;
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
         Page<User> usersPage = userRepository.findAll(pageable);
+
         List<UserDto> userDtos = usersPage.getContent()
                 .stream()
                 .map(userMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
 
-        ResponseDto responseDto = ResponseDto.builder()
-                .status(HttpStatus.OK)
-                .description("List of All Users.")
-                .payload(userDtos)
-                .totalPages(usersPage.getTotalPages())
-                .totalElements(usersPage.getTotalElements())
-                .currentPage(usersPage.getNumber())
-                .pageSize(usersPage.getSize())
-                .build();
+        ResponseDto responseDto = responseDtoSetter.responseDtoSetter(
+                HttpStatus.OK,
+                "Fetched List of All Users.",
+                userDtos
+        ).getBody();
+
+        assert responseDto != null;
+        responseDto.setTotalPages(usersPage.getTotalPages());
+        responseDto.setTotalElements(usersPage.getTotalElements());
+        responseDto.setCurrentPage(usersPage.getNumber());
+        responseDto.setPageSize(usersPage.getSize());
 
         return ResponseEntity.ok(responseDto);
     }
 
     @Override
-    public ResponseEntity<ResponseDto> deleteById(long id){
+    public ResponseEntity<ResponseDto> deleteUserById(long id){
 
         try{
             userRepository.deleteById(id);

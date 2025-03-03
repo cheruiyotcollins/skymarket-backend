@@ -19,7 +19,9 @@ import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -149,8 +151,17 @@ public class CartItemServiceImpl implements CartItemService {
     }
 
     @Override
-    public ResponseEntity<ResponseDto> getAllCartItems(Long cartId, Pageable pageable) {
+    public ResponseEntity<ResponseDto> getAllCartItems(Long cartId, int page, int size, String sort) {
+        String[] sortParams = sort.split(",");
+        Sort.Direction direction = Sort.Direction.ASC;
+
+        if (sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")) {
+            direction = Sort.Direction.DESC;
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
         Page<CartItem> cartItemsPage = cartItemRepository.findByCart_CartId(cartId, pageable);
+
         List<CartItemDto> cartItemDtos = cartItemsPage.getContent()
                 .stream()
                 .map(this::mapToDto)

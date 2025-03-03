@@ -1,6 +1,7 @@
 package com.gigster.skymarket.controller;
 
 import com.gigster.skymarket.dto.PaymentServiceProviderDto;
+import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.service.PaymentServiceProviderService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -8,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -43,9 +42,12 @@ public class PaymentServiceProviderController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PaymentServiceProviderDto>> getAll() {
-        List<PaymentServiceProviderDto> dtos = service.getAll();
-        return ResponseEntity.ok(dtos);
+    public ResponseEntity<ResponseDto> getAllPSP(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
+
+        return service.getAllPSP(page, size, sort);
     }
 
     @DeleteMapping("/{id}")

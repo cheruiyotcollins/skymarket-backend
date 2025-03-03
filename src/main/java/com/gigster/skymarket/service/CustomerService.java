@@ -5,15 +5,13 @@ import com.gigster.skymarket.dto.ResponseDto;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 
-import org.springframework.data.domain.Pageable;
-
 public interface CustomerService{
 
     ResponseEntity<ResponseDto> saveCustomer(CustomerDto newCustomer);
 
-    ResponseEntity<ResponseDto> getAllCustomers(Pageable pageable);
-
     ResponseEntity<ResponseDto> findCustomerById(long id);
+
+    ResponseEntity<ResponseDto> getAllCustomers(int page, int size, String sort);
 
     ResponseEntity<ResponseDto> deleteCustomerById(long id);
 

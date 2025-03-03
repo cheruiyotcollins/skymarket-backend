@@ -5,7 +5,6 @@ import com.gigster.skymarket.model.Cart;
 import com.gigster.skymarket.model.Product;
 import com.gigster.skymarket.security.UserPrincipal;
 import org.springframework.http.ResponseEntity;
-import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
@@ -15,7 +14,7 @@ public interface CartItemService {
 
     ResponseEntity<ResponseDto> getCartItem(Long cartId, Long itemId);
 
-    ResponseEntity<ResponseDto> getAllCartItems(Long cartId, Pageable pageable);
+    ResponseEntity<ResponseDto> getAllCartItems(Long cartId, int page, int size, String sort);
 
     ResponseEntity<ResponseDto> updateCartItem(Long cartId, Long itemId, int quantity);
 }

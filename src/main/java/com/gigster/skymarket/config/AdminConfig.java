@@ -38,7 +38,7 @@ public class AdminConfig implements CommandLineRunner {
             Role adminRole = roleRepository.findByName(RoleName.ROLE_ADMIN).orElse(null);
             if (adminRole == null) {
                 log.error("ROLE_ADMIN does not exist in the database. Please insert it manually.");
-                return;  // Exit early if the role is not found
+                return;  // Exit early if the role is not found.
             }
 
             User user = new User();
@@ -52,7 +52,7 @@ public class AdminConfig implements CommandLineRunner {
             user.setContact("+254700000000");
             user.setPassword(passwordEncoder.encode("password"));
             user.setGender("Undefined");
-            user.setFirstLogin(true); // Add this flag to User entity
+            user.setFirstLogin(true);
             userRepository.save(user);
             log.info("Admin user created with first login flag set to true.");
         }

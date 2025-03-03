@@ -14,12 +14,15 @@ import com.gigster.skymarket.utils.PhoneNumberEditor;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.List;
 
 @Slf4j
 @AllArgsConstructor
@@ -63,12 +66,22 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
-    public ExtendedResDto getAllSuperAdmins() {
-        List<SuperAdmin> supers = procRepository.getSuperAdmins();
-        return  ExtendedResDto.builder()
+    public ExtendedResDto getAllSuperAdmins(int page, int size, String sort) {
+        String[] sortParams = sort.split(",");
+        Sort.Direction direction = Sort.Direction.ASC;
+
+        if (sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")) {
+            direction = Sort.Direction.DESC;
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
+
+        Page<SuperAdmin> superAdminsPage = procRepository.getSuperAdmins(pageable);
+
+        return ExtendedResDto.builder()
                 .status(200)
-                .body(supers)
-                .message("A list of all super admins.")
+                .body(superAdminsPage.getContent())
+                .message("A paginated list of super admins.")
                 .build();
     }
 

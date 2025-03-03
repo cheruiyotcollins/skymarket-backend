@@ -10,9 +10,6 @@ import com.gigster.skymarket.security.UserPrincipal;
 import com.gigster.skymarket.service.CartItemService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -54,10 +51,10 @@ public class CartItemController {
     public ResponseEntity<ResponseDto> getAllCartItems(
             @PathVariable("cartId") Long cartId,
             @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "size", defaultValue = "20") int size,
             @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
-        return cartItemService.getAllCartItems(cartId, pageable);
+
+        return cartItemService.getAllCartItems(cartId, page, size, sort);
     }
 
     @PutMapping("/{cartId}/{itemId}")

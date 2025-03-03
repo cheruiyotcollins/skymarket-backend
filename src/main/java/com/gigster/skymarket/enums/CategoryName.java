@@ -5,10 +5,11 @@ public enum CategoryName {
     GROCERIES,
     FASHION,
     FURNITURE,
-    STATIONARY,
-    MENSCLOTHING,
-    JEWELERY,
-    WOMENSCLOTHING;
+    STATIONERY,
+    MENCLOTHING,
+    JEWELLERY,
+    WOMENCLOTHING;
+
     public static CategoryName fromString(String categoryName) {
         return CategoryName.valueOf(categoryName.toUpperCase());
     }

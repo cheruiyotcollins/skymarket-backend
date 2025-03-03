@@ -13,4 +13,8 @@ public class ExtendedResDto {
     private int status;
     private String message;
     private Object body;
+    private int page;
+    private int size;
+    private long totalElements;
+    private int totalPages;
 }

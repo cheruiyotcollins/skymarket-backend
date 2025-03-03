@@ -11,7 +11,9 @@ import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -64,8 +66,17 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public ResponseEntity<ResponseDto> getAllCustomers(Pageable pageable) {
+    public ResponseEntity<ResponseDto> getAllCustomers(int page, int size, String sort) {
+        String[] sortParams = sort.split(",");
+        Sort.Direction direction = Sort.Direction.ASC;
+
+        if (sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")) {
+            direction = Sort.Direction.DESC;
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
         Page<Customer> customersPage = customerRepository.findAll(pageable);
+
         List<CustomerDto> customerDtos = customersPage.getContent()
                 .stream()
                 .map(customerMapper::toDto)
@@ -83,6 +94,7 @@ public class CustomerServiceImpl implements CustomerService {
 
         return ResponseEntity.ok(responseDto);
     }
+
 
     @Override
     public ResponseEntity<ResponseDto> deleteCustomerById(long id){
