@@ -5,9 +5,6 @@ import com.gigster.skymarket.security.UserPrincipal;
 import com.gigster.skymarket.service.CartService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,7 +18,7 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
-    private UserPrincipal getCurrentUser() {
+    public UserPrincipal getCurrentUser() {
         return (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
@@ -40,8 +37,8 @@ public class CartController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
-        return cartService.getAllCarts(pageable, getCurrentUser());
+
+        return cartService.getAllCarts(page, size, sort, getCurrentUser());
     }
 
     @GetMapping("/customer")
