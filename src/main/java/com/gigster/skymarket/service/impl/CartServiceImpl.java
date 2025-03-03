@@ -17,7 +17,9 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -101,9 +103,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public ResponseEntity<ResponseDto> getAllCarts(Pageable pageable, UserPrincipal userPrincipal) {
-        // If you require UserPrincipal, handle the logic here or inject it where
-        // necessary
+    public ResponseEntity<ResponseDto> getAllCarts(int page, int size, String sort, UserPrincipal userPrincipal) {
         if (userPrincipal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     ResponseDto.builder()
@@ -112,6 +112,13 @@ public class CartServiceImpl implements CartService {
                             .build());
         }
 
+        String[] sortParams = sort.split(",");
+        Sort.Direction direction = Sort.Direction.ASC;
+        if (sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")) {
+            direction = Sort.Direction.DESC;
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
         Page<Cart> cartsPage = cartRepository.findAll(pageable);
 
         List<CartDto> cartDtos = cartsPage.getContent()
