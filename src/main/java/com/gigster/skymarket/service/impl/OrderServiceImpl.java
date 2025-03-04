@@ -14,8 +14,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.PessimisticLockingFailureException;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -175,15 +173,7 @@ public class OrderServiceImpl implements OrderService {
 
     // 3. Retrieve all orders, ADMIN.
     @Override
-    public ResponseEntity<ResponseDto> getAllOrders(int page, int size, String sort) {
-        String[] sortParams = sort.split(",");
-        Sort.Direction direction = Sort.Direction.ASC;
-
-        if (sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")) {
-            direction = Sort.Direction.DESC;
-        }
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
+    public ResponseEntity<ResponseDto> getAllOrders(Pageable pageable) {
         Page<Order> orderPage = orderRepository.findAll(pageable);
 
         List<OrderDto> orderDtos = orderPage.getContent()
@@ -200,8 +190,8 @@ public class OrderServiceImpl implements OrderService {
         assert responseDto != null;
         responseDto.setTotalPages(orderPage.getTotalPages());
         responseDto.setTotalElements(orderPage.getTotalElements());
-        responseDto.setCurrentPage(orderPage.getNumber());
-        responseDto.setPageSize(orderPage.getSize());
+        responseDto.setCurrentPage(pageable.getPageNumber());
+        responseDto.setPageSize(pageable.getPageSize());
 
         return ResponseEntity.ok(responseDto);
     }
@@ -337,17 +327,18 @@ public class OrderServiceImpl implements OrderService {
         List<OrderProduct> orderProducts = new ArrayList<>();
         for (OrderProductDto orderProductDto : orderDto.getOrderProducts()) {
             OrderProduct orderProduct = new OrderProduct();
-            orderProduct.setOrder(order);
+            orderProduct.setOrder(order);  // Set the current order
 
+            // Fetch the product from the database
             Product product = productRepository.findById(orderProductDto.getProductId())
                     .orElseThrow(() -> new EntityNotFoundException("Product not found"));
-            orderProduct.setProduct(product);
-            orderProduct.setQuantity(orderProductDto.getQuantity());
+            orderProduct.setProduct(product);  // Set the fetched product
+            orderProduct.setQuantity(orderProductDto.getQuantity());  // Set quantity
 
             orderProducts.add(orderProduct);
         }
 
-        order.setOrderProducts(orderProducts);
+        order.setOrderProducts(orderProducts);  // Set the list of OrderProducts
         return order;
     }
 

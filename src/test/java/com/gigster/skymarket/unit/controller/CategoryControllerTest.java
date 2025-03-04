@@ -70,17 +70,18 @@ class CategoryControllerTest {
         int page = 0;
         int size = 10;
         String sort = "id,asc";
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
         ResponseDto responseDto = new ResponseDto();
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.OK);
 
-        when(categoryService.getAllCategories(page, size, sort)).thenReturn(expectedResponse);
+        when(categoryService.getAllCategories(pageable)).thenReturn(expectedResponse);
 
         // Act
         ResponseEntity<ResponseDto> actualResponse = categoryController.getAllCategories(page, size, sort);
 
         // Assert
         assertEquals(expectedResponse, actualResponse);
-        verify(categoryService, times(1)).getAllCategories(page, size, sort);
+        verify(categoryService, times(1)).getAllCategories(pageable);
     }
 
     @Test

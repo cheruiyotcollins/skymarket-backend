@@ -10,9 +10,7 @@ import com.gigster.skymarket.repository.CategoryRepository;
 import com.gigster.skymarket.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -60,17 +58,8 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public ResponseEntity<ResponseDto> getAllCategories(int page, int size, String sort) {
-        String[] sortParams = sort.split(",");
-        Sort.Direction direction = Sort.Direction.ASC;
-
-        if (sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")) {
-            direction = Sort.Direction.DESC;
-        }
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
+    public ResponseEntity<ResponseDto> getAllCategories(Pageable pageable) {
         Page<Category> categoriesPage = categoryRepository.findAll(pageable);
-
         List<CategoryDto> categoryDtos = categoriesPage.getContent()
                 .stream()
                 .map(categoryMapper::toDto)

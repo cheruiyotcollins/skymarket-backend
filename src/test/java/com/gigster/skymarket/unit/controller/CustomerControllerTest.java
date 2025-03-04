@@ -71,25 +71,26 @@ class CustomerControllerTest {
         int page = 0;
         int size = 10;
         String sort = "id,asc";
-        ResponseDto responseDto = new ResponseDto();
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
+        ResponseDto responseDto = new ResponseDto(); // Add fields as necessary
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.OK);
 
-        when(customerService.getAllCustomers(page, size, sort)).thenReturn(expectedResponse);
+        when(customerService.getAllCustomers(pageable)).thenReturn(expectedResponse);
 
         // Act
         ResponseEntity<ResponseDto> actualResponse = customerController.getAllCustomers(page, size, sort);
 
         // Assert
         assertEquals(expectedResponse, actualResponse);
-        verify(customerService, times(1)).getAllCustomers(page, size, sort);
+        verify(customerService, times(1)).getAllCustomers(pageable);
     }
 
     @Test
     void updateCustomer_ShouldReturnUpdatedCustomer() {
         // Arrange
         long customerId = 1L;
-        CustomerDto updatedCustomer = new CustomerDto();
-        ResponseDto responseDto = new ResponseDto();
+        CustomerDto updatedCustomer = new CustomerDto(); // Add fields as necessary
+        ResponseDto responseDto = new ResponseDto(); // Add fields as necessary
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.OK);
 
         when(customerService.updateCustomer(customerId, updatedCustomer)).thenReturn(expectedResponse);
@@ -106,7 +107,7 @@ class CustomerControllerTest {
     void deleteCustomer_ShouldReturnResponseEntity() {
         // Arrange
         long customerId = 1L;
-        ResponseDto responseDto = new ResponseDto();
+        ResponseDto responseDto = new ResponseDto(); // Add fields as necessary
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.NO_CONTENT);
 
         when(customerService.deleteCustomerById(customerId)).thenReturn(expectedResponse);

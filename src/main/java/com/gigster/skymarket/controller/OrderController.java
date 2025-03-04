@@ -36,12 +36,8 @@ public class OrderController {
 
     // 2. READ: Get all orders, admin
     @GetMapping
-    public ResponseEntity<ResponseDto> getAllOrders(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
-
-        return orderService.getAllOrders(page, size, sort);
+    public ResponseEntity<ResponseDto> getAllOrders(Pageable pageable) {
+        return orderService.getAllOrders(pageable);
     }
 
     // 4. UPDATE: Update an existing order

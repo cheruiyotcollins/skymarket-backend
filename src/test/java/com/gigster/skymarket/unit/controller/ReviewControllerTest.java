@@ -29,11 +29,11 @@ class ReviewControllerTest {
     @InjectMocks
     private ReviewController reviewController;
 
-    private static final String SUCCESS_REVIEW_ADDED = "Review added successfully.";
-    private static final String SUCCESS_COMMENT_ADDED = "Comment added successfully.";
-    private static final String SUCCESS_REVIEW_LIKED = "Review liked successfully.";
-    private static final String SUCCESS_REVIEW_DISLIKED = "Review disliked successfully.";
-    private static final String SUCCESS_REVIEW_VERIFIED = "Review marked as verified.";
+    private static final String SUCCESS_REVIEW_ADDED = "Review added successfully";
+    private static final String SUCCESS_COMMENT_ADDED = "Comment added successfully";
+    private static final String SUCCESS_REVIEW_LIKED = "Review liked successfully";
+    private static final String SUCCESS_REVIEW_DISLIKED = "Review disliked successfully";
+    private static final String SUCCESS_REVIEW_VERIFIED = "Review marked as verified";
 
     @BeforeEach
     void setUp() {
