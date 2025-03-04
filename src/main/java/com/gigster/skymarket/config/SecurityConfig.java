@@ -68,6 +68,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/v1/products/{id}").permitAll()
                                 .requestMatchers("/api/v1/products").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/carts**").permitAll()
+                                     .requestMatchers(HttpMethod.DELETE, "/api/v1/carts**").permitAll()
 
                                 // Endpoints requiring specific roles.
                                 //  User endpoints.

@@ -19,9 +19,7 @@ import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -43,7 +41,7 @@ public class CartItemServiceImpl implements CartItemService {
         private final ResponseDtoMapper responseDtoSetter;
 
      @Override
-     public ResponseEntity<ResponseDto> addOrUpdateCartItem(Optional<Cart> cart, Optional<Product> product, int quantity, UserPrincipal userPrincipal) {
+     public ResponseEntity<ResponseDto> addCartItem(Optional<Cart> cart, Optional<Product> product, int quantity, UserPrincipal userPrincipal) {
             try {
                 // Map the authenticated user to a customer
                 Customer customer = CurrentUserV2.mapToCustomer(userPrincipal);
@@ -126,6 +124,79 @@ public class CartItemServiceImpl implements CartItemService {
         }
 
     @Override
+    public ResponseEntity<ResponseDto> updateCartItem(Optional<Cart> cart, Optional<CartItem> cartItem, int quantity, UserPrincipal userPrincipal) {
+        try {
+            // Map the authenticated user to a customer
+            Customer customer = CurrentUserV2.mapToCustomer(userPrincipal);
+            log.debug("Mapped customer: {}", customer);
+
+            // Validate customer existence
+            Optional<Customer> existingCustomer = customerRepository.findById(customer.getCustomerId());
+            if (existingCustomer.isEmpty()) {
+                log.error("Customer with ID {} does not exist.", customer.getCustomerId());
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                        ResponseDto.builder()
+                                .status(HttpStatus.NOT_FOUND)
+                                .description("Customer not found.")
+                                .build());
+            }
+
+            // Validate cart existence
+            if (cart.isEmpty()) {
+                log.error("Cart with ID {} not found.", customer.getCustomerId());
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                        ResponseDto.builder()
+                                .status(HttpStatus.NOT_FOUND)
+                                .description("Cart not found.")
+                                .build());
+            }
+
+            // Validate cart item existence
+            if (cartItem.isEmpty()) {
+                log.error("Cart item with ID not found in cart.");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                        ResponseDto.builder()
+                                .status(HttpStatus.NOT_FOUND)
+                                .description("Cart item not found.")
+                                .build());
+            }
+
+            Cart existingCart = cart.get();
+            CartItem existingCartItem = cartItem.get();
+
+            // Ensure the cart belongs to the authenticated user
+            if (!existingCart.getCustomer().getCustomerId().equals(customer.getCustomerId())) {
+                log.error("User is not authorized to update this cart.");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                        ResponseDto.builder()
+                                .status(HttpStatus.FORBIDDEN)
+                                .description("You are not authorized to update this cart.")
+                                .build());
+            }
+
+            // Update the quantity
+            existingCartItem.setQuantity(existingCartItem.getQuantity()+quantity);
+            cartItemRepository.save(existingCartItem);
+
+            log.info("Cart item updated successfully.");
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    ResponseDto.builder()
+                            .status(HttpStatus.OK)
+                            .description("Cart item updated successfully.")
+                            .build());
+
+        } catch (Exception e) {
+            log.error("Error updating cart item: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    ResponseDto.builder()
+                            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .description("An error occurred while updating the cart item.")
+                            .build());
+        }
+    }
+
+
+    @Override
     public ResponseEntity<ResponseDto> getCartItem(Long cartId, Long itemId) {
         Optional<CartItem> cartItemOptional = cartItemRepository.findByCart_CartIdAndProductId(cartId, itemId);
 
@@ -151,17 +222,8 @@ public class CartItemServiceImpl implements CartItemService {
     }
 
     @Override
-    public ResponseEntity<ResponseDto> getAllCartItems(Long cartId, int page, int size, String sort) {
-        String[] sortParams = sort.split(",");
-        Sort.Direction direction = Sort.Direction.ASC;
-
-        if (sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")) {
-            direction = Sort.Direction.DESC;
-        }
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
+    public ResponseEntity<ResponseDto> getAllCartItems(Long cartId, Pageable pageable) {
         Page<CartItem> cartItemsPage = cartItemRepository.findByCart_CartId(cartId, pageable);
-
         List<CartItemDto> cartItemDtos = cartItemsPage.getContent()
                 .stream()
                 .map(this::mapToDto)
