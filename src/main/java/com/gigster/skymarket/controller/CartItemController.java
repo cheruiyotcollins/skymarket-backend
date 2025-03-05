@@ -36,20 +36,29 @@ public class CartItemController {
 
     @PostMapping
     public ResponseEntity<ResponseDto> addCartItem(@RequestBody CartItemRequestDto request) {
-        Optional<Cart> cart = cartRepository.findById(request.getCartId());
-        Optional<Product> product = productRepository.findById(request.getProductId());
-
         UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Optional<Cart> cart;
+        if(request.getCartId()==null){
+            cart= cartRepository.findByCustomerId(userPrincipal.getCustomerId());
+        }else {
+            cart = cartRepository.findById(request.getCartId());
+        }
+        Optional<Product> product = productRepository.findById(request.getProductId());
 
         return cartItemService.addCartItem(cart, product, request.getQuantity(), userPrincipal);
     }
 
     @PatchMapping
     public ResponseEntity<ResponseDto> updateCartItem(@RequestBody CartItemRequestDto request) {
-        Optional<Cart> cart = cartRepository.findById(request.getCartId());
+        UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Optional<Cart> cart;
+        if(request.getCartId()==null){
+             cart= cartRepository.findByCustomerId(userPrincipal.getCustomerId());
+        }else {
+             cart = cartRepository.findById(request.getCartId());
+        }
 
         Optional<CartItem> cartItem = cartItemRepository.findByCart_CartIdAndId(request.getCartId(), request.getCartItemId());
-        UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         return cartItemService.updateCartItem(cart, cartItem, request.getQuantity(), userPrincipal);
     }
