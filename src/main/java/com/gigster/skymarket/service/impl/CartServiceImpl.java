@@ -89,6 +89,7 @@ public class CartServiceImpl implements CartService {
                     ResponseDto.builder()
                             .status(HttpStatus.CREATED)
                             .description("Cart created successfully.")
+                            .payload(savedCart)
                             .build());
         } catch (Exception e) {
             log.error("Error creating cart: {}", e.getMessage(), e);
