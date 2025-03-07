@@ -78,9 +78,6 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsByEmail(signUpRequestDto.getEmail())) {
             return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_ACCEPTABLE, "Email Address already in use!");
         }
-        if (userRepository.existsByUsername(signUpRequestDto.getUsername())) {
-            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_ACCEPTABLE, "Username is already taken!");
-        }
 
         // Determine if the user is an admin
         boolean isAdmin = signUpRequestDto.getRoleName() != null && signUpRequestDto.getRoleName().equalsIgnoreCase("ROLE_ADMIN");
@@ -91,7 +88,7 @@ public class UserServiceImpl implements UserService {
                     .email(signUpRequestDto.getEmail())
                     .password(passwordEncoder.encode(signUpRequestDto.getPassword()))
                     .fullName(signUpRequestDto.getFullName())
-                    .username(signUpRequestDto.getUsername())
+                    .username(signUpRequestDto.getEmail())
                     .contact(signUpRequestDto.getContact())
                     .gender(signUpRequestDto.getGender())
                     .firstLogin(true)
@@ -129,7 +126,7 @@ public class UserServiceImpl implements UserService {
                 .email(signUpRequestDto.getEmail())
                 .password(passwordEncoder.encode(signUpRequestDto.getPassword()))
                 .fullName(signUpRequestDto.getFullName())
-                .username(signUpRequestDto.getUsername())
+                .username(signUpRequestDto.getEmail())
                 .contact(signUpRequestDto.getContact())
                 .gender(signUpRequestDto.getGender())
                 .customer(customer) // Link the Customer to the User
