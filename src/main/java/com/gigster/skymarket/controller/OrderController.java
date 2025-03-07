@@ -1,7 +1,11 @@
 package com.gigster.skymarket.controller;
 
+import com.gigster.skymarket.dto.NewOrderDto;
 import com.gigster.skymarket.dto.OrderDto;
 import com.gigster.skymarket.dto.ResponseDto;
+import com.gigster.skymarket.model.Cart;
+import com.gigster.skymarket.repository.CartRepository;
+import com.gigster.skymarket.security.UserPrincipal;
 import com.gigster.skymarket.service.OrderService;
 import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import jakarta.validation.Valid;
@@ -9,7 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/orders")
@@ -21,10 +27,26 @@ public class OrderController {
 
     @Autowired
     ResponseDtoMapper responseDtoSetter;
+    @Autowired
+    CartRepository cartRepository;
+
+    private UserPrincipal getCurrentUser() {
+        return (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
 
     // 1. CREATE: Add a new order
     @PostMapping
-    public ResponseEntity<ResponseDto> createOrder(@Valid @RequestBody OrderDto orderDto) {
+    public ResponseEntity<ResponseDto> createOrder(@Valid @RequestBody NewOrderDto newOrderDto) {
+        UserPrincipal userPrincipal = getCurrentUser();
+        Long customerId=userPrincipal.getCustomerId();
+        OrderDto orderDto= new OrderDto();
+        orderDto.setCustomerId(customerId);
+        Optional<Cart> cart;
+            cart= cartRepository.findByCustomerId(customerId);
+
+        orderDto.setCartId(cart.get().getCartId());
+        orderDto.setPaymentMethod(newOrderDto.getPaymentMethod());
+        orderDto.setShippingAddress(newOrderDto.getShippingAddress());
         return orderService.createOrder(orderDto);
     }
 
