@@ -107,9 +107,9 @@ public class CartItemServiceImpl implements CartItemService {
                 cartItemRepository.save(newCartItem);
 
                 log.info("Cart item added successfully for cart ID {}", cartId);
-                return ResponseEntity.status(HttpStatus.CREATED).body(
+                return ResponseEntity.status(HttpStatus.OK).body(
                         ResponseDto.builder()
-                                .status(HttpStatus.CREATED)
+                                .status(HttpStatus.OK)
                                 .description("Cart item added successfully.")
                                 .build());
             }

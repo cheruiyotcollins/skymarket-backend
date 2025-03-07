@@ -85,9 +85,9 @@ public class CartServiceImpl implements CartService {
             Cart savedCart = cartRepository.save(cart);
             log.info("Cart created successfully: {}", savedCart);
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(
+            return ResponseEntity.status(HttpStatus.OK).body(
                     ResponseDto.builder()
-                            .status(HttpStatus.CREATED)
+                            .status(HttpStatus.OK)
                             .description("Cart created successfully.")
                             .payload(savedCart)
                             .build());
