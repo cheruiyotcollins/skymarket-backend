@@ -5,6 +5,9 @@ import com.gigster.skymarket.security.UserPrincipal;
 import com.gigster.skymarket.service.CartService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,7 +21,7 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
-    public UserPrincipal getCurrentUser() {
+    private UserPrincipal getCurrentUser() {
         return (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
@@ -37,8 +40,8 @@ public class CartController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
-
-        return cartService.getAllCarts(page, size, sort, getCurrentUser());
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
+        return cartService.getAllCarts(pageable, getCurrentUser());
     }
 
     @GetMapping("/customer")
@@ -48,15 +51,11 @@ public class CartController {
         log.info("Fetching cart for customer with email: {}", email);
         return cartService.findCartPerCustomer(email);
     }
-
-    @DeleteMapping("/remove/{productId}")
-    public ResponseEntity<ResponseDto> removeItemFromCart(@PathVariable Long productId) {
+   //todo
+    @DeleteMapping("/remove/{cartItemId}")
+    public ResponseEntity<ResponseDto> removeItemFromCart(@PathVariable Long cartItemId) {
         UserPrincipal userPrincipal = getCurrentUser();
-        log.info("Authenticated UserPrincipal for removal: {}", userPrincipal);
-        log.info("Removing product with ID: {}", productId);
-
-        ResponseEntity<ResponseDto> response = cartService.removeItemFromCart(productId);
-        log.info("Response after removal: {}", response.getBody());
+        ResponseEntity<ResponseDto> response = cartService.removeItemFromCart(cartItemId);
         return response;
     }
 

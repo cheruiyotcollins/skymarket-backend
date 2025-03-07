@@ -1,6 +1,7 @@
 package com.gigster.skymarket.model;
 
 import com.gigster.skymarket.enums.OrderStatus;
+import com.gigster.skymarket.enums.PaymentProvider;
 import com.gigster.skymarket.utils.DateUtils;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -43,6 +44,8 @@ public class Order implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
+    private String shippingAddress;
+    private PaymentProvider paymentProvider;
 
     @Builder.Default
     private String createdOn= DateUtils.dateNowString();

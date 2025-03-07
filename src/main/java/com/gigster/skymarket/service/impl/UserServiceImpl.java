@@ -17,9 +17,7 @@ import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -80,9 +78,6 @@ public class UserServiceImpl implements UserService {
         if (userRepository.existsByEmail(signUpRequestDto.getEmail())) {
             return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_ACCEPTABLE, "Email Address already in use!");
         }
-        if (userRepository.existsByUsername(signUpRequestDto.getUsername())) {
-            return responseDtoSetter.responseDtoSetter(HttpStatus.NOT_ACCEPTABLE, "Username is already taken!");
-        }
 
         // Determine if the user is an admin
         boolean isAdmin = signUpRequestDto.getRoleName() != null && signUpRequestDto.getRoleName().equalsIgnoreCase("ROLE_ADMIN");
@@ -93,7 +88,7 @@ public class UserServiceImpl implements UserService {
                     .email(signUpRequestDto.getEmail())
                     .password(passwordEncoder.encode(signUpRequestDto.getPassword()))
                     .fullName(signUpRequestDto.getFullName())
-                    .username(signUpRequestDto.getUsername())
+                    .username(signUpRequestDto.getEmail())
                     .contact(signUpRequestDto.getContact())
                     .gender(signUpRequestDto.getGender())
                     .firstLogin(true)
@@ -123,7 +118,7 @@ public class UserServiceImpl implements UserService {
 
         // Ensure Customer is saved successfully
         if (customer.getCustomerId() == null) {
-            return responseDtoSetter.responseDtoSetter(HttpStatus.INTERNAL_SERVER_ERROR, "Customer could not be added.");
+            return responseDtoSetter.responseDtoSetter(HttpStatus.INTERNAL_SERVER_ERROR, "Customer could not be created.");
         }
 
         // Now create the User entity and associate it with the Customer
@@ -131,7 +126,7 @@ public class UserServiceImpl implements UserService {
                 .email(signUpRequestDto.getEmail())
                 .password(passwordEncoder.encode(signUpRequestDto.getPassword()))
                 .fullName(signUpRequestDto.getFullName())
-                .username(signUpRequestDto.getUsername())
+                .username(signUpRequestDto.getEmail())
                 .contact(signUpRequestDto.getContact())
                 .gender(signUpRequestDto.getGender())
                 .customer(customer) // Link the Customer to the User
@@ -207,39 +202,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<ResponseDto> getAllUsers(int page, int size, String sort) {
-        String[] sortParams = sort.split(",");
-        Sort.Direction direction = Sort.Direction.ASC;
-
-        if (sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")) {
-            direction = Sort.Direction.DESC;
-        }
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
+    public ResponseEntity<ResponseDto> getAllUsers(Pageable pageable) {
         Page<User> usersPage = userRepository.findAll(pageable);
-
         List<UserDto> userDtos = usersPage.getContent()
                 .stream()
                 .map(userMapper::toDto)
-                .toList();
+                .collect(Collectors.toList());
 
-        ResponseDto responseDto = responseDtoSetter.responseDtoSetter(
-                HttpStatus.OK,
-                "Fetched List of All Users.",
-                userDtos
-        ).getBody();
-
-        assert responseDto != null;
-        responseDto.setTotalPages(usersPage.getTotalPages());
-        responseDto.setTotalElements(usersPage.getTotalElements());
-        responseDto.setCurrentPage(usersPage.getNumber());
-        responseDto.setPageSize(usersPage.getSize());
+        ResponseDto responseDto = ResponseDto.builder()
+                .status(HttpStatus.OK)
+                .description("List of All Users.")
+                .payload(userDtos)
+                .totalPages(usersPage.getTotalPages())
+                .totalElements(usersPage.getTotalElements())
+                .currentPage(usersPage.getNumber())
+                .pageSize(usersPage.getSize())
+                .build();
 
         return ResponseEntity.ok(responseDto);
     }
 
     @Override
-    public ResponseEntity<ResponseDto> deleteUserById(long id){
+    public ResponseEntity<ResponseDto> deleteById(long id){
 
         try{
             userRepository.deleteById(id);

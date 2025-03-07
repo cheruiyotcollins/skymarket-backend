@@ -3,26 +3,24 @@ package com.gigster.skymarket.unit.repository;
 import com.gigster.skymarket.model.Admin;
 import com.gigster.skymarket.model.SuperAdmin;
 import com.gigster.skymarket.repository.ProcRepository;
-import com.gigster.skymarket.rowmapper.AdminRowMapper;
-import com.gigster.skymarket.rowmapper.SuperAdminRowMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.jdbc.core.RowMapper;
 
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class ProcRepositoryTest {
 
     @Mock
@@ -31,47 +29,64 @@ class ProcRepositoryTest {
     @InjectMocks
     private ProcRepository procRepository;
 
-    private List<Admin> adminList;
-    private List<SuperAdmin> superAdminList;
-
     @BeforeEach
     void setUp() {
-        adminList = List.of(
-                Admin.builder().adminId(1L).email("admin@example.com").fullName("Admin One").contact("1234567890").build()
-        );
-
-        superAdminList = List.of(
-                SuperAdmin.builder().superAdminId(1L).email("superadmin@example.com").fullName("SuperAdmin One").contact("0987654321").employeeNo("EMP001").build()
-        );
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void getAdmins_ShouldReturnPagedAdmins() {
-        Pageable pageable = PageRequest.of(0, 10, Sort.unsorted());
-        String query = "SELECT * FROM get_admins() ORDER BY UNSORTED LIMIT ? OFFSET ?;";
+    void testGetAdmins() {
+        // Arrange
+        List<Admin> expectedAdmins = Arrays.asList(
+                Admin.builder()
+                        .email("admin1@example.com")
+                        .adminId(1L)
+                        .fullName("Admin One")
+                        .createdOn(Instant.parse("2025-01-01T00:00:00Z"))
+                        .contact("123456789")
+                        .build(),
+                Admin.builder()
+                        .email("admin2@example.com")
+                        .adminId(2L)
+                        .fullName("Admin Two")
+                        .createdOn(Instant.parse("2025-01-02T00:00:00Z"))
+                        .contact("987654321")
+                        .build()
+        );
 
-        doReturn(adminList).when(jdbcTemplate).query(eq(query), any(AdminRowMapper.class), eq(10), eq(0L));
-        doReturn(1).when(jdbcTemplate).queryForObject(anyString(), eq(Integer.class));
+        ArgumentCaptor<RowMapper<Admin>> captor = ArgumentCaptor.forClass(RowMapper.class);
+        when(jdbcTemplate.query(anyString(), captor.capture())).thenReturn(expectedAdmins);
 
-        Page<Admin> result = procRepository.getAdmins(pageable);
+        // Act
+        List<Admin> admins = procRepository.getAdmins();
 
-        assertNotNull(result);
-        assertEquals(1, result.getTotalElements());
-        assertEquals(adminList, result.getContent());
+        // Assert
+        assertEquals(expectedAdmins, admins);
+        verify(jdbcTemplate, times(1)).query(eq("SELECT * from get_admins();"), any(RowMapper.class));
     }
 
     @Test
-    void getSuperAdmins_ShouldReturnPagedSuperAdmins() {
-        Pageable pageable = PageRequest.of(0, 10, Sort.unsorted());
-        String query = "SELECT * FROM get_super_admins() ORDER BY UNSORTED LIMIT ? OFFSET ?;";
+    void testGetSuperAdmins() {
+        // Arrange
+        List<SuperAdmin> expectedSuperAdmins = Collections.singletonList(
+                SuperAdmin.builder()
+                        .email("superadmin1@example.com")
+                        .superAdminId(1L)
+                        .fullName("SuperAdmin One")
+                        .createdOn(Instant.parse("2025-01-01T00:00:00Z"))
+                        .contact("123456789")
+                        .employeeNo("EMP001")
+                        .build()
+        );
 
-        doReturn(superAdminList).when(jdbcTemplate).query(eq(query), any(SuperAdminRowMapper.class), eq(10), eq(0L));
-        doReturn(1).when(jdbcTemplate).queryForObject(anyString(), eq(Integer.class));
+        ArgumentCaptor<RowMapper<SuperAdmin>> captor = ArgumentCaptor.forClass(RowMapper.class);
+        when(jdbcTemplate.query(anyString(), captor.capture())).thenReturn(expectedSuperAdmins);
 
-        Page<SuperAdmin> result = procRepository.getSuperAdmins(pageable);
+        // Act
+        List<SuperAdmin> superAdmins = procRepository.getSuperAdmins();
 
-        assertNotNull(result);
-        assertEquals(1, result.getTotalElements());
-        assertEquals(superAdminList, result.getContent());
+        // Assert
+        assertEquals(expectedSuperAdmins, superAdmins);
+        verify(jdbcTemplate, times(1)).query(eq("SELECT * FROM get_super_admins();"), any(RowMapper.class));
     }
 }

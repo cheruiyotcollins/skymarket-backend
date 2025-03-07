@@ -76,17 +76,18 @@ class CatalogueControllerTest {
         int page = 0;
         int size = 10;
         String sort = "id,asc";
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
         ResponseDto responseDto = new ResponseDto();
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.OK);
 
-        when(catalogueService.getAllCatalogues(page, size, sort)).thenReturn(expectedResponse);
+        when(catalogueService.getAllCatalogues(pageable)).thenReturn(expectedResponse);
 
         // Act
         ResponseEntity<ResponseDto> actualResponse = catalogueController.getAllCatalogues(page, size, sort);
 
         // Assert
         assertEquals(expectedResponse, actualResponse);
-        verify(catalogueService, times(1)).getAllCatalogues(page, size, sort);
+        verify(catalogueService, times(1)).getAllCatalogues(pageable);
     }
 
     @Test

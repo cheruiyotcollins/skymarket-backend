@@ -63,22 +63,18 @@ class AdminControllerTest {
     }
 
     @Test
-    void getAllAdmins_ShouldReturnPaginatedAdmins() {
+    void getAllAdmins_ShouldReturnAllAdmins() {
         // Arrange
-        int page = 0;
-        int size = 20;
-        String sort = "id,asc";
         ExtendedResDto extendedResDto = new ExtendedResDto();
 
-        when(adminService.getAllAdmins(page, size, sort)).thenReturn(extendedResDto);
+        when(adminService.getAllAdmins()).thenReturn(extendedResDto);
 
         // Act
-        ResponseEntity<ExtendedResDto> actualResponse = adminController.getAllAdmins(page, size, sort);
+        ExtendedResDto actualResponse = adminController.getAllAdmins();
 
         // Assert
-        assertEquals(HttpStatus.OK, actualResponse.getStatusCode());
-        assertEquals(extendedResDto, actualResponse.getBody());
-        verify(adminService, times(1)).getAllAdmins(page, size, sort);
+        assertEquals(extendedResDto, actualResponse);
+        verify(adminService, times(1)).getAllAdmins();
     }
 
     @Test

@@ -4,13 +4,15 @@ import com.gigster.skymarket.dto.NewProductDto;
 import com.gigster.skymarket.dto.ResponseDto;
 import org.springframework.http.ResponseEntity;
 
+import org.springframework.data.domain.Pageable;
+
 public interface ProductService {
 
     ResponseEntity<ResponseDto> createProduct(NewProductDto newProductDto);
 
     ResponseEntity<ResponseDto> getProductById(Long id);
 
-    ResponseEntity<ResponseDto> getAllProducts(int page, int size, String sort);
+    ResponseEntity<ResponseDto> getAllProducts(Pageable pageable);
 
     ResponseEntity<ResponseDto> updateProduct(Long id, NewProductDto newProductDto);
 
