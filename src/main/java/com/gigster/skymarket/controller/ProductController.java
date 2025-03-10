@@ -26,6 +26,7 @@ public class ProductController {
         return productService.createProduct(newProductDto);
     }
 
+
     @GetMapping("/{id}")
     public ResponseEntity<ResponseDto> getProductById(@PathVariable Long id) {
         return productService.getProductById(id);
@@ -35,8 +36,10 @@ public class ProductController {
     public ResponseEntity<ResponseDto> getAllProducts(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
-        return productService.getAllProducts(page, size, sort);
+            //todo confirm if removing asc affects the response
+            @RequestParam(value = "sort", defaultValue = "id") String sort) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
+        return productService.getAllProducts(pageable);
     }
 
     @PutMapping("/{id}")
@@ -54,11 +57,13 @@ public class ProductController {
         return productService.restockProduct(id, stock);
     }
 
+    // New Endpoint for liking a product
     @PatchMapping("/{productId}/like")
     public ResponseEntity<ResponseDto> likeProduct(@PathVariable Long productId, @RequestParam Long userId) {
         return productService.likeProduct(productId, userId);
     }
 
+    // New Endpoint for disliking a product
     @PatchMapping("/{productId}/dislike")
     public ResponseEntity<ResponseDto> dislikeProduct(@PathVariable Long productId, @RequestParam Long userId) {
         return productService.dislikeProduct(productId, userId);

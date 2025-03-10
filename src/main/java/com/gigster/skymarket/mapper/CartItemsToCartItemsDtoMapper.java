@@ -18,6 +18,7 @@ public class CartItemsToCartItemsDtoMapper {
             CartItemResponseDto cartItemDto = CartItemResponseDto.builder()
                     .id(item.getId())
                     .title(item.getProduct().getProductName())
+                    .imageUrl(item.getProduct().getImageUrl())
                     .price(item.getProduct().getPrice())
                     .quantity(item.getQuantity())
                     .subTotal(item.getSubtotal())

@@ -42,8 +42,8 @@ public class CatalogueController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
-
-        return catalogueService.getAllCatalogues(page, size, sort);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
+        return catalogueService.getAllCatalogues(pageable);
     }
 
     @PutMapping("/{id}")

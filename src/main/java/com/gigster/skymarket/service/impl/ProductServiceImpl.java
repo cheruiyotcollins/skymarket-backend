@@ -13,9 +13,7 @@ import com.gigster.skymarket.mapper.ResponseDtoMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -26,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -69,33 +68,24 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ResponseEntity<ResponseDto> getAllProducts(int page, int size, String sort) {
-        String[] sortParams = sort.split(",");
-        Sort.Direction direction = Sort.Direction.ASC;
+    public ResponseEntity<ResponseDto> getAllProducts(Pageable pageable) {
 
-        if (sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")) {
-            direction = Sort.Direction.DESC;
-        }
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
         Page<Product> productsPage = productRepository.findAll(pageable);
 
-        List<ProductDto> productDtos = productsPage.getContent()
+        List<ProductDto> ProductDtos = productsPage.getContent()
                 .stream()
-                .map(productMapper::toDto)
-                .toList();
+                .map(productMapper::toDto) // Use a mapper for consistency
+                .collect(Collectors.toList());
 
-        ResponseDto responseDto = responseDtoSetter.responseDtoSetter(
-                HttpStatus.OK,
-                "Fetched List of All Products.",
-                productDtos
-        ).getBody();
-
-        assert responseDto != null;
-        responseDto.setTotalPages(productsPage.getTotalPages());
-        responseDto.setTotalElements(productsPage.getTotalElements());
-        responseDto.setCurrentPage(productsPage.getNumber());
-        responseDto.setPageSize(productsPage.getSize());
+        ResponseDto responseDto = ResponseDto.builder()
+                .status(HttpStatus.OK)
+                .description("List of All Products.")
+                .payload(ProductDtos)
+                .totalPages(productsPage.getTotalPages())
+                .totalElements(productsPage.getTotalElements())
+                .currentPage(productsPage.getNumber())
+                .pageSize(productsPage.getSize())
+                .build();
 
         return ResponseEntity.ok(responseDto);
     }

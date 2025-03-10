@@ -25,12 +25,8 @@ public class AdminController {
     }
 
     @GetMapping
-    public ResponseEntity<ExtendedResDto> getAllAdmins(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "20") int size,
-            @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
-
-        return ResponseEntity.ok(adminService.getAllAdmins(page, size, sort));
+    public ExtendedResDto getAllAdmins() {
+        return adminService.getAllAdmins();
     }
 
     @PutMapping("/{id}")

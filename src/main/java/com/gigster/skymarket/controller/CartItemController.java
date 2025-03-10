@@ -3,7 +3,9 @@ package com.gigster.skymarket.controller;
 import com.gigster.skymarket.dto.CartItemRequestDto;
 import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.model.Cart;
+import com.gigster.skymarket.model.CartItem;
 import com.gigster.skymarket.model.Product;
+import com.gigster.skymarket.repository.CartItemRepository;
 import com.gigster.skymarket.repository.CartRepository;
 import com.gigster.skymarket.repository.ProductRepository;
 import com.gigster.skymarket.security.UserPrincipal;
@@ -26,18 +28,39 @@ public class CartItemController {
 
     @Autowired
     private CartRepository cartRepository;
+    @Autowired
+    private CartItemRepository cartItemRepository;
 
     @Autowired
     private ProductRepository productRepository;
 
     @PostMapping
-    public ResponseEntity<ResponseDto> addOrUpdateCartItem(@RequestBody CartItemRequestDto request) {
-        Optional<Cart> cart = cartRepository.findById(request.getCartId());
+    public ResponseEntity<ResponseDto> addCartItem(@RequestBody CartItemRequestDto request) {
+        UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Optional<Cart> cart;
+        if(request.getCartId()==null){
+            cart= cartRepository.findByCustomerId(userPrincipal.getCustomerId());
+        }else {
+            cart = cartRepository.findById(request.getCartId());
+        }
         Optional<Product> product = productRepository.findById(request.getProductId());
 
-        UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return cartItemService.addCartItem(cart, product, request.getQuantity(), userPrincipal);
+    }
 
-        return cartItemService.addOrUpdateCartItem(cart, product, request.getQuantity(), userPrincipal);
+    @PatchMapping
+    public ResponseEntity<ResponseDto> updateCartItem(@RequestBody CartItemRequestDto request) {
+        UserPrincipal userPrincipal = (UserPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Optional<Cart> cart;
+        if(request.getCartId()==null){
+             cart= cartRepository.findByCustomerId(userPrincipal.getCustomerId());
+        }else {
+             cart = cartRepository.findById(request.getCartId());
+        }
+
+        Optional<CartItem> cartItem = cartItemRepository.findByCart_CartIdAndId(request.getCartId(), request.getCartItemId());
+
+        return cartItemService.updateCartItem(cart, cartItem, request.getQuantity(), userPrincipal);
     }
 
     @GetMapping("/{cartId}/{itemId}")
@@ -47,15 +70,15 @@ public class CartItemController {
         return cartItemService.getCartItem(cartId, itemId);
     }
 
-    @GetMapping("/{cartId}")
-    public ResponseEntity<ResponseDto> getAllCartItems(
-            @PathVariable("cartId") Long cartId,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "20") int size,
-            @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
-
-        return cartItemService.getAllCartItems(cartId, page, size, sort);
-    }
+//    @GetMapping("/{cartId}")
+//    public ResponseEntity<ResponseDto> getAllCartItems(
+//            @PathVariable("cartId") Long cartId,
+//            @RequestParam(value = "page", defaultValue = "0") int page,
+//            @RequestParam(value = "size", defaultValue = "20") int size,
+//            @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
+//
+//        return cartItemService.getAllCartItems(cartId, page, size, sort);
+//    }
 
     @PutMapping("/{cartId}/{itemId}")
     public ResponseEntity<ResponseDto> updateCartItem(

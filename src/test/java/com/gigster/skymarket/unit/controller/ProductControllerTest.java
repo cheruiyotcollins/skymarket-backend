@@ -9,6 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -67,17 +70,18 @@ class ProductControllerTest {
         int page = 0;
         int size = 10;
         String sort = "id,asc";
-        ResponseDto responseDto = new ResponseDto(); // Populate fields as necessary
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
+        ResponseDto responseDto = new ResponseDto(); // Add fields as necessary
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.OK);
 
-        when(productService.getAllProducts(page, size, sort)).thenReturn(expectedResponse);
+        when(productService.getAllProducts(pageable)).thenReturn(expectedResponse);
 
         // Act
         ResponseEntity<ResponseDto> actualResponse = productController.getAllProducts(page, size, sort);
 
         // Assert
         assertEquals(expectedResponse, actualResponse);
-        verify(productService, times(1)).getAllProducts(page, size, sort);
+        verify(productService, times(1)).getAllProducts(pageable);
     }
 
     @Test

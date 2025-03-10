@@ -3,13 +3,14 @@ package com.gigster.skymarket.service;
 import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.security.UserPrincipal;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
 public interface CartService {
 
     ResponseEntity<ResponseDto> createCart(UserPrincipal userPrincipal);
 
-    ResponseEntity<ResponseDto> getAllCarts(int page, int size, String sort, UserPrincipal userPrincipal);
+    ResponseEntity<ResponseDto> getAllCarts(Pageable pageable, UserPrincipal userPrincipal);
 
     // Remove a specific item from the cart by product ID
     ResponseEntity<ResponseDto> removeItemFromCart(Long productId);

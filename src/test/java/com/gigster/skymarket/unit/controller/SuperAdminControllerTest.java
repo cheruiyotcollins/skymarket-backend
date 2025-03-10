@@ -63,25 +63,19 @@ class SuperAdminControllerTest {
     }
 
     @Test
-    void getAllSuperAdmins_ShouldReturnPaginatedSuperAdmins() {
+    void getAllSuperAdmins_ShouldReturnAllSuperAdmins() {
         // Arrange
-        int page = 0;
-        int size = 10;
-        String sort = "superAdmin_id,asc";
-
         ExtendedResDto extendedResDto = new ExtendedResDto();
 
-        when(superAdminService.getAllSuperAdmins(page, size, sort)).thenReturn(extendedResDto);
+        when(superAdminService.getAllSuperAdmins()).thenReturn(extendedResDto);
 
         // Act
-        ResponseEntity<ExtendedResDto> actualResponse = superAdminController.getAllSuperAdmins(page, size, sort);
+        ExtendedResDto actualResponse = superAdminController.getAllSuperAdmins();
 
         // Assert
-        assertEquals(HttpStatus.OK, actualResponse.getStatusCode());
-        assertEquals(extendedResDto, actualResponse.getBody());
-        verify(superAdminService, times(1)).getAllSuperAdmins(page, size, sort);
+        assertEquals(extendedResDto, actualResponse);
+        verify(superAdminService, times(1)).getAllSuperAdmins();
     }
-
 
     @Test
     void updateSuperAdminById_ShouldReturnUpdatedSuperAdmin() {

@@ -1,5 +1,7 @@
 package com.gigster.skymarket.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.gigster.skymarket.enums.OrderStatus;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -12,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderDto {
     private Long orderId;
     private String orderNumber;
@@ -24,4 +27,6 @@ public class OrderDto {
     private List<OrderProductDto> orderProducts;
     @Temporal(TemporalType.TIMESTAMP)
     private String CreatedOn;
+    private String shippingAddress;
+    private String paymentMethod;
 }

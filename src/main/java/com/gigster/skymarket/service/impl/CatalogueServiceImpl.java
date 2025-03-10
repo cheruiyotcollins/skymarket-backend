@@ -15,9 +15,7 @@ import com.gigster.skymarket.service.NotificationService;
 import com.gigster.skymarket.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -97,15 +95,8 @@ public class CatalogueServiceImpl implements CatalogueService {
     }
 
     @Override
-    public ResponseEntity<ResponseDto> getAllCatalogues(int page, int size, String sort) {
-        String[] sortParams = sort.split(",");
-        Sort.Direction direction = Sort.Direction.ASC;
-
-        if (sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")) {
-            direction = Sort.Direction.DESC;
-        }
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
+    public ResponseEntity<ResponseDto> getAllCatalogues(Pageable pageable) {
+        // Fetch paginated catalogues from the repository.
         Page<Catalogue> cataloguesPage = catalogueRepository.findAll(pageable);
 
         List<CatalogueDto> catalogueDtos = cataloguesPage.getContent()
@@ -125,7 +116,6 @@ public class CatalogueServiceImpl implements CatalogueService {
 
         return ResponseEntity.ok(responseDto);
     }
-
 
     @Override
     public Catalogue updateCatalogue(Long id, Catalogue updatedCatalogue) {
