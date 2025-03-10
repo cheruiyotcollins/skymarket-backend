@@ -14,15 +14,12 @@ import com.gigster.skymarket.utils.PhoneNumberEditor;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -66,22 +63,12 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public ExtendedResDto getAllAdmins(int page, int size, String sort) {
-        String[] sortParams = sort.split(",");
-        Sort.Direction direction = Sort.Direction.ASC; // Default sorting order.
-
-        if (sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")) {
-            direction = Sort.Direction.DESC;
-        }
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
-
-        Page<Admin> adminsPage = procRepository.getAdmins(pageable);
-
-        return ExtendedResDto.builder()
+    public ExtendedResDto getAllAdmins() {
+        List<Admin> admins = procRepository.getAdmins();
+        return  ExtendedResDto.builder()
                 .status(200)
-                .body(adminsPage.getContent())
-                .message("A paginated list of admins.")
+                .body(admins)
+                .message("A list of all admins.")
                 .build();
     }
 

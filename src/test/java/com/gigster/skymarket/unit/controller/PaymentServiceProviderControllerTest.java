@@ -2,23 +2,18 @@ package com.gigster.skymarket.unit.controller;
 
 import com.gigster.skymarket.controller.PaymentServiceProviderController;
 import com.gigster.skymarket.dto.PaymentServiceProviderDto;
-import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.service.PaymentServiceProviderService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 class PaymentServiceProviderControllerTest {
@@ -38,9 +33,9 @@ class PaymentServiceProviderControllerTest {
     void create_ShouldReturnCreatedPaymentServiceProviderDto() {
         // Arrange
         PaymentServiceProviderDto dto = new PaymentServiceProviderDto();
-        dto.setServiceProviderName("Provider1");
+        dto.setServiceProviderName("Provider1"); // Set other fields as needed
         PaymentServiceProviderDto createdDto = new PaymentServiceProviderDto();
-        createdDto.setServiceProviderName("Provider1");
+        createdDto.setServiceProviderName("Provider1"); // Set other fields as needed
 
         when(service.create(dto)).thenReturn(createdDto);
 
@@ -58,9 +53,9 @@ class PaymentServiceProviderControllerTest {
         // Arrange
         Long id = 1L;
         PaymentServiceProviderDto dto = new PaymentServiceProviderDto();
-        dto.setServiceProviderName("UpdatedProvider");
+        dto.setServiceProviderName("UpdatedProvider"); // Set other fields as needed
         PaymentServiceProviderDto updatedDto = new PaymentServiceProviderDto();
-        updatedDto.setServiceProviderName("UpdatedProvider");
+        updatedDto.setServiceProviderName("UpdatedProvider"); // Set other fields as needed
 
         when(service.update(id, dto)).thenReturn(updatedDto);
 
@@ -78,7 +73,7 @@ class PaymentServiceProviderControllerTest {
         // Arrange
         Long id = 1L;
         PaymentServiceProviderDto dto = new PaymentServiceProviderDto();
-        dto.setServiceProviderName("Provider1");
+        dto.setServiceProviderName("Provider1"); // Set other fields as needed
 
         when(service.getById(id)).thenReturn(dto);
 
@@ -92,49 +87,29 @@ class PaymentServiceProviderControllerTest {
     }
 
     @Test
-    void getAll_ShouldReturnPaginatedListOfPaymentServiceProviderDtos() {
+    void getAll_ShouldReturnListOfPaymentServiceProviderDtos() {
         // Arrange
-        int page = 0;
-        int size = 10;
-        String sort = "id,asc";
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
-
         PaymentServiceProviderDto dto1 = new PaymentServiceProviderDto();
-        dto1.setServiceProviderName("Provider1");
-
+        dto1.setServiceProviderName("Provider1"); // Set other fields as needed
         PaymentServiceProviderDto dto2 = new PaymentServiceProviderDto();
-        dto2.setServiceProviderName("Provider2");
-
+        dto2.setServiceProviderName("Provider2"); // Set other fields as needed
         List<PaymentServiceProviderDto> dtos = List.of(dto1, dto2);
 
-        ResponseDto responseDto = ResponseDto.builder()
-                .status(HttpStatus.OK)
-                .description("List of All Payment Service Providers.")
-                .payload(dtos)
-                .totalPages(1)
-                .totalElements((long) dtos.size())
-                .currentPage(page)
-                .pageSize(size)
-                .build();
-
-        ResponseEntity<ResponseDto> expectedResponse = ResponseEntity.ok(responseDto);
-
-        when(service.getAllPSP(page, size, sort)).thenReturn(expectedResponse);
+        when(service.getAll()).thenReturn(dtos);
 
         // Act
-        ResponseEntity<ResponseDto> response = controller.getAllPSP(page, size, sort);
+        ResponseEntity<List<PaymentServiceProviderDto>> response = controller.getAll();
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(responseDto, response.getBody());
-        verify(service, times(1)).getAllPSP(page, size, sort);
+        assertEquals(dtos, response.getBody());
+        verify(service, times(1)).getAll();
     }
 
     @Test
     void deleteById_ShouldReturnNoContent() {
         // Arrange
-        long id = 1L;
+        Long id = 1L;
 
         // Act
         ResponseEntity<Void> response = controller.deleteById(id);

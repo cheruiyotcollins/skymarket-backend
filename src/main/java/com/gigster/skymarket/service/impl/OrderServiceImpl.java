@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +26,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,6 +49,8 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private CartItemRepository cartItemRepository;
 
     @Autowired
     ResponseDtoMapper responseDtoSetter;
@@ -79,7 +79,12 @@ public class OrderServiceImpl implements OrderService {
             }
 
             // Extract product IDs and validate inputs
-            List<Long> productIds = orderDto.getOrderProducts()
+            List<OrderProductDto> orderProducts = cart.getCartItems()
+                    .stream()
+                    .map(cartItem -> new OrderProductDto(cartItem.getProduct().getId(), cartItem.getQuantity())) // Create OrderProductDto
+                    .toList();
+            orderDto.setOrderProducts(orderProducts);
+            List<Long> productIds = orderProducts
                     .stream()
                     .map(OrderProductDto::getProductId)
                     .collect(Collectors.toList());
@@ -90,13 +95,13 @@ public class OrderServiceImpl implements OrderService {
 
             // Lock products and validate stock
             List<Product> products = productRepository.findAllByIdsWithLock(productIds);
-            if (products.isEmpty()) {
+           if (products.isEmpty()) {
                 throw new RuntimeException("Some products in your cart are no longer available. Please review your order.");
             }
 
             Map<Long, Integer> stockValidationMap = products.stream()
                     .collect(Collectors.toMap(Product::getId, Product::getStock));
-            for (OrderProductDto orderProductDto : orderDto.getOrderProducts()) {
+            for (OrderProductDto orderProductDto : orderProducts) {
                 Integer availableStock = stockValidationMap.get(orderProductDto.getProductId());
                 if (availableStock == null || orderProductDto.getQuantity() > availableStock) {
                     throw new RuntimeException("Insufficient stock for product ID: " + orderProductDto.getProductId());
@@ -104,7 +109,7 @@ public class OrderServiceImpl implements OrderService {
             }
 
             // Bulk stock update
-            for (OrderProductDto orderProductDto : orderDto.getOrderProducts()) {
+            for (OrderProductDto orderProductDto : orderProducts) {
                 int updatedRows = productRepository.updateStockIfAvailable(
                         orderProductDto.getProductId(),
                         orderProductDto.getQuantity()
@@ -113,19 +118,23 @@ public class OrderServiceImpl implements OrderService {
                     throw new RuntimeException("Failed to update stock for product ID: " + orderProductDto.getProductId());
                 }
             }
+            orderDto.setOrderNumber(generateOrderNumber());
+            orderDto.setStatus(OrderStatus.PENDING_PAYMENT);
+            orderDto.setOrderDate(LocalDateTime.now());
+            orderDto.setCreatedOn(LocalDateTime.now().toString());
+            orderDto.setTotalAmount(cart.getTotalPrice());
 
             // Create order and persist it
             Order order = mapToOrder(orderDto, customer);
-            order.setStatus(OrderStatus.PENDING_PAYMENT);
             order = orderRepository.save(order);
-
+            // Clean up cart
+           //todo make sure to find a way to delete cart items first before deleting cart
+            cartRepository.delete(cart);
+//            cartRepository.findByCustomerId(customer.getCustomerId())
+//                    .ifPresent(cartRepository::delete);
+            //todo
             // Notify customer asynchronously
             notificationService.sendOrderConfirmationEmail(customer, order);
-
-            // Clean up cart
-            cartRepository.findByCustomerId(customer.getCustomerId())
-                    .ifPresent(cartRepository::delete);
-
             // Build and return success response
             ResponseDto response = ResponseDto.builder()
                     .status(HttpStatus.CREATED)
@@ -175,15 +184,7 @@ public class OrderServiceImpl implements OrderService {
 
     // 3. Retrieve all orders, ADMIN.
     @Override
-    public ResponseEntity<ResponseDto> getAllOrders(int page, int size, String sort) {
-        String[] sortParams = sort.split(",");
-        Sort.Direction direction = Sort.Direction.ASC;
-
-        if (sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")) {
-            direction = Sort.Direction.DESC;
-        }
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
+    public ResponseEntity<ResponseDto> getAllOrders(Pageable pageable) {
         Page<Order> orderPage = orderRepository.findAll(pageable);
 
         List<OrderDto> orderDtos = orderPage.getContent()
@@ -200,8 +201,8 @@ public class OrderServiceImpl implements OrderService {
         assert responseDto != null;
         responseDto.setTotalPages(orderPage.getTotalPages());
         responseDto.setTotalElements(orderPage.getTotalElements());
-        responseDto.setCurrentPage(orderPage.getNumber());
-        responseDto.setPageSize(orderPage.getSize());
+        responseDto.setCurrentPage(pageable.getPageNumber());
+        responseDto.setPageSize(pageable.getPageSize());
 
         return ResponseEntity.ok(responseDto);
     }
@@ -326,29 +327,32 @@ public class OrderServiceImpl implements OrderService {
     // Mapping OrderDto to Order
     private Order mapToOrder(OrderDto orderDto, Customer customer) {
         Order order = new Order();
-        order.setId(orderDto.getOrderId());
         order.setOrderNumber(orderDto.getOrderNumber());
         order.setTotalAmount(orderDto.getTotalAmount());
         order.setStatus(orderDto.getStatus());
         order.setOrderDate(orderDto.getOrderDate());
         order.setCustomer(customer);
+        order.setShippingAddress(orderDto.getShippingAddress());
 
-        // Create OrderProduct instances for each product in the order
+//
+//        // Create OrderProduct instances for each product in the order
         List<OrderProduct> orderProducts = new ArrayList<>();
         for (OrderProductDto orderProductDto : orderDto.getOrderProducts()) {
             OrderProduct orderProduct = new OrderProduct();
-            orderProduct.setOrder(order);
+            orderProduct.setOrder(order);  // Set the current order
 
+//            // Fetch the product from the database
             Product product = productRepository.findById(orderProductDto.getProductId())
                     .orElseThrow(() -> new EntityNotFoundException("Product not found"));
-            orderProduct.setProduct(product);
-            orderProduct.setQuantity(orderProductDto.getQuantity());
+            orderProduct.setProduct(product);  // Set the fetched product
+            orderProduct.setQuantity(orderProductDto.getQuantity());  // Set quantity
 
             orderProducts.add(orderProduct);
         }
 
-        order.setOrderProducts(orderProducts);
-        return order;
+         order.setOrderProducts(orderProducts);
+        return order; // Set the list of OrderProducts
+
     }
 
     // Mapping Order to OrderDto
@@ -374,6 +378,11 @@ public class OrderServiceImpl implements OrderService {
         orderDto.setOrderProducts(orderProductDtos);
 
         return orderDto;
+    }
+    private String generateOrderNumber() {
+        long timestamp = Instant.now().toEpochMilli(); // Current time in milliseconds
+        int randomPart = new Random().nextInt(900) + 100; // Generates a 3-digit random number (100-999)
+        return "ORD-" + timestamp + "-" + randomPart; // Example: ORD-1709823745632-245
     }
 
 }

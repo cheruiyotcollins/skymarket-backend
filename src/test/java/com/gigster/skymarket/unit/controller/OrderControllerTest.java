@@ -71,17 +71,18 @@ class OrderControllerTest {
         int page = 0;
         int size = 10;
         String sort = "id,asc";
-        ResponseDto responseDto = new ResponseDto(); // Populate fields as necessary
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
+        ResponseDto responseDto = new ResponseDto(); // Add fields as necessary
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.OK);
 
-        when(orderService.getAllOrders(page, size, sort)).thenReturn(expectedResponse);
+        when(orderService.getAllOrders(pageable)).thenReturn(expectedResponse);
 
         // Act
-        ResponseEntity<ResponseDto> actualResponse = orderController.getAllOrders(page, size, sort);
+        ResponseEntity<ResponseDto> actualResponse = orderController.getAllOrders(pageable);
 
         // Assert
         assertEquals(expectedResponse, actualResponse);
-        verify(orderService, times(1)).getAllOrders(page, size, sort);
+        verify(orderService, times(1)).getAllOrders(pageable);
     }
 
     @Test

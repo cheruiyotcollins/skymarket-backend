@@ -23,26 +23,26 @@ public class ReviewController {
     public ResponseEntity<?> addReview(@RequestParam Long userId, @PathVariable Long productId,
                                        @RequestParam int rating, @RequestParam String comment) {
         reviewService.addReview(userId, productId, rating, comment);
-        return ResponseEntity.ok("Review added successfully.");
+        return ResponseEntity.ok("Review added successfully");
     }
 
     @PostMapping("/{productId}/comment")
     public ResponseEntity<?> addComment(@RequestParam Long userId, @PathVariable Long productId,
                                         @RequestParam String comment) {
         reviewService.addComment(userId, productId, comment);
-        return ResponseEntity.ok("Comment added successfully.");
+        return ResponseEntity.ok("Comment added successfully");
     }
 
     @PatchMapping("/{reviewId}/like")
     public ResponseEntity<?> likeReview(@RequestParam Long userId, @PathVariable Long reviewId) {
         reviewService.likeReview(userId, reviewId);
-        return ResponseEntity.ok("Review liked successfully.");
+        return ResponseEntity.ok("Review liked successfully");
     }
 
     @PatchMapping("/{reviewId}/dislike")
     public ResponseEntity<?> dislikeReview(@RequestParam Long userId, @PathVariable Long reviewId) {
         reviewService.dislikeReview(userId, reviewId);
-        return ResponseEntity.ok("Review disliked successfully.");
+        return ResponseEntity.ok("Review disliked successfully");
     }
 
     @GetMapping("/{productId}/reviews")
@@ -54,7 +54,7 @@ public class ReviewController {
     @PatchMapping("/{reviewId}/verify")
     public ResponseEntity<?> markAsVerified(@PathVariable Long reviewId) {
         reviewService.markAsVerified(reviewId);
-        return ResponseEntity.ok("Review marked as verified.");
+        return ResponseEntity.ok("Review marked as verified");
     }
 
     @GetMapping("/verify/{productId}")
