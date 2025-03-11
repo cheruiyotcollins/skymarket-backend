@@ -14,7 +14,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.PessimisticLockingFailureException;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,11 +126,13 @@ public class OrderServiceImpl implements OrderService {
             // Create order and persist it
             Order order = mapToOrder(orderDto, customer);
             order = orderRepository.save(order);
+
             // Clean up cart
-           //todo make sure to find a way to delete cart items first before deleting cart
+            // Delete cart items first before deleting the cart
+            cartItemRepository.deleteByCartId(cart.getCartId());
+
             cartRepository.delete(cart);
-//            cartRepository.findByCustomerId(customer.getCustomerId())
-//                    .ifPresent(cartRepository::delete);
+
             //todo
             // Notify customer asynchronously
             notificationService.sendOrderConfirmationEmail(customer, order);
@@ -334,14 +335,13 @@ public class OrderServiceImpl implements OrderService {
         order.setCustomer(customer);
         order.setShippingAddress(orderDto.getShippingAddress());
 
-//
-//        // Create OrderProduct instances for each product in the order
+       // Create OrderProduct instances for each product in the order
         List<OrderProduct> orderProducts = new ArrayList<>();
         for (OrderProductDto orderProductDto : orderDto.getOrderProducts()) {
             OrderProduct orderProduct = new OrderProduct();
             orderProduct.setOrder(order);  // Set the current order
 
-//            // Fetch the product from the database
+            // Fetch the product from the database
             Product product = productRepository.findById(orderProductDto.getProductId())
                     .orElseThrow(() -> new EntityNotFoundException("Product not found"));
             orderProduct.setProduct(product);  // Set the fetched product
