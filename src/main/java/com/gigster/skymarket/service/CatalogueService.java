@@ -2,7 +2,6 @@ package com.gigster.skymarket.service;
 
 import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.model.Catalogue;
-import com.gigster.skymarket.model.Category;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 
@@ -26,7 +25,7 @@ public interface CatalogueService {
 
     Catalogue removeCategoryFromCatalogue(Long catalogueId, Long categoryId);
 
-    List<Category> getCategoriesInCatalogue(Long catalogueId);
+    ResponseEntity<ResponseDto> getCategoriesInCatalogue(Long catalogueId, Pageable pageable);
 
     ResponseDto getProductsInCatalogue(Long catalogueId, Pageable pageable);
 
