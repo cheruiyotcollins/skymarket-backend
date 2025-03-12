@@ -14,18 +14,14 @@ import com.gigster.skymarket.service.CatalogueService;
 import com.gigster.skymarket.service.NotificationService;
 import com.gigster.skymarket.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -160,9 +156,58 @@ public class CatalogueServiceImpl implements CatalogueService {
     }
 
     @Override
-    public List<Category> getCategoriesInCatalogue(Long catalogueId) {
+    public ResponseEntity<ResponseDto> getCategoriesInCatalogue(Long catalogueId, Pageable pageable) {
+        // Get catalogue by ID
         Catalogue catalogue = getCatalogueById(catalogueId);
-        return new ArrayList<>(catalogue.getCategories());
+
+        // Get paginated categories
+        Page<Category> categoryPage = getCategories(catalogue, pageable);
+
+        // Build response
+        ResponseDto responseDto = ResponseDto.builder()
+                .status(HttpStatus.OK)
+                .description("List of Categories in Catalogue.")
+                .payload(categoryPage.getContent())
+                .totalPages(categoryPage.getTotalPages())
+                .totalElements(categoryPage.getTotalElements())
+                .currentPage(categoryPage.getNumber())
+                .pageSize(categoryPage.getSize())
+                .build();
+
+        return ResponseEntity.ok(responseDto);
+    }
+
+    private static Page<Category> getCategories(Catalogue catalogue, Pageable pageable) {
+        List<Category> allCategories = new ArrayList<>(catalogue.getCategories());
+
+        // Apply sorting if specified
+        if (pageable.getSort().isSorted()) {
+            Sort.Order order = pageable.getSort().toList().get(0);
+            String sortField = order.getProperty();
+            boolean isDescending = order.getDirection().isDescending();
+
+            Comparator<Category> comparator;
+            if (sortField.equalsIgnoreCase("name")) {
+                comparator = Comparator.comparing(
+                        category -> category.getCategoryName() != null ? category.getCategoryName().toString() : ""
+                );
+            } else {
+                comparator = Comparator.comparing(
+                        category -> category.getCategoryId() != null ? category.getCategoryId() : 0L
+                );
+            }
+
+            // Apply sorting direction
+            allCategories.sort(isDescending ? comparator.reversed() : comparator);
+        }
+
+        // Pagination logic
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), allCategories.size());
+        List<Category> paginatedCategories = (start >= allCategories.size()) ?
+                Collections.emptyList() : allCategories.subList(start, end);
+
+        return new PageImpl<>(paginatedCategories, pageable, allCategories.size());
     }
 
     @Override
