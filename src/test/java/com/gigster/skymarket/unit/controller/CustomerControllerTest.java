@@ -34,8 +34,8 @@ class CustomerControllerTest {
     @Test
     void createCustomer_ShouldReturnResponseEntity() {
         // Arrange
-        CustomerDto newCustomer = new CustomerDto(); // Add fields as necessary
-        ResponseDto responseDto = new ResponseDto(); // Add fields as necessary
+        CustomerDto newCustomer = new CustomerDto();
+        ResponseDto responseDto = new ResponseDto();
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.CREATED);
 
         when(customerService.saveCustomer(newCustomer)).thenReturn(expectedResponse);
@@ -52,7 +52,7 @@ class CustomerControllerTest {
     void getCustomerById_ShouldReturnCustomer() {
         // Arrange
         long customerId = 1L;
-        ResponseDto responseDto = new ResponseDto(); // Add fields as necessary
+        ResponseDto responseDto = new ResponseDto();
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.OK);
 
         when(customerService.findCustomerById(customerId)).thenReturn(expectedResponse);
@@ -89,8 +89,8 @@ class CustomerControllerTest {
     void updateCustomer_ShouldReturnUpdatedCustomer() {
         // Arrange
         long customerId = 1L;
-        CustomerDto updatedCustomer = new CustomerDto(); // Add fields as necessary
-        ResponseDto responseDto = new ResponseDto(); // Add fields as necessary
+        CustomerDto updatedCustomer = new CustomerDto();
+        ResponseDto responseDto = new ResponseDto();
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.OK);
 
         when(customerService.updateCustomer(customerId, updatedCustomer)).thenReturn(expectedResponse);
@@ -107,7 +107,7 @@ class CustomerControllerTest {
     void deleteCustomer_ShouldReturnResponseEntity() {
         // Arrange
         long customerId = 1L;
-        ResponseDto responseDto = new ResponseDto(); // Add fields as necessary
+        ResponseDto responseDto = new ResponseDto();
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.NO_CONTENT);
 
         when(customerService.deleteCustomerById(customerId)).thenReturn(expectedResponse);

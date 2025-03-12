@@ -16,9 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -73,17 +71,14 @@ class CatalogueControllerTest {
     @Test
     void getAllCatalogues_ShouldReturnResponseEntity() {
         // Arrange
-        int page = 0;
-        int size = 10;
-        String sort = "id,asc";
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("id", "ASC"));
         ResponseDto responseDto = new ResponseDto();
         ResponseEntity<ResponseDto> expectedResponse = new ResponseEntity<>(responseDto, HttpStatus.OK);
 
         when(catalogueService.getAllCatalogues(pageable)).thenReturn(expectedResponse);
 
         // Act
-        ResponseEntity<ResponseDto> actualResponse = catalogueController.getAllCatalogues(page, size, sort);
+        ResponseEntity<ResponseDto> actualResponse = catalogueController.getAllCatalogues(pageable);
 
         // Assert
         assertEquals(expectedResponse, actualResponse);
@@ -143,21 +138,31 @@ class CatalogueControllerTest {
     }
 
     @Test
-    void getCategoriesInCatalogue_ShouldReturnResponseEntity() {
+    void getCategoriesInCatalogue_ShouldReturnResponseDto() {
         // Arrange
         Long catalogueId = 1L;
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "id"));
         List<Category> categoryList = List.of(new Category(), new Category());
-        Set<Category> categories = new HashSet<>(categoryList);
-        ResponseEntity<Set<Category>> expectedResponse = new ResponseEntity<>(categories, HttpStatus.OK);
 
-        when(catalogueService.getCategoriesInCatalogue(catalogueId)).thenReturn(categoryList);
+        ResponseDto responseDto = ResponseDto.builder()
+                .status(HttpStatus.OK)
+                .description("List of Categories in Catalogue.")
+                .payload(categoryList)
+                .totalPages(1)
+                .totalElements((long) categoryList.size())
+                .currentPage(0)
+                .pageSize(10)
+                .build();
+
+        ResponseEntity<ResponseDto> expectedResponse = ResponseEntity.ok(responseDto);
+        when(catalogueService.getCategoriesInCatalogue(catalogueId, pageable)).thenReturn(expectedResponse);
 
         // Act
-        ResponseEntity<Set<Category>> actualResponse = catalogueController.getCategoriesInCatalogue(catalogueId);
+        ResponseEntity<ResponseDto> actualResponse = catalogueController.getCategoriesInCatalogue(catalogueId, pageable);
 
         // Assert
         assertEquals(expectedResponse, actualResponse);
-        verify(catalogueService, times(1)).getCategoriesInCatalogue(catalogueId);
+        verify(catalogueService, times(1)).getCategoriesInCatalogue(catalogueId, pageable);
     }
 
     @Test

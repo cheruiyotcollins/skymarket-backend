@@ -2,18 +2,16 @@ package com.gigster.skymarket.controller;
 
 import com.gigster.skymarket.dto.ResponseDto;
 import com.gigster.skymarket.model.Catalogue;
-import com.gigster.skymarket.model.Category;
 import com.gigster.skymarket.service.CatalogueService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/catalogues")
@@ -39,10 +37,7 @@ public class CatalogueController {
 
     @GetMapping
     public ResponseEntity<ResponseDto> getAllCatalogues(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "sort", defaultValue = "id,asc") String sort) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(sort.split(",")));
+            @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
         return catalogueService.getAllCatalogues(pageable);
     }
 
@@ -77,10 +72,10 @@ public class CatalogueController {
     }
 
     @GetMapping("/{id}/categories")
-    public ResponseEntity<Set<Category>> getCategoriesInCatalogue(@PathVariable Long id) {
-        List<Category> categoryList = catalogueService.getCategoriesInCatalogue(id);
-        Set<Category> categories = new HashSet<>(categoryList);
-        return ResponseEntity.ok(categories);
+    public ResponseEntity<ResponseDto> getCategoriesInCatalogue(
+            @PathVariable Long id,
+            @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+        return catalogueService.getCategoriesInCatalogue(id, pageable);
     }
 
     @GetMapping("/{id}/products")
