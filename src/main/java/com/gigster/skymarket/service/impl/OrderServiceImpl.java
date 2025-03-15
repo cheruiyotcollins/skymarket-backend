@@ -306,8 +306,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public ResponseEntity<ResponseDto> getAllOrdersByCustomer(Long customerId) {
-        //todo
-        return null;
+       List<Order> customerOrders= orderRepository.findByCustomerId(customerId);
+
+        return  responseDtoSetter.responseDtoSetter(HttpStatus.OK, "Customer Orders ",customerOrders);
     }
 
     // 7.
