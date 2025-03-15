@@ -59,9 +59,7 @@ public class OrderController {
     public ResponseEntity<ResponseDto> getAllOrdersByCustomer() {
         UserPrincipal userPrincipal= getCurrentUser();
         Long customerId=userPrincipal.getCustomerId();
-        orderService.getAllOrdersByCustomer(customerId);
-        //todo ensure that it returns a list of orders
-        return null;
+        return orderService.getAllOrdersByCustomer(customerId);
     }
     // 2. READ: Get all orders, admin
     @GetMapping
