@@ -231,7 +231,7 @@ public class OrderServiceImpl implements OrderService {
             existingOrder.setOrderNumber(orderDto.getOrderNumber());
             existingOrder.setTotalAmount(orderDto.getTotalAmount());
             existingOrder.setStatus(orderDto.getStatus());
-            existingOrder.setOrderDate(orderDto.getOrderDate());
+            existingOrder.setCreatedOn(orderDto.getOrderDate().toString());
             existingOrder.setCustomer(customer);
 
             // Create OrderProduct instances
@@ -311,6 +311,16 @@ public class OrderServiceImpl implements OrderService {
         return  responseDtoSetter.responseDtoSetter(HttpStatus.OK, "Customer Orders ",customerOrders);
     }
 
+    @Override
+    public ResponseEntity<ResponseDto> getOrderDetails(Long customerId, Long orderId) {
+        Optional<Order> order=orderRepository.findById(orderId);
+        List<OrderProduct> orderProducts= new ArrayList<>();
+        if (order.isPresent()) {
+             orderProducts = order.get().getOrderProducts();
+        }
+        return responseDtoSetter.responseDtoSetter(HttpStatus.OK, "Order Details ",orderProducts);
+    }
+
     // 7.
     @Override
     public void saveOrder(Order order) {
@@ -337,7 +347,7 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderNumber(orderDto.getOrderNumber());
         order.setTotalAmount(orderDto.getTotalAmount());
         order.setStatus(orderDto.getStatus());
-        order.setOrderDate(orderDto.getOrderDate());
+        order.setCreatedOn(orderDto.getOrderDate().toString());
         order.setCustomer(customer);
         order.setShippingAddress(orderDto.getShippingAddress());
 
@@ -369,7 +379,7 @@ public class OrderServiceImpl implements OrderService {
         orderDto.setOrderNumber(order.getOrderNumber());
         orderDto.setTotalAmount(order.getTotalAmount());
         orderDto.setStatus(order.getStatus());
-        orderDto.setOrderDate(order.getOrderDate());
+        orderDto.setCreatedOn(order.getCreatedOn());
         orderDto.setCustomerId(order.getCustomer().getCustomerId());
 
         // Map OrderProducts to OrderProductDto
