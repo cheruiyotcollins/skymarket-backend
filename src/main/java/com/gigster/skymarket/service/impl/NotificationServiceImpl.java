@@ -70,7 +70,7 @@ public class NotificationServiceImpl implements NotificationService {
                         + "Regards,\nSkyMarket Online Store Team",
                 customer.getFullName(),
                 order.getOrderNumber(),
-                order.getOrderDate(),
+                order.getCreatedOn(),
                 order.getTotalAmount()
         );
 

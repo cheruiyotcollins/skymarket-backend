@@ -27,21 +27,15 @@ public class Order implements Serializable {
     private long id;
 
     private long userId;
-
     private long productId;
-
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonIgnore
     private List<OrderProduct> orderProducts = new ArrayList<>();
-
     private String orderNumber;
-
     private double totalAmount;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
-
-    private LocalDateTime orderDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
@@ -49,7 +43,8 @@ public class Order implements Serializable {
     private Customer customer;
     private String shippingAddress;
     private PaymentProvider paymentProvider;
-
     @Builder.Default
     private String createdOn= DateUtils.dateNowString();
+    @Builder.Default
+    private String shippedOn="N/A";
 }

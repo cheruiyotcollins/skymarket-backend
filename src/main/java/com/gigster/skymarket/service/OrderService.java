@@ -23,4 +23,6 @@ public interface OrderService {
     ResponseEntity<ResponseDto> cancelOrder(Long orderId);
 
     ResponseEntity<ResponseDto> getAllOrdersByCustomer(Long customerId);
+
+    ResponseEntity<ResponseDto> getOrderDetails(Long customerId,Long orderId);
 }
