@@ -50,12 +50,23 @@ public class OrderController {
         return orderService.createOrder(orderDto);
     }
 
-    // 3. READ: Get order by ID, admin
+    // 3. READ: Get order by ID, admin and customer
     @GetMapping("/{id}")
     public ResponseEntity<ResponseDto> getOrderById(@PathVariable Long id) {
         return orderService.getOrderById(id);
     }
-
+    @GetMapping("/customer")
+    public ResponseEntity<ResponseDto> getAllOrdersByCustomer() {
+        UserPrincipal userPrincipal= getCurrentUser();
+        Long customerId=userPrincipal.getCustomerId();
+        return orderService.getAllOrdersByCustomer(customerId);
+    }
+    @GetMapping("/details/{orderId}")
+    public ResponseEntity<ResponseDto> getOrderDetails(@PathVariable Long orderId) {
+//        UserPrincipal userPrincipal= getCurrentUser();
+        Long customerId=1L;
+        return orderService.getOrderDetails(customerId, orderId);
+    }
     // 2. READ: Get all orders, admin
     @GetMapping
     public ResponseEntity<ResponseDto> getAllOrders(Pageable pageable) {

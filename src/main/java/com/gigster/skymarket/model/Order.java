@@ -1,5 +1,6 @@
 package com.gigster.skymarket.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.gigster.skymarket.enums.OrderStatus;
 import com.gigster.skymarket.enums.PaymentProvider;
 import com.gigster.skymarket.utils.DateUtils;
@@ -26,27 +27,24 @@ public class Order implements Serializable {
     private long id;
 
     private long userId;
-
     private long productId;
-
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderProduct> orderProducts = new ArrayList<>();  // List of OrderProduct to handle product-quantity pair
-
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonIgnore
+    private List<OrderProduct> orderProducts = new ArrayList<>();
     private String orderNumber;
-
     private double totalAmount;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
-    private LocalDateTime orderDate;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
+    @JsonIgnore
     private Customer customer;
     private String shippingAddress;
     private PaymentProvider paymentProvider;
-
     @Builder.Default
     private String createdOn= DateUtils.dateNowString();
+    @Builder.Default
+    private String shippedOn="N/A";
 }
